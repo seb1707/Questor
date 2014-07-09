@@ -70,8 +70,6 @@ namespace Questor.Storylines
                 AgentInteraction.Purpose = AgentInteractionPurpose.AmmoCheck;
 
                 _States.CurrentArmState = ArmState.Idle;
-                Modules.Actions.Arm.AmmoTypesToLoad.Clear();
-
                 _States.CurrentCombatMissionCtrlState = CombatMissionCtrlState.Start;
                 _States.CurrentDroneState = DroneState.WaitingForTargets;
             }

@@ -36,42 +36,6 @@ namespace Questor.Modules.Actions
 
         private static int _itemsLeftToMoveQuantity;
         
-        public static List<Ammo> AmmoTypesToLoad
-        {
-            get
-            {
-                try
-                {
-                    int numAmmoType = 0;
-                    
-                    if (MissionSettings.MissionAmmoTypesToLoad == null || (MissionSettings.MissionAmmoTypesToLoad != null && !MissionSettings.MissionAmmoTypesToLoad.Any()))
-                    {
-                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "MissionSettings.MissionAmmoTypesToLoad is null", Logging.Debug);
-                    }
-
-                    if ((MissionSettings.MissionAmmoTypesToLoad != null && !MissionSettings.MissionAmmoTypesToLoad.Any()))
-                    {
-                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "MissionSettings.MissionAmmoTypesToLoad is empty", Logging.Debug);
-                    }
-
-                    if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "Using MissionSettings.MissionAmmo: MissionAmmo Contains [" + MissionSettings.MissionAmmoTypesToLoad.Count() + "] ammo type", Logging.Debug);
-                    numAmmoType = 0;
-                    foreach (Ammo _missionAmmoTypeToLoad in MissionSettings.MissionAmmoTypesToLoad)
-                    {
-                        numAmmoType++;
-                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "[" + numAmmoType + "] DamageType Chosen Based on Faction: Name: [" + _missionAmmoTypeToLoad.Name + "] TypeID: [" + _missionAmmoTypeToLoad.TypeId + "] [" + _missionAmmoTypeToLoad.DamageType + "]", Logging.Debug);
-                    }
-                    return MissionSettings.MissionAmmoTypesToLoad;
-
-                }
-                catch (Exception ex)
-                {
-                    Logging.Log("AmmoTypesToLoad", "Exception [" + ex + "]", Logging.Debug);
-                    return null;
-                }
-            }
-        }
-
         private static bool DefaultFittingChecked; //false; //flag to check for the correct default fitting before using the fitting manager
         private static bool DefaultFittingFound; //Did we find the default fitting?
         private static bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
@@ -114,8 +78,8 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
-                MissionSettings.MissionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == _damageType).Select(a => a.Clone()));
+                MissionSettings.AmmoTypesToLoad = new List<Ammo>();
+                MissionSettings.AmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == _damageType).Select(a => a.Clone()));
             }
             catch (Exception ex)
             {
@@ -968,179 +932,186 @@ namespace Questor.Modules.Actions
         }
         private static bool MoveAmmo()
         {
-            if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 3000)))
-            {
-                if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
-                return false;
-            }
-
-            if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
-                 Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
-                 Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                 Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName)
-            {
-                ChangeArmState(ArmState.StackAmmoHangar);
-                return false;
-            }
-
-            if (Combat.WeaponGroupId == 53) //civilian guns of all types
-            {
-                Logging.Log(WeAreInThisStateForLogs(), "No ammo needed for civilian guns: done", Logging.White);
-                ChangeArmState(ArmState.StackAmmoHangar);
-                return false;
-            }
-
-            //
-            // load ammo
-            //
-            #region load ammo
-            
-            if (ItemsAreBeingMoved)
-            {
-                if (!WaitForLockedItems(ArmState.MoveAmmo)) return false;
-                return true;
-            }
-
-            //
-            // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
-            //
-            Ammo CurrentAmmoToLoad = AmmoTypesToLoad.FirstOrDefault();
-            if (CurrentAmmoToLoad == null)
-            {
-                //
-                // if we have no more ammo types to be loaded we have to be finished with arm.
-                //
-                if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "We have no more ammo types to be loaded. We have to be finished with arm.", Logging.Debug);
-                ChangeArmState(ArmState.StackAmmoHangar);
-                return false;
-            }
-
             try
             {
-                IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
-                IEnumerable<DirectItem> AmmoItems = AmmoHangarItems;
 
-                if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "Ammohangar has [" + AmmoHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use AmmoHangar", Logging.Debug);
-                if (!AmmoHangarItems.Any())
+                if (DateTime.UtcNow < _lastArmAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 3000)))
                 {
-                    ItemHangarRetries++;
-                    if (ItemHangarRetries < 10)
-                    {
-                        //just retry... after 10 tries try to use the itemhangar instead of ammohangar
-                        return false;
-                    }
+                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (DateTime.UtcNow < Cache.Instance.NextArmAction)) return;", Logging.Teal);
+                    return false;
+                }
 
-                    foreach (Ammo ammo in AmmoTypesToLoad)
+                if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
+                     Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
+                     Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
+                     Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName)
+                {
+                    ChangeArmState(ArmState.StackAmmoHangar);
+                    return false;
+                }
+
+                if (Combat.WeaponGroupId == 53) //civilian guns of all types
+                {
+                    Logging.Log(WeAreInThisStateForLogs(), "No ammo needed for civilian guns: done", Logging.White);
+                    ChangeArmState(ArmState.StackAmmoHangar);
+                    return false;
+                }
+
+                //
+                // load ammo
+                //
+                #region load ammo
+
+                if (ItemsAreBeingMoved)
+                {
+                    if (!WaitForLockedItems(ArmState.MoveAmmo)) return false;
+                    return true;
+                }
+
+                //
+                // make sure we actually have something in the list of AmmoToLoad before trying to load ammo.
+                //
+
+                Ammo CurrentAmmoToLoad = MissionSettings.AmmoTypesToLoad.FirstOrDefault();
+                if (CurrentAmmoToLoad == null)
+                {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "We have no more ammo types to be loaded. We have to be finished with arm.", Logging.Debug);
+                    ChangeArmState(ArmState.StackAmmoHangar);
+                    return false;
+                }
+
+
+                try
+                {
+                    IEnumerable<DirectItem> AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
+                    IEnumerable<DirectItem> AmmoItems = AmmoHangarItems;
+
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "Ammohangar has [" + AmmoHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use AmmoHangar", Logging.Debug);
+                    if (!AmmoHangarItems.Any())
                     {
-                        Logging.Log("Arm", "Ammohangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "] trying item hangar next", Logging.Orange);
+                        ItemHangarRetries++;
+                        if (ItemHangarRetries < 10)
+                        {
+                            //just retry... after 10 tries try to use the itemhangar instead of ammohangar
+                            return false;
+                        }
+
+                        foreach (Ammo ammo in MissionSettings.AmmoTypesToLoad)
+                        {
+                            Logging.Log("Arm", "Ammohangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "] trying item hangar next", Logging.Orange);
+                        }
+
+                        try
+                        {
+                            IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
+                            AmmoItems = ItemHangarItems;
+                            if (Logging.DebugArm)
+                            {
+                                Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);
+                                foreach (DirectItem item in AmmoItems)
+                                {
+
+                                }
+                            }
+                            if (!ItemHangarItems.Any())
+                            {
+                                ItemHangarRetries++;
+                                if (ItemHangarRetries < 10)
+                                {
+                                    //just retry... after 10 tries fail and let the user know we are out of ammo
+                                    return false;
+                                }
+
+                                foreach (Ammo ammo in MissionSettings.AmmoTypesToLoad)
+                                {
+                                    Logging.Log("Arm", "Itemhangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                                }
+
+                                ChangeArmState(ArmState.NotEnoughAmmo);
+                                return false;
+                            }
+                        }
+                        catch (Exception exception)
+                        {
+                            Logging.Log("Arm.MoveItems", "Itemhangar Exception [" + exception + "]", Logging.Debug);
+                        }
                     }
 
                     try
                     {
-                        IEnumerable<DirectItem> ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == CurrentAmmoToLoad.TypeId).OrderBy(i => !i.IsSingleton).ThenByDescending(i => i.Quantity);
-                        AmmoItems = ItemHangarItems;
-                        if (Logging.DebugArm)
+                        int itemnum = 0;
+                        foreach (DirectItem item in AmmoItems)
                         {
-                            Logging.Log("Arm", "Itemhangar has [" + ItemHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use ItemHangar", Logging.Debug);
-                            foreach (DirectItem item in AmmoItems)
+                            itemnum++;
+                            int moveAmmoQuantity = Math.Min(item.Stacksize, CurrentAmmoToLoad.Quantity);
+                            moveAmmoQuantity = Math.Max(moveAmmoQuantity, 1);
+                            if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "In Hangar we have: [" + itemnum + "] TypeName [" + item.TypeName + "] StackSize [" + item.Stacksize + "] - CurrentAmmoToLoad.Quantity [" + CurrentAmmoToLoad.Quantity + "] Actual moveAmmoQuantity [" + moveAmmoQuantity + "]", Logging.White);
+
+                            if ((moveAmmoQuantity <= item.Stacksize) || moveAmmoQuantity == 1)
                             {
-                                
+                                Logging.Log("Arm.MoveAmmo", "Moving [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
+                                //
+                                // move items to cargo
+                                //
+                                Cache.Instance.CurrentShipsCargo.Add(item, moveAmmoQuantity);
+                                ItemsAreBeingMoved = true;
+                                _lastArmAction = DateTime.UtcNow;
+
+                                //
+                                // subtract the moved items from the items that need to be moved
+                                //
+                                CurrentAmmoToLoad.Quantity -= moveAmmoQuantity;
+                                if (CurrentAmmoToLoad.Quantity == 0)
+                                {
+                                    //
+                                    // if we have moved all the ammo of this type that needs to be moved remove this type of ammo from the list of ammos that need to be moved
+                                    // 
+                                    MissionSettings.AmmoTypesToLoad.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
+                                    return false;
+                                }
                             }
-                        }
-                        if (!ItemHangarItems.Any())
-                        {
-                            ItemHangarRetries++;
-                            if (ItemHangarRetries < 10)
+                            else
                             {
-                                //just retry... after 10 tries fail and let the user know we are out of ammo
-                                return false;
+                                Logging.Log("Arm.MoveAmmo", "While calculating what to move we wanted to move [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold, but somehow the current Item Stacksize is only [" + item.Stacksize + "]", Logging.White);
+                                continue;
                             }
 
-                            foreach (Ammo ammo in AmmoTypesToLoad)
-                            {
-                                Logging.Log("Arm", "Itemhangar was Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
-                            }
-
-                            ChangeArmState(ArmState.NotEnoughAmmo);
-                            return false;
+                            return false; //you can only move one set of items per frame.
                         }
                     }
                     catch (Exception exception)
                     {
-                        Logging.Log("Arm.MoveItems", "Itemhangar Exception [" + exception + "]", Logging.Debug);
+                        Logging.Log("Arm.MoveAmmo", "AmmoItems Exception [" + exception + "]", Logging.Debug);
                     }
-                }
 
-                try
-                {
-                    int itemnum = 0;
-                    foreach (DirectItem item in AmmoItems)
-                    {
-                        itemnum++;
-                        int moveAmmoQuantity = Math.Min(item.Stacksize, CurrentAmmoToLoad.Quantity);
-                        moveAmmoQuantity = Math.Max(moveAmmoQuantity, 1);
-                        if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "In Hangar we have: [" + itemnum + "] TypeName [" + item.TypeName + "] StackSize [" + item.Stacksize + "] - CurrentAmmoToLoad.Quantity [" + CurrentAmmoToLoad.Quantity + "] Actual moveAmmoQuantity [" + moveAmmoQuantity + "]", Logging.White);
-                        
-                        if ((moveAmmoQuantity <= item.Stacksize) || moveAmmoQuantity == 1)
-                        {
-                            Logging.Log("Arm.MoveAmmo", "Moving [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold", Logging.White);
-                            //
-                            // move items to cargo
-                            //
-                            Cache.Instance.CurrentShipsCargo.Add(item, moveAmmoQuantity);
-                            ItemsAreBeingMoved = true;
-                            _lastArmAction = DateTime.UtcNow;
-
-                            //
-                            // subtract the moved items from the items that need to be moved
-                            //
-                            CurrentAmmoToLoad.Quantity -= moveAmmoQuantity;
-                            if (CurrentAmmoToLoad.Quantity == 0)
-                            {
-                                //
-                                // if we have moved all the ammo of this type that needs to be moved remove this type of ammo from the list of ammos that need to be moved
-                                // 
-                                MissionSettings.MissionAmmoTypesToLoad.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
-                                AmmoTypesToLoad.RemoveAll(a => a.TypeId == CurrentAmmoToLoad.TypeId);
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            Logging.Log("Arm.MoveAmmo", "While calculating what to move we wanted to move [" + moveAmmoQuantity + "] units of Ammo  [" + item.TypeName + "] from [ AmmoHangar ] to CargoHold, but somehow the current Item Stacksize is only [" + item.Stacksize + "]", Logging.White);
-                            continue;
-                        }
-                        
-                        return false; //you can only move one set of items per frame.
-                    }
                 }
                 catch (Exception exception)
                 {
-                    Logging.Log("Arm.MoveAmmo", "AmmoItems Exception [" + exception + "]", Logging.Debug);
+                    Logging.Log("Arm.MoveAmmo", "Error while processing Itemhangar Items exception was: [" + exception + "]", Logging.Debug);
                 }
 
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("Arm.MoveAmmo", "Error while processing Itemhangar Items exception was: [" + exception + "]", Logging.Debug);
-            }
-
-            if (AmmoTypesToLoad.Any()) //if we still have any ammo to load here then we must be missing ammo
-            {
-                foreach (Ammo ammo in AmmoTypesToLoad)
+                if (MissionSettings.AmmoTypesToLoad.Any()) //if we still have any ammo to load here then we must be missing ammo
                 {
-                    Logging.Log("Arm.MoveAmmo", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                    foreach (Ammo ammo in MissionSettings.AmmoTypesToLoad)
+                    {
+                        Logging.Log("Arm.MoveAmmo", "Missing [" + ammo.Quantity + "] units of ammo: [ " + ammo.Description + " ] with TypeId [" + ammo.TypeId + "]", Logging.Orange);
+                    }
+
+                    ChangeArmState(ArmState.NotEnoughAmmo);
+                    return false;
                 }
 
-                ChangeArmState(ArmState.NotEnoughAmmo);
+                _lastArmAction = DateTime.UtcNow;
+                ChangeArmState(ArmState.StackAmmoHangar);
+                return false;
+
+                #endregion move ammo
+            }
+            catch (Exception ex)
+            {
+                if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Teal);
                 return false;
             }
-
-            _lastArmAction = DateTime.UtcNow;
-            ChangeArmState(ArmState.StackAmmoHangar);
-            return false;
-
-            #endregion move ammo
         }
         
         private static bool MoveMiningCrystals()
@@ -1249,7 +1220,7 @@ namespace Questor.Modules.Actions
                         //
                         // if we have moved all the ammo of this type that needs to be moved remove this type of ammo from the list of ammos that need to be moved
                         // 
-                        MissionSettings.MissionAmmoTypesToLoad.RemoveAll(a => a.TypeId == CurrentMiningCrystalsToLoad.TypeId);
+                        MissionSettings.AmmoTypesToLoad.RemoveAll(a => a.TypeId == CurrentMiningCrystalsToLoad.TypeId);
                         CrystalsToLoad.RemoveAll(a => a.TypeId == CurrentMiningCrystalsToLoad.TypeId);
                         return false;
                     }

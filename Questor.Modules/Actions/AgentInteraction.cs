@@ -559,7 +559,7 @@ namespace Questor.Modules.Actions
                         //MissionSettings.GetDungeonId(html);
                         MissionSettings.SetmissionXmlPath(Logging.FilterPath(MissionSettings.MissionName));
 
-                        MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
+                        MissionSettings.AmmoTypesToLoad = new List<Ammo>();
                         if (File.Exists(MissionSettings.MissionXmlPath))
                         {
                             MissionSettings.LoadMissionXMLData();

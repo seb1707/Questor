@@ -195,15 +195,15 @@ namespace Questor.Behaviors
                         _States.CurrentArmState = ArmState.Begin;
 
                         // Load ammo... this "fixes" the problem I experienced with not reloading after second arm phase. The quantity was getting set to 0.
-                        Arm.AmmoTypesToLoad.Clear();
-                        Arm.AmmoTypesToLoad.Add(Combat.Ammo.FirstOrDefault());
+                        //Arm.AmmoTypesToLoad.Clear();
+                        //Arm.AmmoTypesToLoad.Add(Combat.Ammo.FirstOrDefault());
 
                         //FIXME: bad hack - this should be fixed differently / elsewhere
-                        Ammo FirstAmmoToLoad = Arm.AmmoTypesToLoad.FirstOrDefault();
-                        if (FirstAmmoToLoad != null && FirstAmmoToLoad.Quantity == 0)
-                        {
-                            FirstAmmoToLoad.Quantity = 333;
-                        }
+                        //Ammo FirstAmmoToLoad = Arm.AmmoTypesToLoad.FirstOrDefault();
+                        //if (FirstAmmoToLoad != null && FirstAmmoToLoad.Quantity == 0)
+                        //{
+                        //    FirstAmmoToLoad.Quantity = 333;
+                        //}
                         
                     }
 

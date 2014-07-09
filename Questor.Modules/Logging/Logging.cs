@@ -55,21 +55,7 @@ namespace Questor.Modules.Logging
         public const string Teal = "\at";     //log debug
         public const string White = "\aw";    //questor
 
-
         public const string Debug = Teal;     //log debug
-
-        public const string CombatUserCorrectableErrors = Orange;
-        public const string CombatFatalErrors = Red;
-        public const string CombatGenericLogging = White;
-
-        public const string DronesUserCorrectableErrors = Orange;
-        public const string DronesFatalErrors = Red;
-        public const string DronesGenericLogging = White;
-
-        public const string TravelerUserCorrectableErrors = Orange;
-        public const string TravelerFatalErrors = Red;
-        public const string TravelerGenericLogging = White;
-        public const string TravelerDestinationColor = White;
 
         public static string EVELoginUserName;
         public static string EVELoginPassword;
@@ -82,7 +68,7 @@ namespace Questor.Modules.Logging
 
         private static string colorLogLine;
         private static string plainLogLine;
-        private static string ConsoleLogText;
+        //private static string ConsoleLogText;
         public static bool SaveConsoleLog;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static bool ConsoleLogOpened = false;
         public static string ExtConsole { get; set; }
@@ -135,9 +121,7 @@ namespace Questor.Modules.Logging
 
                 Logging.redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
 
-                //Logging.ConsoleLogText = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + plainLogLine + "\r\n");
-                Logging.ConsoleLogText = Logging.redactedPlainLogLine;
-                Logging.ExtConsole = Logging.ConsoleLogText;
+                Logging.ExtConsole = Logging.redactedPlainLogLine;
                 
                 //
                 // Innerspace Console logging
@@ -149,7 +133,7 @@ namespace Questor.Modules.Logging
                 }
                 else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
-                    Console.WriteLine(Logging.ConsoleLogText);
+                    Console.Write(Logging.redactedPlainLogLine);
                 }
                 
                 if (Logging.tryToLogToFile)
@@ -200,7 +184,7 @@ namespace Questor.Modules.Logging
                             //
                             if (Logging.ConsoleLogFile != null && !verbose) //normal
                             {
-                                File.AppendAllText(Logging.ConsoleLogFile, Logging.ConsoleLogText); //Write In Memory Console log to File
+                                File.AppendAllText(Logging.ConsoleLogFile, Logging.redactedPlainLogLine); //Write In Memory Console log to File
                             }
 
                             //

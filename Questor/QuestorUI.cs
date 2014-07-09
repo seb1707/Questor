@@ -21,9 +21,9 @@ namespace Questor
 
     public partial class QuestorUI : Form
     {
-        private DateTime _nextConsoleLogRefresh = DateTime.MinValue;
         private DateTime _nextUIDataRefresh = DateTime.UtcNow;
         private DateTime _nextScheduleUpdate = DateTime.UtcNow;
+        private string _lastLogLine = string.Empty;
 
         public QuestorUI()
         {
@@ -468,6 +468,21 @@ namespace Questor
         {
             try
             {
+                if (!String.IsNullOrEmpty(Logging.ExtConsole))
+                {
+                    if (Logging.ExtConsole != _lastLogLine)
+                    {
+                        if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
+                        {
+                            txtExtConsole.Text = "";
+                        }
+                        
+                        txtExtConsole.AppendText(Logging.ExtConsole);
+                        _lastLogLine = Logging.ExtConsole;
+                        Logging.ExtConsole = null;
+                    }
+                }
+
                 //if (Logging.DebugUI) Logging.Log("QuestorUI", "UpdateUiTick", Logging.White);
                 // The if's in here stop the UI from flickering
                 string text = "Questor";
@@ -833,20 +848,6 @@ namespace Questor
                     {
                         buttonQuestormanager.Enabled = false;
                         Settings.Instance.QuestorManagerExists = false;
-                    }
-                }
-
-                if (!String.IsNullOrEmpty(Logging.ExtConsole))
-                {
-                    if (DateTime.UtcNow > _nextConsoleLogRefresh)
-                    {
-                        if (txtExtConsole.Lines.Count() >= Settings.Instance.MaxLineConsole)
-                        {
-                            txtExtConsole.Text = "";
-                        }
-                        txtExtConsole.AppendText(Logging.ExtConsole);
-                        Logging.ExtConsole = null;
-                        _nextConsoleLogRefresh = DateTime.UtcNow.AddSeconds(1);
                     }
                 }
 

@@ -47,8 +47,6 @@ namespace Questor.Behaviors
             //
             // this is combat mission specific and needs to be generalized
             //
-            Settings.Instance.SettingsLoaded += SettingsLoaded;
-
             _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
             _States.CurrentArmState = ArmState.Idle;
             _States.CurrentDroneState = DroneState.Idle;
@@ -56,96 +54,14 @@ namespace Questor.Behaviors
             _States.CurrentTravelerState = TravelerState.Idle;
         }
 
-        public void SettingsLoaded(object sender, EventArgs e)
-        {
-            ValidateCombatMissionSettings();
-        }
-
-        public void DebugPerformanceClearandStartTimer()
-        {
-            _watch.Reset();
-            _watch.Start();
-        }
-
-        public void DebugPerformanceStopandDisplayTimer(string whatWeAreTiming)
-        {
-            _watch.Stop();
-            if (Logging.DebugPerformance)
-                Logging.Log(whatWeAreTiming, " took " + _watch.ElapsedMilliseconds + "ms", Logging.White);
-        }
-
-        public void ValidateCombatMissionSettings()
-        {
-            ValidSettings = true;
-            if (Combat.Ammo.Select(a => a.DamageType).Distinct().Count() != 4)
-            {
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.EM))
-                    Logging.Log("Settings", ": Missing EM damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Thermal))
-                    Logging.Log("Settings", "Missing Thermal damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Kinetic))
-                    Logging.Log("Settings", "Missing Kinetic damage type!", Logging.Orange);
-                if (Combat.Ammo.All(a => a.DamageType != DamageType.Explosive))
-                    Logging.Log("Settings", "Missing Explosive damage type!", Logging.Orange);
-
-                Logging.Log("Settings", "You are required to specify all 4 damage types in your settings xml file!", Logging.White);
-                ValidSettings = false;
-            }
-
-            DirectAgent agent = Cache.Instance.DirectEve.GetAgentByName(Cache.Instance.CurrentAgent);
-
-            if (agent == null || !agent.IsValid)
-            {
-                Logging.Log("Settings", "Unable to locate agent [" + Cache.Instance.CurrentAgent + "]", Logging.White);
-                ValidSettings = false;
-            }
-            else
-            {
-                AgentID = agent.AgentId;
-            }
-        }
+       
 
         private void BeginClosingQuestor()
         {
             Time.EnteredCloseQuestor_DateTime = DateTime.UtcNow;
             _States.CurrentQuestorState = QuestorState.CloseQuestor;
         }
-
-        private void AvoidBumpingThings()
-        {
-            //if It has not been at least 60 seconds since we last session changed do not do anything
-            if (Cache.Instance.InStation || !Cache.Instance.InSpace || Cache.Instance.ActiveShip.Entity.IsCloaked || (Cache.Instance.InSpace && Time.Instance.LastSessionChange.AddSeconds(60) < DateTime.UtcNow))
-                return;
-            //
-            // if we are "too close" to the bigObject move away... (is orbit the best thing to do here?)
-            //
-            if (Cache.Instance.ClosestStargate.Distance > 9000 || Cache.Instance.ClosestStation.Distance > 5000)
-            {
-                EntityCache thisBigObject = Cache.Instance.BigObjects.FirstOrDefault();
-                if (thisBigObject != null)
-                {
-                    if (thisBigObject.Distance >= (int)Distances.TooCloseToStructure)
-                    {
-                        //we are no longer "too close" and can proceed.
-                    }
-                    else
-                    {
-                        
-                        if (thisBigObject.Orbit((int) Distances.SafeDistancefromStructure))
-                        {
-                            Logging.Log("DebugBehavior", _States.CurrentDebugBehaviorState +
-                                        ": initiating Orbit of [" + thisBigObject.Name +
-                                        "] orbiting at [" + Distances.SafeDistancefromStructure + "]", Logging.White);
-                            return;
-                        }
-
-                        return;
-                        //we are still too close, do not continue through the rest until we are not "too close" anymore
-                    }
-                }
-            }
-        }
-
+        
         #region Old Scanner Functions
 
         private void OpenDirectionalScanner()
@@ -236,16 +152,7 @@ namespace Questor.Behaviors
         public void ProcessState()
         {
             // Invalid settings, quit while we're ahead
-            if (!ValidSettings)
-            {
-                if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.ValidateSettings_seconds) //default is a 15 second interval
-                {
-                    ValidateCombatMissionSettings();
-                    LastAction = DateTime.UtcNow;
-                }
-                return;
-            }
-
+            
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             //this local is safe check is useless as their is no LocalWatch processstate running every tick...
             //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -328,192 +235,6 @@ namespace Questor.Behaviors
             //Logging.Log("test");
             switch (_States.CurrentDebugBehaviorState)
             {
-                case DebugBehaviorState.Idle:
-
-                    if (Cache.Instance.StopBot)
-                    {
-                        //
-                        // this is used by the 'local is safe' routines - standings checks - at the moment is stops questor for the rest of the session.
-                        //
-                        if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: StopBot [" + Cache.Instance.StopBot + "]", Logging.White);
-                        return;
-                    }
-
-                    if (Cache.Instance.InSpace)
-                    {
-                        if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: InSpace [" + Cache.Instance.InSpace + "]", Logging.White);
-
-                        // Questor does not handle in space starts very well, head back to base to try again
-                        Logging.Log("DebugBehavior", "Started questor while in space, heading back to base in 15 seconds", Logging.White);
-                        LastAction = DateTime.UtcNow;
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.DelayedGotoBase;
-                        break;
-                    }
-                    
-                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(10))
-                    {
-                        if (Logging.DebugAutoStart || Logging.DebugIdle) Logging.Log("DebugBehavior", "DebugIdle: Cache.Instance.LastInSpace [" + Time.Instance.LastInSpace.Subtract(DateTime.UtcNow).TotalSeconds + "] sec ago, waiting until we have been docked for 10+ seconds", Logging.White);
-                        return;
-                    }
-
-                    _States.CurrentArmState = ArmState.Idle;
-                    _States.CurrentDroneState = DroneState.Idle;
-                    _States.CurrentSalvageState = SalvageState.Idle;
-                    _States.CurrentTravelerState = TravelerState.Idle;
-                    _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                    _States.CurrentTravelerState = TravelerState.Idle;
-
-                    Logging.Log("DebugBehavior", "Started questor in Debug mode", Logging.White);
-                    LastAction = DateTime.UtcNow;
-                    break;
-
-                case DebugBehaviorState.DelayedGotoBase:
-                    if (DateTime.UtcNow.Subtract(LastAction).TotalSeconds < Time.Instance.DelayedGotoBase_seconds)
-                        break;
-
-                    Logging.Log("DebugBehavior", "Heading back to base", Logging.White);
-                    _States.CurrentDebugBehaviorState = DebugBehaviorState.GotoBase;
-                    break;
-
-                case DebugBehaviorState.Arm:
-                    //
-                    // only used when someone manually selects the arm state.
-                    //
-                    if (_States.CurrentArmState == ArmState.Idle)
-                    {
-                        Logging.Log("Arm", "Begin", Logging.White);
-                        _States.CurrentArmState = ArmState.Begin;
-
-                        // Load right ammo based on mission
-                        Arm.AmmoTypesToLoad.Clear();
-                        Arm.LoadSpecificAmmoTypeForNonMissionSituations(new[] { MissionSettings.MissionDamageType });
-                    }
-
-                    Arm.ProcessState();
-
-                    if (_States.CurrentArmState == ArmState.NotEnoughAmmo)
-                    {
-                        // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        Logging.Log("Arm", "Armstate.NotEnoughAmmo", Logging.Orange);
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
-                    }
-
-                    if (_States.CurrentArmState == ArmState.NotEnoughDrones)
-                    {
-                        // we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        // we may be out of drones/ammo but disconnecting/reconnecting will not fix that so update the timestamp
-                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        Logging.Log("Arm", "Armstate.NotEnoughDrones", Logging.Orange);
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
-                    }
-
-                    if (_States.CurrentArmState == ArmState.Done)
-                    {
-                        //we know we are connected if we were able to arm the ship - update the lastknownGoodConnectedTime
-                        Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        Cache.Instance.MyWalletBalance = Cache.Instance.DirectEve.Me.Wealth;
-                        _States.CurrentArmState = ArmState.Idle;
-                        _States.CurrentDroneState = DroneState.WaitingForTargets;
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
-                    }
-                    break;
-
-                case DebugBehaviorState.Salvage:
-                    if (!Cache.Instance.InSpace)
-                        return;
-
-                    Salvage.SalvageAll = true;
-                    Salvage.OpenWrecks = true;
-
-                    if (Cache.Instance.CurrentShipsCargo == null) return;
-
-                    if (Salvage.UnloadLootAtStation && Cache.Instance.CurrentShipsCargo.Window.IsReady && (Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < 100)
-                    {
-                        Logging.Log("CombatMissionsBehavior.Salvage", "We are full, go to base to unload", Logging.White);
-                        _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                        break;
-                    }
-
-                    if (!Cache.Instance.UnlootedContainers.Any())
-                    {
-                        break;
-                    }
-
-                    //we __cannot ever__ approach in salvage.cs so this section _is_ needed.
-                    Salvage.MoveIntoRangeOfWrecks();
-                    try
-                    {
-                        // Overwrite settings, as the 'normal' settings do not apply
-                        Salvage.DedicatedSalvagerMaximumWreckTargets = Cache.Instance.MaxLockedTargets;
-                        Salvage.DedicatedSalvagerReserveCargoCapacity = 80;
-                        Salvage.DedicatedSalvagerLootEverything = true;
-                        Salvage.ProcessState();
-                        //Logging.Log("number of max cache ship: " + Cache.Instance.ActiveShip.MaxLockedTargets);
-                        //Logging.Log("number of max cache me: " + Cache.Instance.DirectEve.Me.MaxLockedTargets);
-                        //Logging.Log("number of max math.min: " + _salvage.MaximumWreckTargets);
-                    }
-                    finally
-                    {
-                        Salvage.DedicatedSalvagerMaximumWreckTargets = null;
-                        Salvage.DedicatedSalvagerReserveCargoCapacity = null;
-                        Salvage.DedicatedSalvagerLootEverything = null;
-                    }
-
-                    break;
-
-                case DebugBehaviorState.GotoBase:
-                    if (Logging.DebugGotobase) Logging.Log("DebugBehavior", "GotoBase: AvoidBumpingThings()", Logging.White);
-
-                    AvoidBumpingThings();
-
-                    if (Logging.DebugGotobase) Logging.Log("DebugBehavior", "GotoBase: TravelToAgentsStation()", Logging.White);
-
-                    Traveler.TravelHome("DebugBehavior.TravelHome");
-
-                    if (_States.CurrentTravelerState == TravelerState.AtDestination) // || DateTime.UtcNow.Subtract(Time.EnteredCloseQuestor_DateTime).TotalMinutes > 10)
-                    {
-                        if (Logging.DebugGotobase) Logging.Log("DebugBehavior", "GotoBase: We are at destination", Logging.White);
-                        Cache.Instance.GotoBaseNow = false; //we are there - turn off the 'forced' GoToBase
-                        MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentID, false);
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.UnloadLoot;
-                        Traveler.Destination = null;
-                    }
-                    break;
-
-                case DebugBehaviorState.UnloadLoot:
-                    if (_States.CurrentUnloadLootState == UnloadLootState.Idle)
-                    {
-                        Logging.Log("DebugBehavior", "UnloadLoot: Begin", Logging.White);
-                        _States.CurrentUnloadLootState = UnloadLootState.Begin;
-                    }
-
-                    UnloadLoot.ProcessState();
-
-                    if (_States.CurrentUnloadLootState == UnloadLootState.Done)
-                    {
-                        Cache.Instance.LootAlreadyUnloaded = true;
-                        _States.CurrentUnloadLootState = UnloadLootState.Idle;
-                        MissionSettings.Mission = Cache.Instance.GetAgentMission(AgentID, false);
-                        if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
-                        {
-                            Logging.Log("DebugBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);
-                            _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
-                            return;
-                        }
-
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
-                        Logging.Log("DebugBehavior.Unloadloot", "CharacterMode: [" + Settings.Instance.CharacterMode + "], AfterMissionSalvaging: [" + Salvage.AfterMissionSalvaging + "], DebugBehaviorState: [" + _States.CurrentDebugBehaviorState + "]", Logging.White);
-                        Statistics.FinishedMission = DateTime.UtcNow;
-                        return;
-                    }
-                    break;
-
                 case DebugBehaviorState.Traveler:
                     Salvage.OpenWrecks = false;
                     List<int> destination = Cache.Instance.DirectEve.Navigation.GetDestinationPath();
@@ -570,55 +291,6 @@ namespace Questor.Behaviors
                                 return;
                             }
                         }
-                    }
-                    break;
-
-                case DebugBehaviorState.GotoNearestStation:
-                    if (!Cache.Instance.InSpace || Cache.Instance.InWarp) return;
-                    EntityCache station = null;
-                    if (Cache.Instance.Stations != null && Cache.Instance.Stations.Any())
-                    {
-                        station = Cache.Instance.Stations.OrderBy(x => x.Distance).FirstOrDefault();    
-                    }
-
-                    if (station != null)
-                    {
-                        if (station.Distance > (int)Distances.WarptoDistance)
-                        {
-                            if (station.WarpTo())
-                            {
-                                Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
-                                break;
-                            }
-                            
-                            break;
-                        }
-                        else
-                        {
-                            if (station.Distance < 1900)
-                            {
-                                if (station.Dock())
-                                {
-                                    Logging.Log("DebugBehavior.GotoNearestStation", "[" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);
-                                        
-                                }
-                            }
-                            else
-                            {
-                                if (Cache.Instance.Approaching == null || Cache.Instance.Approaching.Id != station.Id)
-                                {
-                                    if(station.Approach())
-                                    {
-                                        Logging.Log("DebugBehavior.GotoNearestStation", "Approaching [" + station.Name + "] which is [" + Math.Round(station.Distance / 1000, 0) + "k away]", Logging.White);    
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        _States.CurrentDebugBehaviorState = DebugBehaviorState.Error; //should we goto idle here?
                     }
                     break;
 

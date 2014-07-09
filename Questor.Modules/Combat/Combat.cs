@@ -1319,8 +1319,7 @@ namespace Questor.Modules.Combat
             if (Combat.WeaponGroupId == 53) return true;
             if (entity == null)
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "if (entity == null)", Logging.Orange);
-                return false;
+                entity = Cache.Instance.MyShipEntity;
             }
 
             List<Ammo> correctAmmoToUse = null;
@@ -1557,14 +1556,28 @@ namespace Questor.Modules.Combat
             //    return true;
             //}
 
-            if (Cache.Instance.CurrentShipsCargo != null) return false;
-
-            DirectItem charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(e => e.TypeId == ammo.TypeId && e.Quantity >= Combat.MinimumAmmoCharges);
-
-            // This should have shown up as "out of ammo"
-            if (charge == null)
+            DirectItem charge = null;
+            if (Cache.Instance.CurrentShipsCargo != null) 
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "This should have shown up as out of ammo", Logging.Orange);
+                if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                {
+                    charge = Cache.Instance.CurrentShipsCargo.Items.FirstOrDefault(e => e.TypeId == ammo.TypeId && e.Quantity >= Combat.MinimumAmmoCharges);
+                    // This should have shown up as "out of ammo"
+                    if (charge == null)
+                    {
+                        if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have no ammo in cargo?! This should have shown up as out of ammo", Logging.Orange);
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have no items in cargo at all?! This should have shown up as out of ammo", Logging.Orange);
+                    return false;
+                }
+            }
+            else
+            {
+                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "CurrentShipsCargo is null?!", Logging.Orange);
                 return false;
             }
 

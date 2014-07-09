@@ -266,7 +266,20 @@ namespace Questor.Modules.Lookup
                     return null;
                 }
 
-                return missionForBookmarkInfo.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
+                if (missionForBookmarkInfo.Bookmarks.Any(b => b.Title.ToLower().StartsWith(startsWith.ToLower())))
+                {
+                    Logging.Log("GetMissionBookmark", "MissionBookmark Found", Logging.White);
+                    return missionForBookmarkInfo.Bookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));
+                }
+                
+                if (Cache.Instance.AllBookmarks.Any(b => b.Title.ToLower().StartsWith(startsWith.ToLower())))
+                {
+                    Logging.Log("GetMissionBookmark", "MissionBookmark From your Agent Not Found, but we did find a bookmark for a mission", Logging.Debug);
+                    return (DirectAgentMissionBookmark)Cache.Instance.AllBookmarks.FirstOrDefault(b => b.Title.ToLower().StartsWith(startsWith.ToLower()));        
+                }
+
+                Logging.Log("GetMissionBookmark", "MissionBookmark From your Agent Not Found: and as a fall back we could not find any bookmark starting with [" + startsWith + "] either... ", Logging.Debug);
+                return null;
             }
             catch (Exception exception)
             {

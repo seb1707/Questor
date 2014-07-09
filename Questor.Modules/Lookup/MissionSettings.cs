@@ -245,7 +245,7 @@ namespace Questor.Modules.Lookup
             try
             {
                 // Get the missions
-                DirectAgentMission missionForBookmarkInfo = Cache.Instance.GetAgentMission(agentId, false);
+                DirectAgentMission missionForBookmarkInfo = Cache.Instance.GetAgentMission(agentId, true);
                 if (missionForBookmarkInfo == null)
                 {
                     Logging.Log("Cache.DirectAgentMissionBookmark", "missionForBookmarkInfo [null] <---bad  parameters passed to us:  agentid [" + agentId + "] startswith [" + startsWith + "]", Logging.White);
@@ -256,7 +256,6 @@ namespace Questor.Modules.Lookup
                 if (missionForBookmarkInfo.State != (int)MissionState.Accepted)
                 {
                     Logging.Log("GetMissionBookmark", "missionForBookmarkInfo.State: [" + missionForBookmarkInfo.State.ToString() + "]", Logging.Debug);
-                    return null;
                 }
 
                 if (missionForBookmarkInfo.AgentId != agentId)

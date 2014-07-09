@@ -808,11 +808,11 @@ namespace Questor.Modules.BackgroundTasks
                         deactivate = true;
                         if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
-                    else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Combat.CombatShipName)
-                    {
-                        deactivate = true;
-                        if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
-                    }
+                    //else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Combat.CombatShipName)
+                    //{
+                    //    deactivate = true;
+                    //    if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
+                    //}
                     else if (!NavigateOnGrid.SpeedTank)
                     {
                         // This only applies when not speed tanking
@@ -874,7 +874,7 @@ namespace Questor.Modules.BackgroundTasks
                             activate = true;
                             if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching or orbiting: Activate [" + activate + "]", Logging.Debug);      
                         }
-                    }    
+                    }
                     
                     // If we have less then x% cap, do not activate the module
                     //Logging.Log("Defense: Current Cap [" + Cache.Instance.ActiveShip.CapacitorPercentage + "]" + "Settings: minimumPropulsionModuleCapacitor [" + Settings.Instance.MinimumPropulsionModuleCapacitor + "]");

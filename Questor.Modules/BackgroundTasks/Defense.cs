@@ -771,24 +771,24 @@ namespace Questor.Modules.BackgroundTasks
 
                 if (Time.Instance.LastActivatedTimeStamp != null && Time.Instance.LastActivatedTimeStamp.ContainsKey(SpeedMod.ItemId))
                 {
-                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + DateTime.UtcNow.Subtract(Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds + "] sec ago", Logging.Debug);
+                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] was last activated [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId]).TotalSeconds, 0) + "] sec ago", Logging.Debug);
                     if (Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId].AddMilliseconds(Time.Instance.AfterburnerDelay_milliseconds) > DateTime.UtcNow)
                     {
-                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
+                        //if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] was last activated [" + Time.Instance.LastActivatedTimeStamp[SpeedMod.ItemId] + "[" + Time.Instance.AfterburnerDelay_milliseconds + "] > [" + DateTime.UtcNow + "], skip this speed mod", Logging.Debug);
                         continue;
                     }
                 }
 
                 if (SpeedMod.InLimboState)
                 {
-                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
+                    if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
                     continue;
                 }
 
                 //
                 // Should we deactivate the module?
                 //
-                if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
+                if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] isActive [" + SpeedMod.IsActive + "]", Logging.Debug);
 
                 if (SpeedMod.IsActive)
                 {
@@ -799,19 +799,19 @@ namespace Questor.Modules.BackgroundTasks
                     bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                     if (bastionModules.Any(i => i.IsActive))
                     {
-                        if (Logging.DebugSpeedMod) Logging.Log("EntityCache.ActivateSpeedMod", "BastionMode is active, we cannot move, deactivating speed module", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("EntityCache.DeactivateSpeedMod", "BastionMode is active, we cannot move, deactivating speed module", Logging.Debug);
                         deactivate = true;
                     }
 
                     if (!Cache.Instance.IsApproachingOrOrbiting(0))
                     {
                         deactivate = true;
-                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] We are not approaching or orbiting anything: Deactivate [" + deactivate + "]", Logging.Debug);
                     }
                     else if (!Combat.PotentialCombatTargets.Any(e => e.IsAttacking) && DateTime.UtcNow > Statistics.StartedPocket.AddSeconds(60) && Cache.Instance.ActiveShip.GivenName == Combat.CombatShipName)
                     {
                         deactivate = true;
-                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] Nothing on grid is attacking and it has been more than 60 seconds since we landed in this pocket. Deactivate [" + deactivate + "]", Logging.Debug);
                     }
                     else if (!NavigateOnGrid.SpeedTank)
                     {
@@ -822,20 +822,21 @@ namespace Questor.Modules.BackgroundTasks
                             if (Cache.Instance.Approaching.Distance < Defense.MinimumPropulsionModuleDistance)
                             {
                                 deactivate = true;
-                                if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] We are approaching... and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within [" + Math.Round((double)Defense.MinimumPropulsionModuleDistance / 1000, 0) + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                                if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] We are approaching... and [" + Math.Round(Cache.Instance.Approaching.Distance / 1000, 0) + "] is within [" + Math.Round((double)Defense.MinimumPropulsionModuleDistance / 1000, 0) + "] Deactivate [" + deactivate + "]", Logging.Debug);
                             }
                         }
                     }
                     else if (Cache.Instance.ActiveShip.CapacitorPercentage < Defense.MinimumPropulsionModuleCapacitor)
                     {
                         deactivate = true;
-                        if (Logging.DebugSpeedMod) Logging.Log("Defense.ActivateSpeedMod", "[" + ModuleNumber + "] Capacitor is at [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is below MinimumPropulsionModuleCapacitor [" + Defense.MinimumPropulsionModuleCapacitor + "] Deactivate [" + deactivate + "]", Logging.Debug);
+                        if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "][" + SpeedMod.TypeName + "] Capacitor is at [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] which is below MinimumPropulsionModuleCapacitor [" + Defense.MinimumPropulsionModuleCapacitor + "] Deactivate [" + deactivate + "]", Logging.Debug);
                     }
 
                     if (deactivate)
                     {
                         if (SpeedMod.Click())
                         {
+                            if (Logging.DebugSpeedMod) Logging.Log("Defense.DeactivateSpeedMod", "[" + ModuleNumber + "] [" + SpeedMod.TypeName + "] Deactivated", Logging.Debug);
                             return;    
                         }
                     }

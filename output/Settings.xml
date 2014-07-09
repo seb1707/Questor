@@ -82,12 +82,8 @@
   <debugWatchForActiveWars>false</debugWatchForActiveWars>
   <detailedCurrentTargetHealthLogging>false</detailedCurrentTargetHealthLogging>
   <defendWhileTraveling>true</defendWhileTraveling>
-  <useInnerspace>true</useInnerspace>
-  <setEveClientDestinationWhenTraveling>false</setEveClientDestinationWhenTraveling>
-  <targetSelectionMethod>isdp</targetSelectionMethod> <!--- only options here are "daxten" and "isdp" -->
   <eveServername>Tranquility</eveServername> <!-- the US server is Tranquility, the CN server is Serenity, this is used for localization purposes -->
   <enforcedDelayBetweenModuleClicks>3000</enforcedDelayBetweenModuleClicks> <!-- do not adjust this, you have been warned, this is for debugging purposed only and may cause all your hair to fall out -->
-  <avoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley>false</avoidShootingTargetsWithMissilesIfweKNowTheyAreAboutToBeHitWithAPreviousVolley>
   <!--                                                -->
   <!--          MISC SETTINGS          -->
   <!--                                                -->

@@ -94,6 +94,7 @@ namespace Questor
                     // ComboxBoxes on main windows (at top)
                     //
                     DamageTypeComboBox.Items.Clear();
+                    DamageTypeComboBox.Items.Add("Auto");
                     foreach (string text in Enum.GetNames(typeof(DamageType)))
                     {
                         DamageTypeComboBox.Items.Add(text);
@@ -265,7 +266,7 @@ namespace Questor
                             lblUserDefinedScript4.Text = Settings.Instance.UserDefinedLavishScriptScript4Description;
                         }
 
-                        DamageTypeData.Text = MissionSettings.MissionDamageType.ToString();
+                        //DamageTypeData.Text = MissionSettings.CurrentDamageType.ToString();
 
                         //OrbitDistanceData.Text = Cache.Instance.OrbitDistance.ToString(CultureInfo.InvariantCulture);
                         //AgentStationIDData.Text = Cache.Instance.AgentStationID.ToString(CultureInfo.InvariantCulture);
@@ -563,10 +564,22 @@ namespace Questor
                 //    }
                 //}
 
-                if ((string)DamageTypeComboBox.SelectedItem != MissionSettings.MissionDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+                if ((string) DamageTypeComboBox.SelectedItem != "Auto")
                 {
-                    DamageTypeComboBox.SelectedItem = MissionSettings.MissionDamageType.ToString();
+                    if ((string)DamageTypeComboBox.SelectedItem != MissionSettings.ManualDamageType.ToString() && !DamageTypeComboBox.DroppedDown)
+                    {
+                        DamageTypeComboBox.SelectedItem = MissionSettings.ManualDamageType.ToString();
+                    }    
                 }
+
+                if ((string) DamageTypeComboBox.SelectedItem == "Auto")
+                {
+                    if (MissionSettings.ManualDamageType != null && !DamageTypeComboBox.DroppedDown)
+                    {
+                        MissionSettings.ManualDamageType = null;
+                    }
+                }
+                
 
                 //
                 // Middle group
@@ -878,7 +891,19 @@ namespace Questor
 
         private void DamageTypeComboBoxSelectedIndexChanged(object sender, EventArgs e)
         {
-            MissionSettings.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
+            if (DamageTypeComboBox.Text != null && !string.IsNullOrEmpty(DamageTypeComboBox.Text))
+            {
+                if (DamageTypeComboBox.Text.ToLower() == "Auto".ToLower())
+                {
+                    MissionSettings.ManualDamageType = null;
+                    return;
+                }
+
+                MissionSettings.ManualDamageType = (DamageType)Enum.Parse(typeof(DamageType), DamageTypeComboBox.Text);
+                return;    
+            }
+
+            return;
         }
 
         private void PauseCheckBoxCheckedChanged(object sender, EventArgs e)

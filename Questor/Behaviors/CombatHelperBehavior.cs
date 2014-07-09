@@ -282,7 +282,11 @@ namespace Questor.Behaviors
 
                         // Load right ammo based on mission
                         Arm.AmmoTypesToLoad.Clear();
-                        Arm.LoadSpecificAmmoTypeForNonMissionSituations(new[] { MissionSettings.MissionDamageType });
+                        if (MissionSettings.ManualDamageType != null)
+                        {
+                            Arm.LoadSpecificAmmoTypeForNonMissionSituations((DamageType) MissionSettings.ManualDamageType);    
+                        }
+                        
                     }
 
                     Arm.ProcessState();

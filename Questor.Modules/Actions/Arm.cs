@@ -26,7 +26,7 @@ namespace Questor.Modules.Actions
     {
         static Arm()
         {
-            _ammoTypesToLoad = new List<Ammo>();
+            //_ammoTypesToLoad = new List<Ammo>();
             CrystalsToLoad = new List<MiningCrystals>();
         }
 
@@ -36,7 +36,6 @@ namespace Questor.Modules.Actions
 
         private static int _itemsLeftToMoveQuantity;
         
-        public static List<Ammo> _ammoTypesToLoad;
         public static List<Ammo> AmmoTypesToLoad
         {
             get
@@ -44,43 +43,26 @@ namespace Questor.Modules.Actions
                 try
                 {
                     int numAmmoType = 0;
-                    if (_ammoTypesToLoad == null || (_ammoTypesToLoad != null && !_ammoTypesToLoad.Any()))
+                    
+                    if (MissionSettings.MissionAmmoTypesToLoad == null || (MissionSettings.MissionAmmoTypesToLoad != null && !MissionSettings.MissionAmmoTypesToLoad.Any()))
                     {
-                        if (MissionSettings.MissionAmmoTypesToLoad == null || (MissionSettings.MissionAmmoTypesToLoad != null && !MissionSettings.MissionAmmoTypesToLoad.Any()))
-                        {
-                            if (MissionSettings.FactionAmmoTypesToLoad == null || (MissionSettings.FactionAmmoTypesToLoad != null && !MissionSettings.FactionAmmoTypesToLoad.Any()))
-                            {
-                                if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "_ammotoLoad, MissionAmmo, FactionAmmo all null or empty!", Logging.Debug);
-                                _ammoTypesToLoad = new List<Ammo>();
-                                return _ammoTypesToLoad;
-                            }
-
-                            if (MissionSettings.FactionAmmoTypesToLoad.Any())
-                            {
-                                if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "Using MissionSettings.FactionAmmo: FactionAmmo Contains [" + MissionSettings.FactionAmmoTypesToLoad.Count() + "] ammo type", Logging.Debug);
-                                numAmmoType = 0;
-                                foreach (Ammo _factionAmmoTypeToLoad in MissionSettings.FactionAmmoTypesToLoad)
-                                {
-                                    numAmmoType++;
-                                    if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "[" + numAmmoType + "] DamageType Chosen Based on Faction: Name: [" + _factionAmmoTypeToLoad.Name + "][" + _factionAmmoTypeToLoad.DamageType + "]", Logging.Debug);
-                                }    
-                            }
-                            
-                            return MissionSettings.FactionAmmoTypesToLoad;
-                        }
-
-                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "Using MissionSettings.MissionAmmo: MissionAmmo Contains [" + MissionSettings.MissionAmmoTypesToLoad.Count() + "] ammo type", Logging.Debug);
-                        numAmmoType = 0;
-                        foreach (Ammo _factionAmmoTypeToLoad in MissionSettings.FactionAmmoTypesToLoad)
-                        {
-                            numAmmoType++;
-                            if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "[" + numAmmoType + "] DamageType Chosen Based on Faction: Name: [" + _factionAmmoTypeToLoad.Name + "] TypeID: [" + _factionAmmoTypeToLoad.TypeId + "] [" + _factionAmmoTypeToLoad.DamageType + "]", Logging.Debug);
-                        }
-                        return MissionSettings.MissionAmmoTypesToLoad;
+                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "MissionSettings.MissionAmmoTypesToLoad is null", Logging.Debug);
                     }
 
-                    if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "Using _ammoToLoad", Logging.Debug);
-                    return _ammoTypesToLoad;
+                    if ((MissionSettings.MissionAmmoTypesToLoad != null && !MissionSettings.MissionAmmoTypesToLoad.Any()))
+                    {
+                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "MissionSettings.MissionAmmoTypesToLoad is empty", Logging.Debug);
+                    }
+
+                    if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "Using MissionSettings.MissionAmmo: MissionAmmo Contains [" + MissionSettings.MissionAmmoTypesToLoad.Count() + "] ammo type", Logging.Debug);
+                    numAmmoType = 0;
+                    foreach (Ammo _missionAmmoTypeToLoad in MissionSettings.MissionAmmoTypesToLoad)
+                    {
+                        numAmmoType++;
+                        if (Logging.DebugArm) Logging.Log("AmmoTypesToLoad", "[" + numAmmoType + "] DamageType Chosen Based on Faction: Name: [" + _missionAmmoTypeToLoad.Name + "] TypeID: [" + _missionAmmoTypeToLoad.TypeId + "] [" + _missionAmmoTypeToLoad.DamageType + "]", Logging.Debug);
+                    }
+                    return MissionSettings.MissionAmmoTypesToLoad;
+
                 }
                 catch (Exception ex)
                 {
@@ -128,12 +110,12 @@ namespace Questor.Modules.Actions
         private static IEnumerable<DirectItem> hangarItems;
         private static DirectItem hangarItem;
 
-        public static void LoadSpecificAmmoTypeForNonMissionSituations(IEnumerable<DamageType> damageTypes)
+        public static void LoadSpecificAmmoTypeForNonMissionSituations(DamageType _damageType)
         {
             try
             {
-                _ammoTypesToLoad = new List<Ammo>();
-                _ammoTypesToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+                MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
+                MissionSettings.MissionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == _damageType).Select(a => a.Clone()));
             }
             catch (Exception ex)
             {
@@ -523,7 +505,7 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                _ammoTypesToLoad.Clear();
+                //_ammoTypesToLoad.Clear();
                 switchingShips = false;
                 UseMissionShip = false;          // Were we successful in activating the mission specific ship?
                 DefaultFittingChecked = false;   //flag to check for the correct default fitting before using the fitting manager

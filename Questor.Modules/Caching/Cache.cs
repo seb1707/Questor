@@ -637,7 +637,7 @@ namespace Questor.Modules.Caching
             get
             {
                 // Get ammo based on current damage type
-                IEnumerable<Ammo> ammo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                IEnumerable<Ammo> ammo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
 
                 try
                 {

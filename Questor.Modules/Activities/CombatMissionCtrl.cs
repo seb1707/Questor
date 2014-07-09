@@ -2601,7 +2601,7 @@ namespace Questor.Modules.Activities
 
                                     if (pocket.Element("damagetype") != null)
                                     {
-                                        MissionSettings.MissionDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
+                                        MissionSettings.PocketDamageType = (DamageType)Enum.Parse(typeof(DamageType), (string)pocket.Element("damagetype"), true);
                                     }
 
                                     if (pocket.Element("orbitdistance") != null) 	//Load OrbitDistance from mission.xml, if present

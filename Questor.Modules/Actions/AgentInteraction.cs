@@ -581,8 +581,8 @@ namespace Questor.Modules.Actions
                         if (!MissionSettings.loadedAmmo)
                         {
                             Logging.Log("AgentInteraction", "List of Ammo not yet populated. Attempting to choose ammo based on faction", Logging.Orange);
-                            MissionSettings.MissionDamageType = MissionSettings.GetFactionDamageType(html);
-                            MissionSettings.LoadSpecificAmmo(new[] { MissionSettings.MissionDamageType }, true, false, true);
+                            MissionSettings.FactionDamageType = MissionSettings.GetFactionDamageType(html);
+                            MissionSettings.LoadCorrectFactionOrMissionAmmo();
                         }
 
                         if (Purpose == AgentInteractionPurpose.AmmoCheck)

@@ -524,7 +524,7 @@ namespace Questor.Modules.Logging
                 return false;
             }
 
-            IEnumerable<Ammo> correctAmmo1 = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType);
+            IEnumerable<Ammo> correctAmmo1 = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType);
             IEnumerable<DirectItem> ammoCargo = Cache.Instance.CurrentShipsCargo.Items.Where(i => correctAmmo1.Any(a => a.TypeId == i.TypeId));
             try
             {

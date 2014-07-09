@@ -231,7 +231,7 @@ namespace Questor.Modules.Lookup
         public static bool UseMissionShip { get; set; } // flags whether we're using a mission specific ship
         public static bool ChangeMissionShipFittings { get; set; } // used for situations in which missionShip's specified, but no faction or mission fittings are; prevents default
         public static List<Ammo> MissionAmmoTypesToLoad { get; set; }
-        public static List<Ammo> FactionAmmoTypesToLoad { get; set; }
+        //public static List<Ammo> FactionAmmoTypesToLoad { get; set; }
         
         public static int MissionsThisSession = 0;
 
@@ -282,6 +282,8 @@ namespace Questor.Modules.Lookup
             MissionSettings.PocketOptimalRange = null;
             MissionSettings.PocketOrbitDistance = null;
             MissionSettings.PocketUseDrones = null;
+            MissionSettings.PocketDamageType = null;
+            MissionSettings.ManualDamageType = null;
         }
 
         public static void ClearMissionSpecificSettings()
@@ -305,6 +307,7 @@ namespace Questor.Modules.Lookup
             MissionSettings.MissionOrbitDistance = null;
             MissionSettings.MissionOptimalRange = null;
             MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
+            MissionSettings.MissionDamageType = null;
         }
 
         public static void ClearFactionSpecificSettings()
@@ -314,7 +317,8 @@ namespace Questor.Modules.Lookup
             MissionSettings.FactionDronesKillHighValueTargets = null;
             MissionSettings.FactionOptimalRange = null;
             MissionSettings.FactionOrbitDistance = null;
-            MissionSettings.FactionAmmoTypesToLoad = new List<Ammo>();
+            MissionSettings.FactionDamageType = null;
+            //MissionSettings.FactionAmmoTypesToLoad = new List<Ammo>();
         }
 
         public static void LoadMissionXMLData()
@@ -376,7 +380,7 @@ namespace Questor.Modules.Lookup
                 {
                     MissionDamageType = damageTypesForThisMission.FirstOrDefault();
                     Logging.Log("AgentInteraction", "Mission XML specified the Mission Damagetype for [" + MissionName + "] is [" + MissionDamageType.ToString() + "]", Logging.White);
-                    LoadSpecificAmmo(damageTypesForThisMission.Distinct(), false, true, true);
+                    LoadCorrectFactionOrMissionAmmo();
                     loadedAmmo = true;
                 }
             }
@@ -394,42 +398,31 @@ namespace Questor.Modules.Lookup
 
         public static bool loadedAmmo = false;
 
-        public static void LoadSpecificAmmo(IEnumerable<DamageType> damageTypes, bool FactionAmmo, bool MissionAmmo, bool ClearExisting)
+        public static void LoadCorrectFactionOrMissionAmmo()
         {
             try
             {
                 Logging.Log("LoadSpecificAmmo", "Clearing existing list of Ammo To load", Logging.White);
-                Arm._ammoTypesToLoad = new List<Ammo>();
-                if (Combat.Ammo.Any(a => damageTypes.Contains(a.DamageType)))
+                if (Combat.Ammo.Any(a => a.DamageType == MissionSettings.CurrentDamageType))
                 {
-                    Ammo _ammo = Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()).FirstOrDefault();
+                    Ammo _ammo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).Select(a => a.Clone()).FirstOrDefault();
                     if (_ammo != null)
                     {
-                        if (FactionAmmo)
-                        {
-                            Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of FactionAmmo to load", Logging.White);
-                            if (ClearExisting) MissionSettings.FactionAmmoTypesToLoad = new List<Ammo>();
-                            MissionSettings.FactionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
-                            return;
-                        }
-
-                        if (MissionAmmo)
-                        {
-                            Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of MissionAmmo to load", Logging.White);
-                            if (ClearExisting) MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
-                            MissionSettings.MissionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
-                            return;
-                        }
-
-                        //if (ClearExisting) Arm.AmmoToLoad.Clear();
-                        //Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of ammo to load", Logging.White);
-                        //Arm._ammoToLoad.AddRange(Combat.Ammo.Where(a => damageTypes.Contains(a.DamageType)).Select(a => a.Clone()));
+                        Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of MissionAmmo to load", Logging.White);
+                        MissionSettings.MissionAmmoTypesToLoad = new List<Ammo>();
+                        MissionSettings.MissionAmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).Select(a => a.Clone()));
+                        return;
                     }
+
+                    return;
                 }
+
+                return;
             }
             catch (Exception exception)
             {
                 Logging.Log("LoadSpecificAmmo", "Exception [" + exception + "]", Logging.Debug);
+                return;
             }
         }
 
@@ -559,7 +552,38 @@ namespace Questor.Modules.Lookup
         /// <summary>
         ///   Best damage type for the mission
         /// </summary>
-        public static DamageType MissionDamageType { get; set; }
+        public static DamageType CurrentDamageType
+        {
+            get
+            {
+                if (ManualDamageType == null)
+                {
+                    if (PocketDamageType == null)
+                    {
+                        if (MissionDamageType == null)
+                        {
+                            if (FactionDamageType == null)
+                            {
+                                return DamageType.EM;
+                            }
+
+                            return (DamageType) FactionDamageType;
+                        }
+
+                        return (DamageType) MissionDamageType;
+                    }
+
+                    return (DamageType)PocketDamageType;
+                }
+
+                return (DamageType) ManualDamageType;
+            }
+        }
+
+        public static DamageType? FactionDamageType { get; set; }
+        public static DamageType? MissionDamageType { get; set; }
+        public static DamageType? PocketDamageType { get; set; }
+        public static DamageType? ManualDamageType { get; set; }
 
         public static DamageType GetFactionDamageType(string html)
         {

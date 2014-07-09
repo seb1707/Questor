@@ -1349,10 +1349,10 @@ namespace Questor.Modules.Combat
                     }
                 }
 
-                if (Combat.Ammo.Any(a => a.DamageType == MissionSettings.MissionDamageType))
+                if (Combat.Ammo.Any(a => a.DamageType == MissionSettings.CurrentDamageType))
                 {
                     // Get ammo based on damage type
-                    correctAmmoToUse = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                    correctAmmoToUse = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
 
                     //
                     // get Ammo Based on entity we are shooting's size class, default to normal ammo if we cant determine its size
@@ -1391,7 +1391,7 @@ namespace Questor.Modules.Combat
                     //check if mission specific ammo is defined
                     if (MissionSettings.MissionAmmoTypesToLoad.Count() != 0)
                     {
-                        correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                        correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
                     }
 
                     // Check if we still have that ammo in our cargo
@@ -1404,7 +1404,7 @@ namespace Questor.Modules.Combat
                     // We are out of ammo! :(
                     if (!correctAmmoInCargo.Any())
                     {
-                        Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + MissionSettings.MissionDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
+                        Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                         _States.CurrentCombatState = CombatState.OutOfAmmo;
                         return false;
                     }
@@ -1424,10 +1424,10 @@ namespace Questor.Modules.Combat
                 //
                 // normal ammo selection - ignore target attributes and uses the right ammo for the pocket
                 //
-                if (Combat.Ammo.Any(a => a.DamageType == MissionSettings.MissionDamageType))
+                if (Combat.Ammo.Any(a => a.DamageType == MissionSettings.CurrentDamageType))
                 {
                     // Get ammo based on damage type
-                    correctAmmoToUse = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                    correctAmmoToUse = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
 
                     // Check if we still have that ammo in our cargo
                     correctAmmoInCargo = correctAmmoToUse.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => i.TypeId == a.TypeId && i.Quantity >= Combat.MinimumAmmoCharges)).ToList();
@@ -1435,7 +1435,7 @@ namespace Questor.Modules.Combat
                     //check if mission specific ammo is defined
                     if (MissionSettings.MissionAmmoTypesToLoad.Count() != 0)
                     {
-                        correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                        correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
                     }
 
                     // Check if we still have that ammo in our cargo
@@ -1448,7 +1448,7 @@ namespace Questor.Modules.Combat
                     // We are out of ammo! :(
                     if (!correctAmmoInCargo.Any())
                     {
-                        Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + MissionSettings.MissionDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
+                        Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                         _States.CurrentCombatState = CombatState.OutOfAmmo;
                         return false;
                     }
@@ -1624,7 +1624,7 @@ namespace Questor.Modules.Combat
         {
             if (Combat.WeaponGroupId == 53) return true;
             // Get ammo based on damage type
-            IEnumerable<Ammo> correctAmmo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+            IEnumerable<Ammo> correctAmmo = Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
 
             // Check if we still have that ammo in our cargo
             IEnumerable<Ammo> correctAmmoInCargo = correctAmmo.Where(a => Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(e => e.TypeId == a.TypeId)).ToList();
@@ -1632,7 +1632,7 @@ namespace Questor.Modules.Combat
             //check if mission specific ammo is defined
             if (MissionSettings.MissionAmmoTypesToLoad.Count() != 0)
             {
-                correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.MissionDamageType).ToList();
+                correctAmmoInCargo = MissionSettings.MissionAmmoTypesToLoad.Where(a => a.DamageType == MissionSettings.CurrentDamageType).ToList();
             }
 
             // Check if we still have that ammo in our cargo
@@ -1645,7 +1645,7 @@ namespace Questor.Modules.Combat
             // We are out of ammo! :(
             if (!correctAmmoInCargo.Any())
             {
-                Logging.Log("Combat", "ReloadEnergyWeapon: not enough [" + MissionSettings.MissionDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
+                Logging.Log("Combat", "ReloadEnergyWeapon: not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                 _States.CurrentCombatState = CombatState.OutOfAmmo;
                 return false;
             }

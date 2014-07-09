@@ -106,8 +106,8 @@ namespace QuestorLoader
         //public static string ConsoleLog { get; set; }
         //public static string ConsoleLogRedacted { get; set; }
         public static string Logpath { get; set; }
-        public static bool InnerspaceGeneratedConsoleLog { get; set; }
-        public const bool UseInnerspace = false;
+        //public static bool InnerspaceGeneratedConsoleLog { get; set; }
+        //public const bool UseInnerspace = false;
         //public static bool ConsoleLog { get; set; }
         public static string ConsoleLogPath { get; set; }
         public static string ConsoleLogFile { get; set; }
@@ -138,11 +138,11 @@ namespace QuestorLoader
                 //
                 // Innerspace Console logging
                 //
-                if (Logging.UseInnerspace)
-                {
+                //if (Logging.UseInnerspace)
+                //{
                     InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + DescriptionOfWhere + Logging.Orange + "] " + color + colorLogLine));
-                }
-                else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
+                //}
+                //else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
                     Console.WriteLine(plainLogLine);
                 }
@@ -159,11 +159,11 @@ namespace QuestorLoader
                             if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
                             {
                                 DescriptionOfWhere = "Logging";
-                                if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
-                                {
-                                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
-                                    LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
-                                }
+                                //if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
+                                //{
+                                //    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
+                                //   LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
+                                //}
 
                                 Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, plainLogLine + "\r\n");
 
@@ -175,16 +175,16 @@ namespace QuestorLoader
                                         Logging.ConsoleLogText = string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "]" + plainLogLine + "\r\n");
                                         Logging.ConsoleLogOpened = true;
                                     }
-                                    else
-                                    {
-                                        if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
-                                    }
+                                    //else
+                                    //{
+                                    //    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
+                                    //}
                                     line = "";
                                 }
                                 else
                                 {
                                     line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
-                                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
+                                    //if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
                                     Logging.ExtConsole = string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + DescriptionOfWhere + "] " + plainLogLine + "\r\n");
                                 }
                             }

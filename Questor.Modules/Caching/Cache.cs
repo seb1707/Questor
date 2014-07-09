@@ -533,11 +533,6 @@ namespace Questor.Modules.Caching
                             if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
                         }
 
-                        if (_currentShipsCargo == null)
-                        {
-                            _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
-                        }
-
                         if (_currentShipsCargo != null)
                         {
                             if (Cache.Instance._currentShipsCargo.Window.IsPrimary())
@@ -547,14 +542,16 @@ namespace Questor.Modules.Caching
                                     if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.Debug);
                                     Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
                                     Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
+                                    return _currentShipsCargo;
                                 }
 
-                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);                                
+                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
                             }
                         }
 
                         if (_currentShipsCargo == null)
                         {
+                            _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
                             if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);
                             return null;
                         }
@@ -3088,6 +3085,7 @@ namespace Questor.Modules.Caching
             }
         }
 
+        //todo: make this match (more or less) Itemhangar
         public DirectContainer ShipHangar { get; set; }
 
         public bool OpenShipsHangar(string module)
@@ -4025,6 +4023,8 @@ namespace Questor.Modules.Caching
 
         public DirectContainerWindow OreHoldWindow { get; set; }
 
+
+        //todo: make this match (more or less) Itemhangar
         public bool OpenOreHold(string module)
         {
             if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction) return false;
@@ -4072,7 +4072,10 @@ namespace Questor.Modules.Caching
                         {
                             if (Settings.Instance.LootHangarTabName != string.Empty)
                             {
-                                
+                                //
+                                // todo: we should check for the CorpHangar window name and open it if necessary!
+                                //
+
                                 Cache.Instance.LootHangarID = -99;
                                 Cache.Instance.LootHangarID = Cache.Instance.DirectEve.GetCorpHangarId(Settings.Instance.LootHangarTabName); //- 1;
                                 if (Logging.DebugHangars) Logging.Log("LootHangar: GetCorpLootHangarID", "LootHangarID is [" + Cache.Instance.LootHangarID + "]", Logging.Teal);

@@ -2403,9 +2403,6 @@ namespace Questor.Modules.Activities
                     MissionSettings.MissionUseDrones = null;
                     MissionSettings.PocketUseDrones = null;
 
-                    // Reload the items needed for this mission from the XML file
-                    MissionSettings.RefreshMissionItems(AgentInteraction.AgentId);
-
                     // Reset notNormalNav and onlyKillAggro to false
                     Cache.Instance.normalNav = true;
                     Cache.Instance.onlyKillAggro = false;

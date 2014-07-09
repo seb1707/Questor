@@ -8,6 +8,11 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Collections;
+using System.IO;
+using System.Xml.Linq;
+using System.Xml.XPath;
+
 namespace Questor.Modules.Actions
 {
     using System;
@@ -92,6 +97,149 @@ namespace Questor.Modules.Actions
         {
             CrystalsToLoad = new List<MiningCrystals>();
             CrystalsToLoad.AddRange(Combat.MiningCrystals.Where(a => miningCrystals.Contains(a.OreType)).Select(a => a.Clone()));
+        }
+
+        public static void RefreshMissionItems(long agentId)
+        {
+            if (_States.CurrentQuestorState != QuestorState.CombatMissionsBehavior)
+            {
+                Settings.Instance.UseFittingManager = false;
+
+                //Logging.Log("Cache.RefreshMissionItems", "We are not running missions so we have no mission items to refresh", Logging.Teal);
+                return;
+            }
+
+            MissionSettings.MissionSpecificShip = null;
+            MissionSettings.FactionSpecificShip = null;
+
+            DirectAgentMission missionDetailsForMissionItems = Cache.Instance.GetAgentMission(agentId, false);
+            if (missionDetailsForMissionItems == null)
+            {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(MissionSettings.FactionName))
+            {
+                MissionSettings.FactionName = "Default";
+            }
+
+            if (Settings.Instance.UseFittingManager)
+            {
+
+
+                //Set fitting to default
+                MissionSettings.DefaultFittingName = MissionSettings.DefaultFitting.FittingName;
+                MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
+                MissionSettings.MissionSpecificShip = null;
+                MissionSettings.FactionSpecificShip = null;
+                MissionSettings.ChangeMissionShipFittings = false;
+
+                //
+                // default to using the faction fitting if defined
+                //
+                if (!string.IsNullOrEmpty(MissionSettings.FactionFittingForThisMissionsFaction))
+                {
+                    MissionSettings.FittingToLoad = MissionSettings.FactionFittingForThisMissionsFaction;
+                    MissionSettings.MissionDroneTypeID = Drones.FactionDroneTypeID;
+                }
+
+                if (MissionSettings.ListOfMissionFittings.Any(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())) //priority goes to mission-specific fittings
+                {
+                    MissionFitting FittingNameTouseForThisMission;
+
+                    // if we have got multiple copies of the same mission, find the one with the matching faction
+                    if (MissionSettings.ListOfMissionFittings.Any(m => m.Faction.ToLower() == MissionSettings.FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower())))
+                    {
+                        FittingNameTouseForThisMission = MissionSettings.ListOfMissionFittings.FirstOrDefault(m => m.Faction.ToLower() == MissionSettings.FactionName.ToLower() && (m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower()));
+                    }
+                    else //otherwise just use the first copy of that mission
+                    {
+                        FittingNameTouseForThisMission = MissionSettings.ListOfMissionFittings.FirstOrDefault(m => m.Mission.ToLower() == missionDetailsForMissionItems.Name.ToLower());
+                    }
+
+                    if (FittingNameTouseForThisMission != null)
+                    {
+                        //
+                        //
+                        //
+                        // this whole thing should be reworked to use faction fittings, drones, etc and them apply mission specific stuff if avail to overwrite it.
+                        //
+                        //
+                        //
+                        MissionSettings.MissionSpecificShip = FittingNameTouseForThisMission.Ship;
+                        //
+                        // if we have the drone type specified in the mission fitting entry use it, otherwise do not overwrite the default or the drone type specified by the faction
+                        //
+                        if (FittingNameTouseForThisMission.DroneTypeID != null)
+                        {
+                            MissionSettings.MissionDroneTypeID = (int)FittingNameTouseForThisMission.DroneTypeID;
+                        }
+
+                        if (!(FittingNameTouseForThisMission.Fitting == "" && MissionSettings.MissionSpecificShip != "")) // if we have both specified a mission specific ship and a fitting, then apply that fitting to the ship
+                        {
+                            MissionSettings.ChangeMissionShipFittings = true;
+                            MissionSettings.FittingToLoad = FittingNameTouseForThisMission.Fitting;
+                        }
+                        else if (!string.IsNullOrEmpty(MissionSettings.FactionFittingForThisMissionsFaction))
+                        {
+                            MissionSettings.FittingToLoad = MissionSettings.FactionFittingForThisMissionsFaction;
+                        }
+
+                        Logging.Log("RefreshMissionItems", "Mission: " + MissionSettings.MissionSpecificShip + " - Faction: " + MissionSettings.FactionName + " - Fitting: " + MissionSettings.FittingToLoad + "]", Logging.White);
+                        Logging.Log("RefreshMissionItems", "Ship: " + MissionSettings.MissionSpecificShip + " - ChangeMissionShipFittings: " + MissionSettings.ChangeMissionShipFittings + "Using DroneTypeID [" + Drones.DroneTypeID + "]", Logging.White);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(MissionSettings.FactionFittingForThisMissionsFaction)) // if no mission fittings defined, try to match by faction
+                {
+                    MissionSettings.FittingToLoad = MissionSettings.FactionFittingForThisMissionsFaction;
+                }
+
+                if (MissionSettings.FittingToLoad == "") // otherwise use the default
+                {
+                    MissionSettings.FittingToLoad = MissionSettings.DefaultFittingName;
+                }
+            }
+
+            MissionSettings.MissionItems.Clear();
+            MissionSettings.BringMissionItem = string.Empty;
+            MissionSettings.BringOptionalMissionItem = string.Empty;
+
+            string missionName = Logging.FilterPath(missionDetailsForMissionItems.Name);
+            MissionSettings.MissionXmlPath = System.IO.Path.Combine(MissionSettings.MissionsPath, missionName + ".xml");
+            if (!File.Exists(MissionSettings.MissionXmlPath))
+            {
+                return;
+            }
+
+            try
+            {
+                XDocument xdoc = XDocument.Load(MissionSettings.MissionXmlPath);
+                IEnumerable<string> items = ((IEnumerable)xdoc.XPathEvaluate("//action[(translate(@name, 'LOT', 'lot')='loot') or (translate(@name, 'LOTIEM', 'lotiem')='lootitem')]/parameter[translate(@name, 'TIEM', 'tiem')='item']/@value")).Cast<XAttribute>().Select(a => ((string)a ?? string.Empty).ToLower());
+                MissionSettings.MissionItems.AddRange(items);
+
+                if (xdoc.Root != null)
+                {
+                    MissionSettings.BringMissionItem = (string)xdoc.Root.Element("bring") ?? string.Empty;
+                    MissionSettings.BringMissionItem = MissionSettings.BringMissionItem.ToLower();
+                    if (Logging.DebugArm) Logging.Log("RefreshMissionItems", "bring XML [" + xdoc.Root.Element("bring") + "] BringMissionItem [" + MissionSettings.BringMissionItem + "]", Logging.Debug);
+                    MissionSettings.BringMissionItemQuantity = (int?)xdoc.Root.Element("bringquantity") ?? 1;
+                    if (Logging.DebugArm) Logging.Log("RefreshMissionItems", "bringquantity XML [" + xdoc.Root.Element("bringquantity") + "] BringMissionItemQuantity [" + MissionSettings.BringMissionItemQuantity + "]", Logging.Debug);
+
+                    MissionSettings.BringOptionalMissionItem = (string)xdoc.Root.Element("trytobring") ?? string.Empty;
+                    MissionSettings.BringOptionalMissionItem = MissionSettings.BringOptionalMissionItem.ToLower();
+                    if (Logging.DebugArm) Logging.Log("RefreshMissionItems", "trytobring XML [" + xdoc.Root.Element("trytobring") + "] BringOptionalMissionItem [" + MissionSettings.BringOptionalMissionItem + "]", Logging.Debug);
+                    MissionSettings.BringOptionalMissionItemQuantity = (int?)xdoc.Root.Element("trytobringquantity") ?? 1;
+                    if (Logging.DebugArm) Logging.Log("RefreshMissionItems", "trytobringquantity XML [" + xdoc.Root.Element("trytobringquantity") + "] BringOptionalMissionItemQuantity [" + MissionSettings.BringOptionalMissionItemQuantity + "]", Logging.Debug);
+
+                }
+
+                //load fitting setting from the mission file
+                //Fitting = (string)xdoc.Root.Element("fitting") ?? "default";
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("RefreshMissionItems", "Error loading mission XML file [" + ex.Message + "]", Logging.Orange);
+            }
         }
 
         private static bool LookForItem(string itemToFind, DirectContainer HangarToCheckForItemsdWeAlreadyMoved)
@@ -478,7 +626,7 @@ namespace Questor.Modules.Actions
                 ItemsAreBeingMoved = false;
                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.BringOptionalMissionItemQuantity is [" + MissionSettings.BringOptionalMissionItemQuantity + "]", Logging.Debug);
                 ItemHangarRetries = 0;
-                MissionSettings.RefreshMissionItems(AgentInteraction.AgentId);
+                RefreshMissionItems(AgentInteraction.AgentId);
                 
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 {

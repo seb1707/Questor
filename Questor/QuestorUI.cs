@@ -1475,7 +1475,7 @@ namespace Questor
         private void bttnOpenOreHold_Click(object sender, EventArgs e)
         {
             Logging.Log("QuestorUI", "Open OreHold button was pressed", Logging.Debug);
-            Cache.Instance.OpenOreHold("OpenOreHold");
+            if (Cache.Instance.OreHold == null) return;
         }
 
         private void bttnOpenInventory_Click(object sender, EventArgs e)

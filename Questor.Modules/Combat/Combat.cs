@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using System.Windows.Forms;
+
 namespace Questor.Modules.Combat
 {
     using System;
@@ -1342,7 +1344,7 @@ namespace Questor.Modules.Combat
                     {
                         if (weapon.CurrentCharges >= Combat.MinimumAmmoCharges && !force)
                         {
-                            if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "[" + weapon.TypeName + "] last reloaded [" + DateTime.UtcNow.Subtract(Time.Instance.LastChangedAmmoTimeStamp[weapon.ItemId]).TotalSeconds + "sec ago] [ " + weapon.CurrentCharges + " ] charges in in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Combat.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
+                            if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weapon.TypeName + "] last reloaded [" + DateTime.UtcNow.Subtract(Time.Instance.LastChangedAmmoTimeStamp[weapon.ItemId]).TotalSeconds + "sec ago] [ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Combat.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
                             return true;
                         }
                     }
@@ -1513,14 +1515,14 @@ namespace Questor.Modules.Combat
             }
             catch (Exception exception)
             {
-                Logging.Log("Combat", "ReloadNormalAmmo: Unable to find the correct ammo: waiting [" + exception + "]", Logging.Teal);
+                Logging.Log("Combat", "ReloadNormalAmmo: [" + weaponNumber + "] Unable to find the correct ammo: waiting [" + exception + "]", Logging.Teal);
                 return false;
             }
 
             // We do not have any ammo left that can hit targets at that range!
             if (ammo == null)
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We do not have any ammo left that can hit targets at that range!", Logging.Orange);
+                if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "] We do not have any ammo left that can hit targets at that range!", Logging.Orange);
                 return false;
             }
 
@@ -1529,7 +1531,8 @@ namespace Questor.Modules.Combat
             {
                 if (weapon.CurrentCharges >= Combat.MinimumAmmoCharges && !force)
                 {
-                    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Combat.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
+                    if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "][ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Combat.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
+                    Time.Instance.LastReloadedTimeStamp[weapon.ItemId] = DateTime.UtcNow;
                     return true;
                 }
 
@@ -1538,7 +1541,8 @@ namespace Questor.Modules.Combat
                     //
                     // even if force is true do not reload a weapon that is already full!
                     //
-                    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "]", Logging.Orange);
+                    if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "][ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "]", Logging.Orange);
+                    Time.Instance.LastReloadedTimeStamp[weapon.ItemId] = DateTime.UtcNow;
                     return true;
                 }
 
@@ -1547,7 +1551,7 @@ namespace Questor.Modules.Combat
                     //
                     // allow the reload (and log it!)
                     //
-                    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "[ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "] - forced reloading proceeding", Logging.Orange);
+                    if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "][ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "] - forced reloading proceeding", Logging.Orange);
                 }
 
             }
@@ -1568,33 +1572,33 @@ namespace Questor.Modules.Combat
                     // This should have shown up as "out of ammo"
                     if (charge == null)
                     {
-                        if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have no ammo in cargo?! This should have shown up as out of ammo", Logging.Orange);
+                        if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "We have no ammo in cargo?! This should have shown up as out of ammo", Logging.Orange);
                         return false;
                     }
                 }
                 else
                 {
-                    if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We have no items in cargo at all?! This should have shown up as out of ammo", Logging.Orange);
+                    if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "We have no items in cargo at all?! This should have shown up as out of ammo", Logging.Orange);
                     return false;
                 }
             }
             else
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "CurrentShipsCargo is null?!", Logging.Orange);
+                if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "CurrentShipsCargo is null?!", Logging.Orange);
                 return false;
             }
 
             // If we are reloading, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (weapon.IsReloadingAmmo)
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already reloading, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
+                if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "We are already reloading, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
             }
 
             // If we are changing ammo, wait Time.ReloadWeaponDelayBeforeUsable_seconds (see time.cs)
             if (weapon.IsChangingAmmo)
             {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "We are already changing ammo, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
+                if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "We are already changing ammo, wait - weapon.IsReloadingAmmo [" + weapon.IsReloadingAmmo + "]", Logging.Orange);
                 return true;
             }
 
@@ -1748,13 +1752,13 @@ namespace Questor.Modules.Combat
         /// <param name = "entity"></param>
         /// <param name = "weaponNumber"></param>
         /// <returns>True if the (enough/correct) ammo is loaded, false if wrong/not enough ammo is loaded</returns>
-        private static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber)
+        private static bool ReloadAmmo(ModuleCache weapon, EntityCache entity, int weaponNumber, bool force = false)
         {
             // We need the cargo bay open for both reload actions
             //if (!Cache.Instance.OpenCargoHold("Combat: ReloadAmmo")) return false;
             if (weapon.GroupId == 53) return true;
 
-            return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber);
+            return weapon.IsEnergyWeapon ? ReloadEnergyWeaponAmmo(weapon, entity, weaponNumber) : ReloadNormalAmmo(weapon, entity, weaponNumber, force);
         }
 
         public static bool ReloadAll(EntityCache entity, bool force = false)
@@ -1786,14 +1790,6 @@ namespace Questor.Modules.Combat
                 }
             }
 
-            _reloadAllIteration++;
-            if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "Entering reloadAll function (again) - it iterates through all weapon stacks [" + _reloadAllIteration + "]", Logging.White);
-            if (_reloadAllIteration > 12)
-            {
-                if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "reset iteration counter", Logging.Orange);
-                return true;
-            }
-
             _weaponNumber = 0;
             if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll:", "Weapons (or stacks of weapons?): [" + Cache.Instance.Weapons.Count() + "]", Logging.Orange);
 
@@ -1802,6 +1798,15 @@ namespace Questor.Modules.Combat
                 foreach (ModuleCache weapon in Cache.Instance.Weapons)
                 {
                     _weaponNumber++;
+                    if (Time.Instance.LastReloadedTimeStamp != null && Time.Instance.LastReloadedTimeStamp.ContainsKey(weapon.ItemId))
+                    {
+                        if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
+                        {
+                            if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                            continue;
+                        }
+                    }
+
                     // Reloading energy weapons prematurely just results in unnecessary error messages, so let's not do that
                     if (weapon.IsEnergyWeapon)
                     {
@@ -1832,19 +1837,10 @@ namespace Questor.Modules.Combat
                         if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "[" + weapon.TypeName + "][" + _weaponNumber + "] is Active, moving on to next weapon", Logging.White);
                         continue;
                     }
-
-                    if (Time.Instance.LastReloadedTimeStamp != null && Time.Instance.LastReloadedTimeStamp.ContainsKey(weapon.ItemId))
-                    {
-                        if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
-                        {
-                            if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
-                            continue;
-                        }    
-                    }
                     
                     if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                     {
-                        if (!ReloadAmmo(weapon, entity, _weaponNumber)) continue; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
+                        if (!ReloadAmmo(weapon, entity, _weaponNumber, force)) continue; //by returning false here we make sure we only reload one gun (or stack) per iteration (basically per second)    
                     }
 
                     return false;

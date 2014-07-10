@@ -731,7 +731,7 @@ namespace Questor.Modules.Actions
                 // 
                 if (!string.IsNullOrEmpty(ShipNameToActivate))
                 {
-                    if (!Cache.Instance.OpenShipsHangar(WeAreInThisStateForLogs())) return false;
+                    if (Cache.Instance.ShipHangar == null) return false;
 
                     List<DirectItem> shipsInShipHangar = Cache.Instance.ShipHangar.Items;
                     if (shipsInShipHangar.Any(s => s.GivenName != null && s.GivenName.ToLower() == ShipNameToActivate.ToLower()))
@@ -794,7 +794,7 @@ namespace Questor.Modules.Actions
             if (Cache.Instance.ActiveShip.GroupId != (int)Group.RookieShip &&
                 Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
             {
-                if (!Cache.Instance.OpenShipsHangar(WeAreInThisStateForLogs())) return false;
+                if (Cache.Instance.ShipHangar == null) return false;
 
                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GroupId == (int)Group.RookieShip || ship.GroupId == (int)Group.Shuttle))

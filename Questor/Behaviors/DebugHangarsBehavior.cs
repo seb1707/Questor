@@ -231,7 +231,7 @@ namespace Questor.Behaviors
 
                 case DebugHangarsBehaviorState.OpenShipsHangar:
                     Logging.Log("DebugHangars", "DebugHangarsState.OpenShipsHangar:", Logging.White);
-                    if (!Cache.Instance.OpenShipsHangar("DebugHangars")) return;
+                    if (Cache.Instance.ShipHangar == null) return;
                     Cache.Instance.DebugInventoryWindows("DebugHangars");
                     _States.CurrentDebugHangarBehaviorState = DebugHangarsBehaviorState.Error;
                     Cache.Instance.Paused = true;

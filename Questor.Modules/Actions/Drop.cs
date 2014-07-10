@@ -55,7 +55,7 @@
                     }
                     else if (DestinationHangarName == "Ship Hangar")
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Drop")) return;
+                        if (Cache.Instance.ShipHangar == null) return;
                         dropHangar = Cache.Instance.ShipHangar;
                     }
                     else

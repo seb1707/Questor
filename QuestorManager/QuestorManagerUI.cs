@@ -454,7 +454,7 @@ namespace QuestorManager
 
                     case QuestormanagerState.MakeShip:
 
-                        if (!Cache.Instance.OpenShipsHangar("QuestorManager")) break;
+                        if (Cache.Instance.ShipHangar == null) break;
 
                         //Logging.Log("QuestorManager", "MakeShip: ShipName: [" + Cache.Instance.ActiveShip.GivenName + "]", Logging.White);
                         //Logging.Log("QuestorManager", "MakeShip: ShipFind: [" + LstTask.Items[0].SubItems[1].Text + "]", Logging.White);

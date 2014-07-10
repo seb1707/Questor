@@ -37,7 +37,7 @@ namespace Questor.Storylines
             if (Cache.Instance.ActiveShip.GivenName.ToLower() != Settings.Instance.TransportShipName.ToLower())
             {
                 // Open the ship hangar
-                if (!Cache.Instance.OpenShipsHangar("MaterialsForWarPreparation")) return StorylineState.Arm;
+                if (Cache.Instance.ShipHangar == null) return StorylineState.Arm;
 
                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                 foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == Settings.Instance.TransportShipName.ToLower()))

@@ -30,7 +30,7 @@ namespace Questor.Storylines
                 return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if (!Cache.Instance.OpenShipsHangar("TransactionDataDelivery")) return StorylineState.Arm;
+            if (Cache.Instance.ShipHangar == null) return StorylineState.Arm;
 
             //  Look for a shuttle
             DirectItem item = Cache.Instance.ShipHangar.Items.FirstOrDefault(i => i.Quantity == -1 && i.GroupId == (int)Group.Shuttle);

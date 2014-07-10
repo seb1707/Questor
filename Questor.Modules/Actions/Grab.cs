@@ -37,7 +37,7 @@
             if (_States.CurrentGrabState != States.GrabState.WaitForItems)
             {
                 if (Cache.Instance.ItemHangar == null) return;
-                if (!Cache.Instance.OpenShipsHangar("Grab")) return;
+                if (Cache.Instance.ShipHangar == null) return;
 
                 if ("Local Hangar" == Hangar)
                     hangar = Cache.Instance.ItemHangar;
@@ -67,7 +67,7 @@
                     }
                     else if ("Ship Hangar" == Hangar)
                     {
-                        if (!Cache.Instance.OpenShipsHangar("Drop")) return;
+                        if (Cache.Instance.ShipHangar == null) return;
 
                         if (hangar != null && (hangar.Window == null || !hangar.Window.IsReady))
                             break;

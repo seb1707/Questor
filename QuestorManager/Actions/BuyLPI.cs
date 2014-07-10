@@ -58,7 +58,7 @@ namespace QuestorManager.Actions
                 case BuyLPIState.ReadyItemhangar:
 
                     if (Cache.Instance.ItemHangar == null) return;
-                    if (!Cache.Instance.OpenShipsHangar("BuyLPI")) return;
+                    if (Cache.Instance.ShipHangar == null) return;
 
                     _States.CurrentBuyLPIState = BuyLPIState.OpenLpStore;
                     break;

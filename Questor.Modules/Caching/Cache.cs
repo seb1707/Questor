@@ -964,44 +964,7 @@ namespace Questor.Modules.Caching
                 }
             }
         }
-
-
-        public IEnumerable<ItemCache> _modulesAsItemCache;
-
-        public IEnumerable<ItemCache> ModulesAsItemCache
-        {
-            get
-            {
-                try
-                {
-                    if (_modulesAsItemCache == null && Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle)
-                    {
-                        DirectContainer _modulesAsContainer = Cache.Instance.DirectEve.GetShipsModules();
-                        if (_modulesAsContainer != null && _modulesAsContainer.Items.Any())
-                        {
-                            _modulesAsItemCache = _modulesAsContainer.Items.Select(i => new ItemCache(i)).ToList();
-                            if (_modulesAsItemCache.Any())
-                            {
-                                return _modulesAsItemCache;    
-                            }
-
-                            return null;
-                        }
-
-                        return null;
-                    }
-
-                    return _modulesAsItemCache;
-                }
-                catch (Exception exception)
-                {
-                    Logging.Log("Cache.ModulesAsContainer", "Exception [" + exception + "]", Logging.Debug);
-                }
-
-                return _modulesAsItemCache;
-            }
-        }
-
+        
         public IEnumerable<ModuleCache> Modules
         {
             get
@@ -1018,12 +981,32 @@ namespace Questor.Modules.Caching
                 catch (Exception exception)
                 {
                     Logging.Log("Cache.Modules", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
                 }
-
-                return _modules;
             }
         }
 
+        public DirectContainer _fittedModules;
+        public DirectContainer FittedModules
+        {
+            get
+            {
+                try
+                {
+                    if (_fittedModules == null)
+                    {
+                        _fittedModules = Cache.Instance.DirectEve.GetShipsModules();
+                    }
+
+                    return _fittedModules;
+                }
+                catch (Exception exception)
+                {
+                    Logging.Log("Cache.Modules", "Exception [" + exception + "]", Logging.Debug);
+                    return null;
+                }
+            }
+        }
         //
         // this CAN and should just list all possible weapon system groupIDs
         //
@@ -2265,6 +2248,7 @@ namespace Questor.Modules.Caching
                 _ammoHangar = null;
                 _lootHangar = null;
                 _lootContainer = null;
+                _fittedModules = null;
 
                 //
                 // this list of variables is cleared every pulse.
@@ -2296,6 +2280,7 @@ namespace Questor.Modules.Caching
                 _myShipEntity = null;
                 _objects = null;
                 _safeSpotBookmarks = null;
+                _shipHangar = null;
                 _star = null;
                 _stations = null;
                 _stargate = null;
@@ -2620,6 +2605,11 @@ namespace Questor.Modules.Caching
                 {
                     if (!Cache.Instance.InSpace && Cache.Instance.InStation)
                     {
+                        if (Cache.Instance._itemHangar == null)
+                        {
+                            Cache.Instance._itemHangar = Cache.Instance.DirectEve.GetItemHangar();
+                        }
+
                         if (Instance.Windows.All(i => i.Type != "form.StationItems")) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
                         {
                             if (DateTime.UtcNow > Time.Instance.LastOpenItemHangar.AddSeconds(10))
@@ -2629,13 +2619,7 @@ namespace Questor.Modules.Caching
                                 Time.Instance.LastOpenItemHangar = DateTime.UtcNow;
                             }
                         }
-
-                        if (Cache.Instance._itemHangar == null)
-                        {
-                            Cache.Instance._itemHangar = Cache.Instance.DirectEve.GetItemHangar();
-                            return Cache.Instance._itemHangar;
-                        }
-
+                        
                         return Cache.Instance._itemHangar;
                     }
 
@@ -3069,60 +3053,50 @@ namespace Questor.Modules.Caching
         }
 
         //todo: make this match (more or less) Itemhangar
-        public DirectContainer ShipHangar { get; set; }
-
-        public bool OpenShipsHangar(string module)
+        private DirectContainer _shipHangar;
+        public DirectContainer ShipHangar
         {
-            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+            get
             {
-                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
-                return false;
+                try
+                {
+                    if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
+                    {
+                        if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace)", Logging.Teal);
+                        return null;
+                    }
+
+                    if (!Cache.Instance.InSpace && Cache.Instance.InStation)
+                    {
+                        if (Cache.Instance._shipHangar == null)
+                        {
+                            Cache.Instance._shipHangar = Cache.Instance.DirectEve.GetShipHangar();
+                        }
+
+                        if (Instance.Windows.All(i => i.Type != "form.StationShips"))
+                            // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
+                        {
+                            if (DateTime.UtcNow > Time.Instance.LastOpenShiphangar.AddSeconds(10))
+                            {
+                                Statistics.LogWindowActionToWindowLog("ShipHangar", "Opening Shiphangar");
+                                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
+                                Time.Instance.LastOpenShiphangar = DateTime.UtcNow;
+                            }
+                        }
+
+                        return Cache.Instance._shipHangar;
+                    }
+
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("ItemHangar", "Exception [" + ex + "]", Logging.Debug);
+                    return null;
+                }
             }
 
-            if (DateTime.UtcNow < Time.Instance.NextOpenHangarAction)
-            {
-                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (DateTime.UtcNow [" + DateTime.UtcNow + "] < Cache.Instance.NextOpenHangarAction [" + Time.Instance.NextOpenHangarAction + "])", Logging.Teal);
-                return false;
-            }
-
-            if (Cache.Instance.InStation)
-            {
-                if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.InStation)", Logging.Teal);
-
-                Cache.Instance.ShipHangar = Cache.Instance.DirectEve.GetShipHangar();
-                if (Cache.Instance.ShipHangar == null)
-                {
-                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar == null)", Logging.Teal);
-                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
-                    return false;
-                }
-
-                // Is the ship hangar open?
-                if (Cache.Instance.ShipHangar.Window == null)
-                {
-                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window == null)", Logging.Teal);
-                    // No, command it to open
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
-                    Statistics.LogWindowActionToWindowLog("ShipHangar", "Open ShipHangar");
-                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Ship Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    return false;
-                }
-
-                if (!Cache.Instance.ShipHangar.Window.IsReady)
-                {
-                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (!Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
-                    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddMilliseconds(500);
-                    return false;
-                }
-
-                if (Cache.Instance.ShipHangar.Window.IsReady)
-                {
-                    if (Logging.DebugHangars) Logging.Log("OpenShipsHangar", "if (Cache.Instance.ShipHangar.Window.IsReady)", Logging.Teal);
-                    return true;
-                }
-            }
-            return false;
+            set { _shipHangar = value; }
         }
 
         public bool StackShipsHangar(string module)
@@ -3652,6 +3626,18 @@ namespace Questor.Modules.Caching
                             {
                                 //if (Logging.DebugHangars) Logging.Log("LootContainer", "Debug: if (!string.IsNullOrEmpty(Settings.Instance.LootContainer))", Logging.Teal);
 
+                                if (Instance.Windows.All(i => i.Type != "form.Inventory"))
+                                // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
+                                {
+                                    if (DateTime.UtcNow > Time.Instance.LastOpenItemHangar.AddSeconds(10))
+                                    {
+                                        Statistics.LogWindowActionToWindowLog("Inventory", "Opening Inventory");
+                                        Cache.Instance.DirectEve.OpenInventory();
+                                        Time.Instance.LastOpenItemHangar = DateTime.UtcNow;
+                                        return null;
+                                    }
+                                }
+                                
                                 DirectItem firstLootContainer = Cache.Instance.LootHangar.Items.FirstOrDefault(i => i.GivenName != null && i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer) && i.GivenName.ToLower() == Settings.Instance.LootContainerName.ToLower());
                                 if (firstLootContainer == null && Cache.Instance.LootHangar.Items.Any(i => i.IsSingleton && (i.GroupId == (int)Group.FreightContainer || i.GroupId == (int)Group.AuditLogSecureContainer)))
                                 {
@@ -3661,10 +3647,7 @@ namespace Questor.Modules.Caching
 
                                 if (firstLootContainer != null)
                                 {
-                                    
-                                    Cache.Instance.DirectEve.OpenInventory();
                                     _lootContainer = Cache.Instance.DirectEve.GetContainer(firstLootContainer.ItemId);
-                                    
                                     if (_lootContainer != null && _lootContainer.IsValid)
                                     {
                                         Logging.Log("LootContainer", "LootContainer is defined", Logging.Debug);
@@ -4892,7 +4875,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
-                    if (!Cache.Instance.OpenShipsHangar(module)) return false;
+                    if (Cache.Instance.ShipHangar == null) return false;
                     if (Cache.Instance.ItemHangar == null) return false;
                     if (Drones.UseDrones)
                     {

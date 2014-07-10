@@ -21,7 +21,7 @@ namespace Questor.Storylines
         {
             if (_nextGenericCourierStorylineAction > DateTime.UtcNow) return StorylineState.Arm;
 
-            if (!Cache.Instance.OpenShipsHangar("Arm")) return StorylineState.Arm;
+            if (Cache.Instance.ShipHangar == null) return StorylineState.Arm;
 
             // Are we in an industrial?  Yes, goto the agent
             //var directEve = Cache.Instance.DirectEve;
@@ -29,7 +29,7 @@ namespace Questor.Storylines
             //    return StorylineState.GotoAgent;
 
             // Open the ship hangar
-            if (!Cache.Instance.OpenShipsHangar("GenericCourierStoryline: Arm"))
+            if (Cache.Instance.ShipHangar == null)
             {
                 _nextGenericCourierStorylineAction = DateTime.UtcNow.AddSeconds(5);
                 return StorylineState.Arm;

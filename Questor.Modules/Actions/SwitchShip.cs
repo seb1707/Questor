@@ -44,7 +44,7 @@ namespace Questor.Modules.Actions
                 case SwitchShipState.OpenShipHangar:
 
                     // Is the ship hangar open?
-                    if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
+                    if (Cache.Instance.ShipHangar == null) break;
 
                     Logging.Log("SwitchShip", "Activating combat ship", Logging.White);
 
@@ -59,7 +59,7 @@ namespace Questor.Modules.Actions
                     {
                         if (DateTime.UtcNow.Subtract(_lastSwitchShipAction).TotalSeconds > Time.Instance.SwitchShipsDelay_seconds)
                         {
-                            if (!Cache.Instance.OpenShipsHangar("SwitchShip")) break;
+                            if (Cache.Instance.ShipHangar == null) break;
 
                             if (Cache.Instance.ShipHangar != null)
                             {

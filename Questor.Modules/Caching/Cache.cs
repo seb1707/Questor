@@ -520,6 +520,12 @@ namespace Questor.Modules.Caching
                 {
                     if ((Cache.Instance.InSpace && DateTime.UtcNow > Time.Instance.LastInStation.AddSeconds(10)) || (Cache.Instance.InStation && DateTime.UtcNow > Time.Instance.LastInSpace.AddSeconds(10)))
                     {
+                        if (_currentShipsCargo == null)
+                        {
+                            _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
+                            if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);
+                        }
+
                         if (Cache.Instance.Windows.All(i => i.Type != "form.ActiveShipCargo")) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
                         {
                             if (DateTime.UtcNow > Time.Instance.NextOpenCurrentShipsCargoWindowAction)
@@ -532,30 +538,7 @@ namespace Questor.Modules.Caching
 
                             if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "Waiting on NextOpenCurrentShipsCargoWindowAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCurrentShipsCargoWindowAction).TotalSeconds + "sec]", Logging.Debug);
                         }
-
-                        if (_currentShipsCargo != null)
-                        {
-                            if (Cache.Instance._currentShipsCargo.Window.IsPrimary())
-                            {
-                                if (DateTime.UtcNow > Time.Instance.NextOpenCargoAction)
-                                {
-                                    if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "DebugCargoHold: Opening cargoHold window as secondary", Logging.Debug);
-                                    Time.Instance.NextOpenCargoAction = DateTime.UtcNow.AddMilliseconds(1000 + Cache.Instance.RandomNumber(0, 2000));
-                                    Cache.Instance._currentShipsCargo.Window.OpenAsSecondary();
-                                    return _currentShipsCargo;
-                                }
-
-                                if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null - Waiting on NextOpenCargoAction [" + DateTime.UtcNow.Subtract(Time.Instance.NextOpenCargoAction).TotalSeconds + "sec]", Logging.Debug);
-                            }
-                        }
-
-                        if (_currentShipsCargo == null)
-                        {
-                            _currentShipsCargo = Cache.Instance.DirectEve.GetShipsCargo();
-                            if (Logging.DebugCargoHold) Logging.Log("CurrentShipsCargo", "_currentShipsCargo is null", Logging.Debug);
-                            return null;
-                        }
-
+                        
                         return _currentShipsCargo;
                     }
 

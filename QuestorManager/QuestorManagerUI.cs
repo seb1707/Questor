@@ -77,7 +77,7 @@ namespace QuestorManager
 
         private string _selectHangar = "Local Hangar";
 
-        public QuestorManagerUI(bool _standaloneInstance)
+        public QuestorManagerUI()
         {
             Application.EnableVisualStyles();
             InitializeComponent();
@@ -97,51 +97,6 @@ namespace QuestorManager
             //ItemsToSell = new List<ItemCache>();
             //ItemsToSellUnsorted = new List<ItemCache>();
             //ItemsToRefine = new List<ItemCache>();
-            #region Load DirectEVE
-            //
-            // Load DirectEVE
-            //
-
-            try
-            {
-                if (Cache.Instance.DirectEve == null)
-                {
-                    //
-                    // DE now has cloaking enabled using EasyHook, If EasyHook DLLs are missing DE should complain. We check for and complain about missing EasyHook stuff before we get this far.
-                    // 
-                    //
-                    //Logging.Log("Startup", "temporarily disabling the loading of DE for debugging purposes, halting", Logging.Debug);
-                    //while (Cache.Instance.DirectEve == null)
-                    //{
-                    //    System.Threading.Thread.Sleep(50); //this pauses forever...
-                    //}
-                    if (_standaloneInstance)
-                    {
-                        Logging.Log("Startup", "Starting Instance of DirectEVE using StandaloneFramework", Logging.Debug);
-                        Cache.Instance.DirectEve = new DirectEve(new StandaloneFramework());
-                    }
-                    else
-                    {
-                        Logging.Log("Startup", "Starting Instance of DirectEVE using Innerspace", Logging.Debug);
-                        Cache.Instance.DirectEve = new DirectEve();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logging.Log("Startup", "Error on Loading DirectEve, maybe server is down", Logging.Orange);
-                Logging.Log("Startup", string.Format("DirectEVE: Exception {0}...", ex), Logging.White);
-                Cache.Instance.CloseQuestorCMDLogoff = false;
-                Cache.Instance.CloseQuestorCMDExitGame = true;
-                Cache.Instance.CloseQuestorEndProcess = true;
-                Settings.Instance.AutoStart = true;
-                Cleanup.ReasonToStopQuestor = "Error on Loading DirectEve, maybe server is down";
-                Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
-                Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
-                return;
-            }
-            #endregion Load DirectEVE
-            
             
             //
             // InvIgnore.xml
@@ -1093,7 +1048,15 @@ namespace QuestorManager
 
         private void FrmMainFormClosed(object sender, FormClosedEventArgs e)
         {
-            Cache.Instance.DirectEve.Dispose();
+            try
+            {
+                if (Logging.DebugUI) Logging.Log("QuestorUI", "frmMainFormClosed", Logging.White);
+                Cleanup.SignalToQuitQuestor = true;
+            }
+            catch (Exception ex)
+            {
+                Logging.Log("QuestorManagerUI", "Exception [" + ex + "]", Logging.Debug);
+            }
         }
 
         private void UpdateMineralPricesButton_Click(object sender, EventArgs e)

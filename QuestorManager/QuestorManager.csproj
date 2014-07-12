@@ -122,10 +122,6 @@
       <Project>{6D5DAAB6-0208-46AA-BA56-92B6068028C9}</Project>
       <Name>Questor.Modules</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Questor\Questor.csproj">
-      <Project>{0E528457-6A20-441F-94BB-84F6FC0EEE70}</Project>
-      <Name>Questor</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -29,6 +29,7 @@
     <CodeAnalysisIgnoreBuiltInRuleSets>true</CodeAnalysisIgnoreBuiltInRuleSets>
     <CodeAnalysisIgnoreBuiltInRules>true</CodeAnalysisIgnoreBuiltInRules>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
@@ -62,16 +63,23 @@
   <ItemGroup>
     <Compile Include="Actions\Market.cs" />
     <Compile Include="Actions\SkillTrainer.cs" />
+    <Compile Include="Activities\LoginToEVE.cs" />
     <Compile Include="Alerts\Email.cs" />
     <Compile Include="BackgroundTasks\NavigateOnGrid.cs" />
     <Compile Include="Caching\ItemCacheMarket.cs" />
     <Compile Include="Caching\EachWeaponsVolleyCache.cs" />
+    <Compile Include="EVEInteration\D3DDetour\D3D11.cs" />
+    <Compile Include="EVEInteration\D3DDetour\D3D9.cs" />
+    <Compile Include="EVEInteration\D3DDetour\D3DHook.cs" />
+    <Compile Include="EVEInteration\D3DDetour\Pulse.cs" />
+    <Compile Include="EVEInteration\StandAlone.cs" />
     <Compile Include="EVEInteration\DirectAnomalies.cs" />
     <Compile Include="Lookup\InvTypeMarket.cs" />
     <Compile Include="Lookup\MiningCrystals.cs" />
     <Compile Include="Lookup\OreType.cs" />
     <Compile Include="Lookup\SkillPlan.cs" />
     <Compile Include="Lookup\TypeID.cs" />
+    <Compile Include="Misc\Options.cs" />
     <Compile Include="Misc\InnerspaceCommands.cs" />
     <Compile Include="States\BackgrounsBehaviorState.cs" />
     <Compile Include="States\CombatHelperBehaviorState.cs" />

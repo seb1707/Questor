@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Activities;
+
 namespace Questor
 {
     using System;
@@ -103,9 +105,9 @@ namespace Questor
                 Logging.Log("Questor", "Exception while checking: _directEve.HasSupportInstances() in questor.cs - exception was: [" + exception + "]", Logging.Orange);
             }
 
-            if (BeforeLogin.StartTime.AddMinutes(10) < BeforeLogin.StopTime)
+            if (LoginToEVE.StartTime.AddMinutes(10) < LoginToEVE.StopTime)
             {
-                Time.Instance.StopTime = BeforeLogin.StopTime;
+                Time.Instance.StopTime = LoginToEVE.StopTime;
                 Logging.Log("Questor", "Schedule: setup correctly: stoptime is [" + Time.Instance.StopTime.ToShortTimeString() + "]", Logging.Orange);
             }
             else
@@ -118,7 +120,7 @@ namespace Questor
                 Logging.Log("Questor", "dotnet questor questor -x -c \"MyEVECharacterName\"", Logging.Orange);
             }
 
-            Time.Instance.StartTime = BeforeLogin.StartTime;
+            Time.Instance.StartTime = LoginToEVE.StartTime;
             Time.Instance.QuestorStarted_DateTime = DateTime.UtcNow;
 
             // get the current process

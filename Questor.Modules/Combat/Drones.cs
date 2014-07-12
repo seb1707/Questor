@@ -520,15 +520,15 @@ namespace Questor.Modules.Combat
         {
             if (Logging.DebugDisableGetBestDroneTarget || !Drones.UseDrones)
             {
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "!Cache.Instance.UseDrones - drones are disabled currently", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "!Cache.Instance.UseDrones - drones are disabled currently", Logging.Teal);
                 return true;
             }
 
-            if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
+            if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Attempting to get Best Drone Target", Logging.Teal);
 
             if (DateTime.UtcNow < Time.Instance.NextGetBestDroneTarget)
             {
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: DebugGetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "Cant GetBest yet....Too Soon!", Logging.Teal);
                 return false;
             }
 
@@ -550,7 +550,7 @@ namespace Questor.Modules.Combat
 
             if (DateTime.UtcNow < Time.Instance.LastPreferredDroneTargetDateTime.AddSeconds(6) && (Drones.PreferredDroneTarget != null && Cache.Instance.EntitiesOnGrid.Any(t => t.Id == Drones.PreferredDroneTarget.Id)))
             {
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Drones.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "We have a PreferredDroneTarget [" + Drones.PreferredDroneTarget.Name + "] that was chosen less than 6 sec ago, and is still alive.", Logging.Teal);
                 return true;
             }
 
@@ -569,19 +569,19 @@ namespace Questor.Modules.Combat
             //
             if (currentDroneTarget != null && currentDroneTarget.IsReadyToShoot && currentDroneTarget.IsLowValueTarget)
             {
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentDroneTarget", "We have a currentTarget [" + currentDroneTarget.Name + "][" + currentDroneTarget.MaskedId + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k], testing conditions", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget: currentDroneTarget", "We have a currentTarget [" + currentDroneTarget.Name + "][" + currentDroneTarget.MaskedId + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k], testing conditions", Logging.Teal);
 
                 #region Is our current target any other drone priority target?
                 //
                 // Is our current target any other drone priority target? AND if our target is just a PriorityKillTarget assume ALL E-war is more important.
                 //
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones): currentTarget", "Checking Priority", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget: currentTarget", "Checking Priority", Logging.Teal);
                 if (DronePriorityEntities.Any(pt => pt.IsReadyToShoot
                                                         && pt.Nearest5kDistance < MaxDroneRange
                                                         && pt.Id == currentDroneTarget.Id
                                                         && !currentDroneTarget.IsHigherPriorityPresent))
                 {
-                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget (Drones):", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
+                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "CurrentTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
                     Drones.PreferredDroneTarget = currentDroneTarget;
                     Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
@@ -592,10 +592,10 @@ namespace Questor.Modules.Combat
                 //
                 // Is our current target already low health? keep shooting the same target if so...
                 //
-                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
+                if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget: currentDroneTarget", "Checking Low Health", Logging.Teal);
                 if (currentDroneTarget.IsEntityIShouldKeepShootingWithDrones)
                 {
-                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 80% shields, keep killing this target", Logging.Debug);
+                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "currentDroneTarget [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + " GroupID [" + currentDroneTarget.GroupId + "]] has less than 80% shields, keep killing this target", Logging.Debug);
                     Drones.PreferredDroneTarget = currentDroneTarget;
                     Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;
                     return true;
@@ -606,11 +606,11 @@ namespace Questor.Modules.Combat
                 #region If none of the above matches, does our current target meet the conditions of being hittable and in range
                 if (!currentDroneTarget.IsHigherPriorityPresent)
                 {
-                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget: currentDroneTarget", "Does the currentTarget exist? Can it be hit?", Logging.Teal);
+                    if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget: currentDroneTarget", "Does the currentTarget exist? Can it be hit?", Logging.Teal);
                     if (currentDroneTarget.IsReadyToShoot && currentDroneTarget.Nearest5kDistance < MaxDroneRange)
                     {
-                        if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
-                        if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " Debug: GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
+                        if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "if  the currentDroneTarget exists and the target is the right size then continue shooting it;", Logging.Debug);
+                        if (Logging.DebugGetBestDroneTarget) Logging.Log(callingroutine + " GetBestDroneTarget:", "currentDroneTarget is [" + currentDroneTarget.Name + "][" + Math.Round(currentDroneTarget.Distance / 1000, 2) + "k][" + currentDroneTarget.MaskedId + "] GroupID [" + currentDroneTarget.GroupId + "]", Logging.Debug);
 
                         Drones.PreferredDroneTarget = currentDroneTarget;
                         Time.Instance.LastPreferredDroneTargetDateTime = DateTime.UtcNow;

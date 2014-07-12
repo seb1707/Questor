@@ -292,6 +292,13 @@ namespace Questor.Modules.Actions
                             WeHaveThisManyOfThoseItemsInItemHangar = ItemHangarItems.Sum(i => i.Stacksize);
                             if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInItemHangar + "] [" + itemToFind + "] in ItemHangar", Logging.Debug);
                         }
+                        else if (Cache.Instance.ItemHangar.Items.Any(i => i.TypeId == Drones.DroneTypeID))
+                        {
+                            IEnumerable<DirectItem> _dronesInItemHangar = Cache.Instance.ItemHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
+                            Logging.Log(WeAreInThisStateForLogs(), "[" + itemToFind + "] not found by typeName in ItemHangar, but we DID find DroneTypeID [" + Drones.DroneTypeID + "]. We found [" + _dronesInItemHangar.Count() + "] of them in the Itemhangar", Logging.Debug);
+                            ItemHangarItem = _dronesInItemHangar.FirstOrDefault();
+                            WeHaveThisManyOfThoseItemsInItemHangar = _dronesInItemHangar.Sum(i => i.Stacksize);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -319,6 +326,13 @@ namespace Questor.Modules.Actions
                                 AmmoHangarItem = AmmoHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
                                 WeHaveThisManyOfThoseItemsInAmmoHangar = AmmoHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] [" + itemToFind + "] in AmmoHangar", Logging.Debug);
+                            }
+                            else if (Cache.Instance.AmmoHangar.Items.Any(i => i.TypeId == Drones.DroneTypeID))
+                            {
+                                IEnumerable<DirectItem> _dronesInItemHangar = Cache.Instance.AmmoHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
+                                Logging.Log(WeAreInThisStateForLogs(), "[" + itemToFind + "] not found by typeName in ItemHangar, but we DID find DroneTypeID [" + Drones.DroneTypeID + "]. We found [" + _dronesInItemHangar.Count() + "] of them in the AmmoHangar", Logging.Debug);
+                                AmmoHangarItem = _dronesInItemHangar.FirstOrDefault();
+                                WeHaveThisManyOfThoseItemsInAmmoHangar = _dronesInItemHangar.Sum(i => i.Stacksize);
                             }
                         }
 
@@ -349,6 +363,13 @@ namespace Questor.Modules.Actions
                                 LootHangarItem = LootHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
                                 WeHaveThisManyOfThoseItemsInLootHangar = LootHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + itemToFind + "] in LootHangar", Logging.Debug);
+                            }
+                            else if (Cache.Instance.LootHangar.Items.Any(i => i.TypeId == Drones.DroneTypeID))
+                            {
+                                IEnumerable<DirectItem> _dronesInItemHangar = Cache.Instance.LootHangar.Items.Where(i => i.TypeId == Drones.DroneTypeID).ToList();
+                                Logging.Log(WeAreInThisStateForLogs(), "[" + itemToFind + "] not found by typeName in LootHangar, but we DID find DroneTypeID [" + Drones.DroneTypeID + "]. We found [" + _dronesInItemHangar.Count() + "] of them in the Loothangar", Logging.Debug);
+                                LootHangarItem = _dronesInItemHangar.FirstOrDefault();
+                                WeHaveThisManyOfThoseItemsInLootHangar = _dronesInItemHangar.Sum(i => i.Stacksize);
                             }
                         }
                     }

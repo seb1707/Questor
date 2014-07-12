@@ -50,7 +50,9 @@ namespace Questor.Modules.Actions
         private static int ItemHangarRetries = 0;
         private static int DroneBayRetries = 0;
         private static int WeHaveThisManyOfThoseItemsInCargo;
-        private static int WeHaveThisManyOfThoseItemsInHangar;
+        private static int WeHaveThisManyOfThoseItemsInItemHangar;
+        private static int WeHaveThisManyOfThoseItemsInAmmoHangar;
+        private static int WeHaveThisManyOfThoseItemsInLootHangar;
         private static DirectInvType _droneInvTypeItem;
         private static DirectInvType DroneInvTypeItem
         {
@@ -76,9 +78,12 @@ namespace Questor.Modules.Actions
         public static bool ArmLoadCapBoosters { get; set; }
         public static bool NeedRepair { get; set; }
         private static IEnumerable<DirectItem> cargoItems;
-        private static IEnumerable<DirectItem> hangarItems;
-        private static DirectItem hangarItem;
-        
+        private static IEnumerable<DirectItem> ItemHangarItems;
+        private static DirectItem ItemHangarItem;
+        private static IEnumerable<DirectItem> AmmoHangarItems;
+        private static DirectItem AmmoHangarItem;
+        private static IEnumerable<DirectItem> LootHangarItems;
+        private static DirectItem LootHangarItem;
 
         public static void LoadSpecificAmmoTypeForNonMissionSituations(DamageType _damageType)
         {
@@ -247,6 +252,20 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                WeHaveThisManyOfThoseItemsInCargo = 0;
+                WeHaveThisManyOfThoseItemsInItemHangar = 0;
+                WeHaveThisManyOfThoseItemsInAmmoHangar = 0;
+                WeHaveThisManyOfThoseItemsInLootHangar = 0;
+                cargoItems = new List<DirectItem>();
+
+                ItemHangarItems = new List<DirectItem>();
+                ItemHangarItem = null;
+                
+                AmmoHangarItems = new List<DirectItem>();
+                AmmoHangarItem = null;
+                
+                LootHangarItems = new List<DirectItem>();
+                LootHangarItem = null;
                 //
                 // check the local cargo for items and subtract the items in the cargo from the quantity we still need to move to our cargohold
                 //
@@ -265,9 +284,9 @@ namespace Questor.Modules.Actions
                 {
                     if (Cache.Instance.ItemHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
                     {
-                        hangarItems = Cache.Instance.ItemHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
-                        hangarItem = hangarItems.FirstOrDefault();
-                        WeHaveThisManyOfThoseItemsInHangar = hangarItems.Sum(i => i.Stacksize);
+                        ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                        ItemHangarItem = ItemHangarItems.FirstOrDefault();
+                        WeHaveThisManyOfThoseItemsInItemHangar = ItemHangarItems.Sum(i => i.Stacksize);
                         return true;
                     }    
                 }
@@ -280,19 +299,23 @@ namespace Questor.Modules.Actions
                     //
                     if (Cache.Instance.AmmoHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
                     {
-                        hangarItem = Cache.Instance.AmmoHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                        AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                        AmmoHangarItem = AmmoHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                        WeHaveThisManyOfThoseItemsInAmmoHangar = AmmoHangarItems.Sum(i => i.Stacksize);
                         return true;
                     }
                 }
 
-                if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
+                if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Settings.Instance.LootHangarTabName != Settings.Instance.AmmoHangarTabName)
                 {
                     //
                     // check loothangar for the item
                     //
                     if (Cache.Instance.LootHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
                     {
-                        hangarItem = Cache.Instance.LootHangar.Items.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                        LootHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                        LootHangarItem = LootHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                        WeHaveThisManyOfThoseItemsInLootHangar = LootHangarItems.Sum(i => i.Stacksize);
                         return true;
                     }
                 }
@@ -328,7 +351,7 @@ namespace Questor.Modules.Actions
 
                 if (!LookForItem(MoveItemTypeName, Cache.Instance.CurrentShipsCargo)) return false;
 
-                if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInHangar < totalMoveItemQuantity)
+                if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInItemHangar + WeHaveThisManyOfThoseItemsInAmmoHangar + WeHaveThisManyOfThoseItemsInLootHangar < totalMoveItemQuantity)
                 {
                     if (_optional)
                     {
@@ -336,7 +359,7 @@ namespace Questor.Modules.Actions
                         return true;
                     }
 
-                    Logging.Log(WeAreInThisStateForLogs(), "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold)", Logging.Red);
+                    Logging.Log(WeAreInThisStateForLogs(), "ItemHangar has: [" + WeHaveThisManyOfThoseItemsInItemHangar + "] AmmoHangar has: [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] LootHangar has: [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + MoveItemTypeName + "] we need [" + totalMoveItemQuantity + "] units)", Logging.Red);
                     ItemsAreBeingMoved = false;
                     Cache.Instance.Paused = true;
                     ChangeArmState(ArmState.NotEnoughAmmo);
@@ -362,18 +385,52 @@ namespace Questor.Modules.Actions
                     }
                 }
 
-                if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                if (LootHangarItem != null && !string.IsNullOrEmpty(LootHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                 {
-                    if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                    if (LootHangarItem.ItemId <= 0 || LootHangarItem.Volume == 0.00 || LootHangarItem.Quantity == 0)
                     {
                         return false;
                     }
 
-                    int moveItemQuantity = Math.Min(hangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                    int moveItemQuantity = Math.Min(LootHangarItem.Stacksize, _itemsLeftToMoveQuantity);
                     moveItemQuantity = Math.Max(moveItemQuantity, 1);
                     _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveItemQuantity;
-                    Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + hangarItem.TypeName + "] to CargoHold: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
-                    Cache.Instance.CurrentShipsCargo.Add(hangarItem, moveItemQuantity);
+                    Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + LootHangarItem.TypeName + "] from Loothangar to CargoHold: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                    Cache.Instance.CurrentShipsCargo.Add(LootHangarItem, moveItemQuantity);
+                    ItemsAreBeingMoved = true;
+                    _lastArmAction = DateTime.UtcNow;
+                    return false;
+                }
+
+                if (ItemHangarItem != null && !string.IsNullOrEmpty(ItemHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                {
+                    if (ItemHangarItem.ItemId <= 0 || ItemHangarItem.Volume == 0.00 || ItemHangarItem.Quantity == 0)
+                    {
+                        return false;
+                    }
+
+                    int moveItemQuantity = Math.Min(ItemHangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                    moveItemQuantity = Math.Max(moveItemQuantity, 1);
+                    _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveItemQuantity;
+                    Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + ItemHangarItem.TypeName + "] from ItemHangar to CargoHold: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                    Cache.Instance.CurrentShipsCargo.Add(ItemHangarItem, moveItemQuantity);
+                    ItemsAreBeingMoved = true;
+                    _lastArmAction = DateTime.UtcNow;
+                    return false;
+                }
+                
+                if (AmmoHangarItem != null && !string.IsNullOrEmpty(AmmoHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                {
+                    if (AmmoHangarItem.ItemId <= 0 || AmmoHangarItem.Volume == 0.00 || AmmoHangarItem.Quantity == 0)
+                    {
+                        return false;
+                    }
+
+                    int moveItemQuantity = Math.Min(AmmoHangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                    moveItemQuantity = Math.Max(moveItemQuantity, 1);
+                    _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveItemQuantity;
+                    Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + AmmoHangarItem.TypeName + "] from AmmoHangar to CargoHold: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                    Cache.Instance.CurrentShipsCargo.Add(AmmoHangarItem, moveItemQuantity);
                     ItemsAreBeingMoved = true;
                     _lastArmAction = DateTime.UtcNow;
                     return false;
@@ -442,7 +499,7 @@ namespace Questor.Modules.Actions
                         return false;
                     }
 
-                    if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInHangar < neededDrones)
+                    if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInItemHangar + WeHaveThisManyOfThoseItemsInAmmoHangar + WeHaveThisManyOfThoseItemsInLootHangar < neededDrones)
                     {
                         if (_optional)
                         {
@@ -450,7 +507,7 @@ namespace Questor.Modules.Actions
                             return true;
                         }
 
-                        Logging.Log(WeAreInThisStateForLogs(), "We do not have enough of this item [" + MoveItemTypeName + "] in any hangar (we tried itemhangar, ammohangar and loothangar and our cargohold / dronebay)", Logging.Red);
+                        Logging.Log(WeAreInThisStateForLogs(), "ItemHangar has: [" + WeHaveThisManyOfThoseItemsInItemHangar + "] AmmoHangar has: [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] LootHangar has: [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + MoveItemTypeName + "] we need [" + neededDrones + "] drones to fill the DroneBay)", Logging.Red);
                         ItemsAreBeingMoved = false;
                         Cache.Instance.Paused = true;
                         ChangeArmState(ArmState.NotEnoughDrones);
@@ -476,18 +533,52 @@ namespace Questor.Modules.Actions
                         }
                     }
 
-                    if (hangarItem != null && !string.IsNullOrEmpty(hangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                    if (LootHangarItem != null && !string.IsNullOrEmpty(LootHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
                     {
-                        if (hangarItem.ItemId <= 0 || hangarItem.Volume == 0.00 || hangarItem.Quantity == 0)
+                        if (LootHangarItem.ItemId <= 0 || LootHangarItem.Volume == 0.00 || LootHangarItem.Quantity == 0)
                         {
                             return false;
                         }
 
-                        int moveDroneQuantity = Math.Min(hangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                        int moveDroneQuantity = Math.Min(LootHangarItem.Stacksize, _itemsLeftToMoveQuantity);
                         moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
                         _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
-                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + hangarItem.TypeName + "] to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
-                        Drones.DroneBay.Add(hangarItem, moveDroneQuantity);
+                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + LootHangarItem.TypeName + "] from LootHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Drones.DroneBay.Add(LootHangarItem, moveDroneQuantity);
+                        ItemsAreBeingMoved = true;
+                        _lastArmAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    if (ItemHangarItem != null && !string.IsNullOrEmpty(ItemHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                    {
+                        if (ItemHangarItem.ItemId <= 0 || ItemHangarItem.Volume == 0.00 || ItemHangarItem.Quantity == 0)
+                        {
+                            return false;
+                        }
+
+                        int moveDroneQuantity = Math.Min(ItemHangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                        moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
+                        _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
+                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + ItemHangarItem.TypeName + "] from ItemHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Drones.DroneBay.Add(ItemHangarItem, moveDroneQuantity);
+                        ItemsAreBeingMoved = true;
+                        _lastArmAction = DateTime.UtcNow;
+                        return false;
+                    }
+
+                    if (AmmoHangarItem != null && !string.IsNullOrEmpty(AmmoHangarItem.TypeName.ToString(CultureInfo.InvariantCulture)))
+                    {
+                        if (AmmoHangarItem.ItemId <= 0 || AmmoHangarItem.Volume == 0.00 || AmmoHangarItem.Quantity == 0)
+                        {
+                            return false;
+                        }
+
+                        int moveDroneQuantity = Math.Min(AmmoHangarItem.Stacksize, _itemsLeftToMoveQuantity);
+                        moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
+                        _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
+                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + AmmoHangarItem.TypeName + "] from AmmoHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Drones.DroneBay.Add(AmmoHangarItem, moveDroneQuantity);
                         ItemsAreBeingMoved = true;
                         _lastArmAction = DateTime.UtcNow;
                         return false;
@@ -1543,11 +1634,6 @@ namespace Questor.Modules.Actions
                 //
                 // this list of variables is cleared every pulse.
                 //
-                cargoItems = null;
-                hangarItem = null;
-                hangarItems = null;
-                WeHaveThisManyOfThoseItemsInCargo = 0;
-                WeHaveThisManyOfThoseItemsInHangar = 0;
                 _itemsLeftToMoveQuantity = 0;                
             }
             catch (Exception exception)
@@ -1567,8 +1653,8 @@ namespace Questor.Modules.Actions
                 // this list of variables is cleared every pulse.
                 //
                 cargoItems = null;
-                hangarItem = null;
-                hangarItems = null;
+                ItemHangarItem = null;
+                ItemHangarItems = null;
             }
             catch (Exception exception)
             {

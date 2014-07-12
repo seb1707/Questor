@@ -976,80 +976,46 @@ namespace Questor.Modules.Combat
             }
         }
 
-        public static DirectContainer DroneBay { get; set; }
-
-        //{
-        //    get { return _dronebay ?? (_dronebay = Cache.Instance.DirectEve.GetShipsDroneBay()); }
-        //}
-
-        public static bool OpenDroneBay(string module)
+        private static DirectContainer _droneBay;
+        public static DirectContainer DroneBay
         {
-            if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
+            get
             {
-                //Logging.Log(module + ": Opening Drone Bay: waiting [" + Math.Round(Cache.Instance.NextOpenDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]",Logging.White);
-                return false;
+                try
+                {
+                    if (!Cache.Instance.InSpace && Cache.Instance.InStation)
+                    {
+                        if (_droneBay == null)
+                        {
+                            _droneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
+                        }
+
+                        if (Cache.Instance.Windows.All(i => !i.Type.Contains("Drone"))) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
+                        {
+                            if (DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(10))
+                            {
+                                Statistics.LogWindowActionToWindowLog("Dronebay", "Opening Dronebay");
+                                Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
+                                Time.Instance.LastOpenHangar = DateTime.UtcNow;
+                            }
+                        }
+
+                        return _droneBay;
+                    }
+
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    Logging.Log("Dronebay", "Exception [" + ex + "]", Logging.Debug);
+                    return null;
+                }
             }
 
-            try
-            {
-                if ((!Cache.Instance.InSpace && !Cache.Instance.InStation))
-                {
-                    Logging.Log(module, "Opening Drone Bay: We are not in station or space?!", Logging.Orange);
-                    return false;
-                }
-
-                //if(Cache.Instance.ActiveShip.Entity == null || Cache.Instance.ActiveShip.GroupId == 31)
-                //{
-                //    Logging.Log(module + ": Opening Drone Bay: we are in a shuttle or not in a ship at all!");
-                //    return false;
-                //}
-
-                if (Cache.Instance.InStation || Cache.Instance.InSpace)
-                {
-                    DroneBay = Cache.Instance.DirectEve.GetShipsDroneBay();
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
-                }
-                else
-                {
-                    return false;
-                }
-
-                if (GetShipsDroneBayAttempts > 10) //we her have not located a dronebay in over 10 attempts, we are not going to
-                {
-                    Logging.Log(module, "unable to find a dronebay after 11 attempts: continuing without defining one", Logging.Debug);
-                    return true;
-                }
-
-                if (DroneBay == null)
-                {
-                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
-                    Logging.Log(module, "Opening Drone Bay: --- waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    GetShipsDroneBayAttempts++;
-                    return false;
-                }
-
-                if (DroneBay != null && DroneBay.IsValid)
-                {
-                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenDroneBayOfActiveShip);
-                    Statistics.LogWindowActionToWindowLog("Dronebay", "DroneBay Opened");
-                    Time.Instance.NextDroneBayAction = DateTime.UtcNow.AddSeconds(1 + Cache.Instance.RandomNumber(2, 3));
-                    if (Logging.DebugHangars) Logging.Log(module, "DroneBay is ready. waiting [" + Math.Round(Time.Instance.NextDroneBayAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
-                    GetShipsDroneBayAttempts = 0;
-                    return true;
-                }
-
-                if (Logging.DebugHangars) Logging.Log(module, "DroneBay is not ready...", Logging.White);
-                return false;
-            }
-            catch (Exception exception)
-            {
-                Logging.Log("ReadyDroneBay", "Unable to complete ReadyDroneBay [" + exception + "]", Logging.Teal);
-                return false;
-            }
+            set { _droneBay = value; }
         }
 
-        public static bool CloseDroneBay(string module)
+        public static bool CloseDroneBayWindow(string module)
         {
             if (DateTime.UtcNow < Time.Instance.NextDroneBayAction)
             {
@@ -1663,6 +1629,7 @@ namespace Questor.Modules.Combat
                 // this list of variables is cleared every pulse.
                 //
                 _activeDrones = null;
+                _droneBay = null;
                 _dronePriorityEntities = null;
                 _maxDroneRange = null;
                 _preferredDroneTarget = null;

@@ -392,6 +392,10 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                //
+                // we assume useDrones is true if we got this far already.
+                //
+
                 if (string.IsNullOrEmpty(MoveItemTypeName))
                 {
                     ChangeArmState(StateToChangeToWhenDoneMoving);
@@ -405,13 +409,14 @@ namespace Questor.Modules.Actions
                 }
 
                 if (Cache.Instance.ItemHangar == null) return false;
-                if (!Drones.OpenDroneBay(WeAreInThisStateForLogs())) return false;
-
+                if (Drones.DroneBay == null) return false;
+                
                 if (!LookForItem(MoveItemTypeName, Drones.DroneBay)) return false;
 
-                if (Cache.Instance.DirectEve.GetShipsDroneBay().Capacity == Cache.Instance.DirectEve.GetShipsDroneBay().UsedCapacity)
+                Logging.Log(WeAreInThisStateForLogs(), "Dronebay details: Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
+                if (Drones.DroneBay.Capacity == Drones.DroneBay.UsedCapacity)
                 {
-                    Logging.Log(WeAreInThisStateForLogs(), "MoveDrones", Logging.White);
+                    Logging.Log(WeAreInThisStateForLogs(), "Dronebay is Full. No need to move any more drones.", Logging.White);
                     ChangeArmState(StateToChangeToWhenDoneMoving);
                     return false;
                 }
@@ -1405,7 +1410,7 @@ namespace Questor.Modules.Actions
             if (Drones.UseDrones && (Cache.Instance.ActiveShip.GroupId != (int)Group.Shuttle && Cache.Instance.ActiveShip.GroupId != (int)Group.Industrial && Cache.Instance.ActiveShip.GroupId != (int)Group.TransportShip))
             {
                 // Close the drone bay, its not required in space.
-                if (!Drones.CloseDroneBay(WeAreInThisStateForLogs())) return false;
+                if (!Drones.CloseDroneBayWindow(WeAreInThisStateForLogs())) return false;
             }
 
             if (Settings.Instance.UseFittingManager)

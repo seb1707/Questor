@@ -189,6 +189,8 @@ namespace Questor.Modules.Lookup
         ///   Modules last reload time
         /// </summary>
         public Dictionary<long, DateTime> LastReloadedTimeStamp = new Dictionary<long, DateTime>();
+        public Dictionary<long, DateTime> LastReloadAttemptTimeStamp = new Dictionary<long, DateTime>();
+        
 
         /// <summary>
         ///   Modules last changed ammo time

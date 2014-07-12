@@ -194,7 +194,7 @@ namespace Questor.Modules.Caching
                 {
                     if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[ItemId].AddSeconds(reloadDelayToUseForThisWeapon))
                     {
-                        //if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! aborting activating this module.", Logging.Debug);
+                        if (Logging.DebugActivateWeapons) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] This module is likely still reloading! Last reload was [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastReloadedTimeStamp[ItemId]).TotalSeconds, 0) + "sec ago]", Logging.Debug);
                         return true;
                     }
                 }

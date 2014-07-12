@@ -775,6 +775,8 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                Time.Instance.LastReloadAttemptTimeStamp = new Dictionary<long, DateTime>();
+                Time.Instance.LastReloadedTimeStamp = new Dictionary<long, DateTime>();
                 //_ammoTypesToLoad.Clear();
                 switchingShips = false;
                 UseMissionShip = false;          // Were we successful in activating the mission specific ship?

@@ -1532,7 +1532,7 @@ namespace Questor.Modules.Combat
                 if (weapon.CurrentCharges >= Combat.MinimumAmmoCharges && !force)
                 {
                     if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "][ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, minimum of [" + Combat.MinimumAmmoCharges + "] charges, MaxCharges is [" + weapon.MaxCharges + "]", Logging.Orange);
-                    Time.Instance.LastReloadedTimeStamp[weapon.ItemId] = DateTime.UtcNow;
+                    Time.Instance.LastReloadAttemptTimeStamp[weapon.ItemId] = DateTime.UtcNow;
                     return true;
                 }
 
@@ -1542,7 +1542,7 @@ namespace Questor.Modules.Combat
                     // even if force is true do not reload a weapon that is already full!
                     //
                     if (Logging.DebugReloadAll) Logging.Log("ReloadNormalAmmmo", "[" + weaponNumber + "][ " + weapon.CurrentCharges + " ] charges in [" + Cache.Instance.Weapons.Count() + "] total weapons, MaxCharges [" + weapon.MaxCharges + "]", Logging.Orange);
-                    Time.Instance.LastReloadedTimeStamp[weapon.ItemId] = DateTime.UtcNow;
+                    Time.Instance.LastReloadAttemptTimeStamp[weapon.ItemId] = DateTime.UtcNow;
                     return true;
                 }
 
@@ -1803,6 +1803,15 @@ namespace Questor.Modules.Combat
                         if (DateTime.UtcNow < Time.Instance.LastReloadedTimeStamp[weapon.ItemId].AddSeconds(Time.Instance.ReloadWeaponDelayBeforeUsable_seconds))
                         {
                             if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastReloadedTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
+                            continue;
+                        }
+                    }
+
+                    if (Time.Instance.LastReloadAttemptTimeStamp != null && Time.Instance.LastReloadAttemptTimeStamp.ContainsKey(weapon.ItemId))
+                    {
+                        if (DateTime.UtcNow < Time.Instance.LastReloadAttemptTimeStamp[weapon.ItemId].AddSeconds(Cache.Instance.RandomNumber(2,5)))
+                        {
+                            if (Logging.DebugReloadAll) Logging.Log("debug ReloadAll", "Weapon [" + _weaponNumber + "] was just attempted to be reloaded [" + Math.Round(DateTime.UtcNow.Subtract(Time.Instance.LastReloadAttemptTimeStamp[weapon.ItemId]).TotalSeconds, 0) + "] seconds ago , moving on to next weapon", Logging.White);
                             continue;
                         }
                     }

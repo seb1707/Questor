@@ -315,7 +315,7 @@ namespace Questor.Modules.Actions
 
                 if (AmmoIsBeingMoved)
                 {
-                    if (!WaitForLockedItems(WeAreInThisStateForLogs(), UnloadLootState.StackAmmoHangar)) return false;
+                    if (!WaitForLockedItems(WeAreInThisStateForLogs(), UnloadLootState.MoveLoot)) return false;
                     Logging.Log(WeAreInThisStateForLogs(), "Done", Logging.White);
                     AmmoIsBeingMoved = false;
                     return false;
@@ -379,7 +379,7 @@ namespace Questor.Modules.Actions
                             }
 
                             if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No scripts in cargo to move", Logging.White);
-                            _States.CurrentUnloadLootState = UnloadLootState.StackAmmoHangar;
+                            _States.CurrentUnloadLootState = UnloadLootState.MoveLoot;
                             return true;
                         }
                         catch (Exception ex)

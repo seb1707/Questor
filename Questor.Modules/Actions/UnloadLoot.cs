@@ -35,9 +35,7 @@ namespace Questor.Modules.Actions
         private static IEnumerable<DirectItem> scriptsToMove;
         private static IEnumerable<DirectItem> commonMissionCompletionItemsToMove;
         private static IEnumerable<DirectItem> missionGateKeysToMove;
-        private static DirectContainer PutLootHere = null;
-        private static string PutLootHere_Description;
-
+        
         private static bool WaitForLockedItems(string CallingRoutineForLogs, UnloadLootState _UnloadLootStateToSwitchTo)
         {
             if (Cache.Instance.DirectEve.GetLockedItems().Count != 0)
@@ -548,9 +546,9 @@ namespace Questor.Modules.Actions
                 if (lootToMove.Any() && !LootIsBeingMoved)
                 {
                     //Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count() + "] items in it now.", Logging.White);
-                    Logging.Log(WeAreInThisStateForLogs(), "Moving [" + lootToMove.Count() + "] items from CargoHold to [" + PutLootHere_Description + "]", Logging.White);
+                    Logging.Log(WeAreInThisStateForLogs(), "Moving [" + lootToMove.Count() + "] items from CargoHold to Loothangar", Logging.White);
                     LootIsBeingMoved = true;
-                    PutLootHere.Add(lootToMove);
+                    Cache.Instance.LootHangar.Add(lootToMove);
                     _lastUnloadAction = DateTime.UtcNow;
                     return false;
                 }
@@ -608,34 +606,7 @@ namespace Questor.Modules.Actions
 
                 if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20)) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
                     return false;
-
-                if (PutLootHere == null)
-                {
-                    if (!string.IsNullOrEmpty(Settings.Instance.LootContainerName))
-                    {
-                        if (Cache.Instance.LootContainer == null)
-                        {
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.ProcessState", "if (Cache.Instance.LootContainer == null)", Logging.Debug);
-                            return false;
-                        }
-
-                        PutLootHere = Cache.Instance.LootContainer;
-                        PutLootHere_Description = "LootContainer Named: [" + Settings.Instance.LootContainerName + "]";
-                    }
-                    else if (!String.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Cache.Instance.LootHangar != null) //&& Cache.Instance.LootHangar.IsValid)
-                    {
-                        PutLootHere = Cache.Instance.LootHangar;
-                        PutLootHere_Description = "LootHangar Named: [" + Settings.Instance.LootHangarTabName + "]";
-                    }
-                    else
-                    {
-                        PutLootHere = Cache.Instance.ItemHangar;
-                        PutLootHere_Description = "ItemHangar";
-                    }
-
-                    return false;
-                }
-
+                
                 return true;
             }
             catch (Exception exception)

@@ -285,9 +285,9 @@ namespace Questor.Modules.Actions
                     if (Cache.Instance.ItemHangar.Items.Any())
                     {
                         if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + Cache.Instance.ItemHangar.Items.Count() + "] total items in ItemHangar", Logging.Debug);
-                        if (Cache.Instance.ItemHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
+                        if (Cache.Instance.ItemHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()))
                         {
-                            ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
+                            ItemHangarItems = Cache.Instance.ItemHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()).ToList();
                             ItemHangarItem = ItemHangarItems.FirstOrDefault();
                             WeHaveThisManyOfThoseItemsInItemHangar = ItemHangarItems.Sum(i => i.Stacksize);
                             if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInItemHangar + "] [" + itemToFind + "] in ItemHangar", Logging.Debug);
@@ -320,10 +320,10 @@ namespace Questor.Modules.Actions
                         if (Cache.Instance.AmmoHangar.Items.Any())
                         {
                             if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + Cache.Instance.AmmoHangar.Items.Count() + "] total items in AmmoHangar", Logging.Debug);
-                            if (Cache.Instance.AmmoHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
+                            if (Cache.Instance.AmmoHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()))
                             {
-                                AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
-                                AmmoHangarItem = AmmoHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                                AmmoHangarItems = Cache.Instance.AmmoHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()).ToList();
+                                AmmoHangarItem = AmmoHangarItems.FirstOrDefault();
                                 WeHaveThisManyOfThoseItemsInAmmoHangar = AmmoHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] [" + itemToFind + "] in AmmoHangar", Logging.Debug);
                             }
@@ -357,10 +357,10 @@ namespace Questor.Modules.Actions
                         if (Cache.Instance.LootHangar.Items.Any())
                         {
                             if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + Cache.Instance.LootHangar.Items.Count() + "] total items in LootHangar", Logging.Debug);
-                            if (Cache.Instance.LootHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind))
+                            if (Cache.Instance.LootHangar.Items.Any(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()))
                             {
-                                LootHangarItems = Cache.Instance.LootHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind).ToList();
-                                LootHangarItem = LootHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
+                                LootHangarItems = Cache.Instance.LootHangar.Items.Where(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind.ToLower()).ToList();
+                                LootHangarItem = LootHangarItems.FirstOrDefault();
                                 WeHaveThisManyOfThoseItemsInLootHangar = LootHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + itemToFind + "] in LootHangar", Logging.Debug);
                             }

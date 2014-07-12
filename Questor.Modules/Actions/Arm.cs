@@ -291,7 +291,6 @@ namespace Questor.Modules.Actions
                             ItemHangarItem = ItemHangarItems.FirstOrDefault();
                             WeHaveThisManyOfThoseItemsInItemHangar = ItemHangarItems.Sum(i => i.Stacksize);
                             if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInItemHangar + "] [" + itemToFind + "] in ItemHangar", Logging.Debug);
-                            return true;
                         }
                     }
                 }
@@ -320,7 +319,6 @@ namespace Questor.Modules.Actions
                                 AmmoHangarItem = AmmoHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
                                 WeHaveThisManyOfThoseItemsInAmmoHangar = AmmoHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] [" + itemToFind + "] in AmmoHangar", Logging.Debug);
-                                return true;
                             }
                         }
 
@@ -351,7 +349,6 @@ namespace Questor.Modules.Actions
                                 LootHangarItem = LootHangarItems.FirstOrDefault(i => (i.TypeName ?? string.Empty).ToLower() == itemToFind);
                                 WeHaveThisManyOfThoseItemsInLootHangar = LootHangarItems.Sum(i => i.Stacksize);
                                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "We have [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + itemToFind + "] in LootHangar", Logging.Debug);
-                                return true;
                             }
                         }
                     }
@@ -362,7 +359,7 @@ namespace Questor.Modules.Actions
                 }
                 
                 //
-                // no item found
+                // we searched all hangars, hopefully found some items...
                 //
                 return true;
             }

@@ -4893,7 +4893,7 @@ namespace Questor.Modules.Caching
                     if (Cache.Instance.ItemHangar == null) return false;
                     if (Drones.UseDrones)
                     {
-                        if (!Drones.OpenDroneBay(module)) { return false; }
+                        if (Drones.DroneBay == null) return false;
                     }
 
                     //repair ships in ships hangar

@@ -48,6 +48,7 @@ namespace Questor.Modules.Actions
         private static bool switchingShips;
         
         private static int ItemHangarRetries = 0;
+        private static int DroneBayRetries = 0;
         private static int WeHaveThisManyOfThoseItemsInCargo;
         private static int WeHaveThisManyOfThoseItemsInHangar;
         private static DirectInvType _droneInvTypeItem;
@@ -71,13 +72,13 @@ namespace Questor.Modules.Actions
                 }
             }
         }
-
         
         public static bool ArmLoadCapBoosters { get; set; }
         public static bool NeedRepair { get; set; }
         private static IEnumerable<DirectItem> cargoItems;
         private static IEnumerable<DirectItem> hangarItems;
         private static DirectItem hangarItem;
+        
 
         public static void LoadSpecificAmmoTypeForNonMissionSituations(DamageType _damageType)
         {
@@ -410,7 +411,15 @@ namespace Questor.Modules.Actions
 
                 if (Cache.Instance.ItemHangar == null) return false;
                 if (Drones.DroneBay == null) return false;
-                
+
+                if (Drones.DroneBay.Capacity == 0 && DroneBayRetries <= 10)
+                {
+                    DroneBayRetries++;
+                    Logging.Log(WeAreInThisStateForLogs(), "Dronebay: not yet ready. Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
+                    Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
+                    return false;
+                }
+
                 if (!LookForItem(MoveItemTypeName, Drones.DroneBay)) return false;
 
                 Logging.Log(WeAreInThisStateForLogs(), "Dronebay details: Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
@@ -631,6 +640,7 @@ namespace Questor.Modules.Actions
                 ItemsAreBeingMoved = false;
                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.BringOptionalMissionItemQuantity is [" + MissionSettings.BringOptionalMissionItemQuantity + "]", Logging.Debug);
                 ItemHangarRetries = 0;
+                DroneBayRetries = 0;
                 RefreshMissionItems(AgentInteraction.AgentId);
                 
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)

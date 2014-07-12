@@ -263,25 +263,25 @@ namespace Questor.Modules.Actions
                         }
                         catch (Exception exception)
                         {
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "No Mission CompletionItems Found in CargoHold: moving on. [" + exception + "]", Logging.White);
+                            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No Mission CompletionItems Found in CargoHold: moving on. [" + exception + "]", Logging.White);
                         }
 
 
                         if (commonMissionCompletionItemsToMove != null)
                         {
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (commonMissionCompletionItemsToMove != null)", Logging.White);
+                            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (commonMissionCompletionItemsToMove != null)", Logging.White);
                             if (commonMissionCompletionItemsToMove.Any())
                             {
-                                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot", "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
+                                if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (commonMissionCompletionItemsToMove.Any())", Logging.White);
                                 if (Cache.Instance.ItemHangar == null) return false;
-                                Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
+                                Logging.Log(WeAreInThisStateForLogs(), "Moving [" + commonMissionCompletionItemsToMove.Count() + "] Mission Completion items to ItemHangar", Logging.White);
                                 Cache.Instance.ItemHangar.Add(commonMissionCompletionItemsToMove);
                                 AmmoIsBeingMoved = true;
                                 _lastUnloadAction = DateTime.UtcNow;
                                 return false;
                             }
 
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);
+                            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No Mission CompletionItems Found in CargoHold: moving on.", Logging.White);
                         }
 
                         if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No commonMissionCompletionItems in cargo to move", Logging.White);
@@ -290,7 +290,7 @@ namespace Questor.Modules.Actions
 
                     }
 
-                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
+                    if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
                     return false;
                 }
                 catch (NullReferenceException) { }
@@ -298,7 +298,7 @@ namespace Questor.Modules.Actions
             }
             catch (Exception ex)
             {
-                Logging.Log("UnloadLoot.MoveItems", "Exception [" + ex + "]", Logging.Debug);
+                Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Debug);
             }
 
             return false;
@@ -357,25 +357,25 @@ namespace Questor.Modules.Actions
                         }
                         catch (Exception exception)
                         {
-                            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "MoveAmmo: No Scripts Found in CargoHold: moving on. [" + exception + "]", Logging.White);
+                            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "MoveAmmo: No Scripts Found in CargoHold: moving on. [" + exception + "]", Logging.White);
                         }
 
                         try
                         {
                             if (scriptsToMove != null)
                             {
-                                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (scriptsToMove != null)", Logging.White);
+                                if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (scriptsToMove != null)", Logging.White);
                                 if (scriptsToMove.Any())
                                 {
-                                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "if (scriptsToMove.Any())", Logging.White);
+                                    if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (scriptsToMove.Any())", Logging.White);
                                     if (Cache.Instance.ItemHangar == null) return false;
-                                    Logging.Log("UnloadLoot.MoveAmmo", "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
+                                    Logging.Log(WeAreInThisStateForLogs(), "Moving [" + scriptsToMove.Count() + "] Scripts to ItemHangar", Logging.White);
                                     AmmoIsBeingMoved = true;
                                     Cache.Instance.ItemHangar.Add(scriptsToMove);
                                     _lastUnloadAction = DateTime.UtcNow;
                                     return false;
                                 }
-                                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "No Scripts Found in CargoHold: moving on.", Logging.White);
+                                if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No Scripts Found in CargoHold: moving on.", Logging.White);
                             }
 
                             if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "No scripts in cargo to move", Logging.White);
@@ -384,11 +384,11 @@ namespace Questor.Modules.Actions
                         }
                         catch (Exception ex)
                         {
-                            Logging.Log("UnloadLoot.MoveItems", "Exception [" + ex + "]", Logging.Debug);
+                            Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Debug);
                         }
                     }
 
-                    if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveAmmo", "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
+                    if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.CargoHold is Not yet valid", Logging.Teal);
                     return false;
                 }
                 catch (NullReferenceException) { }
@@ -396,7 +396,7 @@ namespace Questor.Modules.Actions
             }
             catch (Exception ex)
             {
-                Logging.Log("UnloadLoot.MoveItems", "Exception [" + ex + "]", Logging.Debug);
+                Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Debug);
             }
 
             return false;
@@ -450,11 +450,11 @@ namespace Questor.Modules.Actions
 
             if (Cache.Instance.CurrentShipsCargo == null)
             {
-                Logging.Log("UnloadLootState.MoveLoot", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                Logging.Log(WeAreInThisStateForLogs(), "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
                 return false;
             }
 
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "Cache.Instance.CurrentShipsCargo.Items.Any() [" + Cache.Instance.CurrentShipsCargo.Items.Any() + "]", Logging.White);
+            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.CurrentShipsCargo.Items.Any() [" + Cache.Instance.CurrentShipsCargo.Items.Any() + "]", Logging.White);
             
 
             if (LootIsBeingMoved || !Cache.Instance.CurrentShipsCargo.Items.Any())
@@ -464,7 +464,7 @@ namespace Questor.Modules.Actions
                 // why do we *ever* have to close the loothangar?
                 //
                 //if (!Cache.Instance.CloseLootHangar("UnloadLootState.MoveLoot")) return false;
-                Logging.Log("UnloadLoot.MoveLoot", "Loot was worth an estimated [" + Statistics.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
+                Logging.Log(WeAreInThisStateForLogs(), "Loot was worth an estimated [" + Statistics.LootValue.ToString("#,##0") + "] isk in buy-orders", Logging.Teal);
                 LootIsBeingMoved = false;
                 _States.CurrentUnloadLootState = UnloadLootState.StackLootHangar;
                 return true;
@@ -473,7 +473,7 @@ namespace Questor.Modules.Actions
             IEnumerable<DirectItem> lootToMove = Cache.Instance.CurrentShipsCargo.Items.ToList();
 
             //IEnumerable<DirectItem> somelootToMove = lootToMove;
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "foreach (DirectItem item in lootToMove) (start)", Logging.White);
+            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "foreach (DirectItem item in lootToMove) (start)", Logging.White);
 
             int y = lootToMove.Count();
             int x = 1;
@@ -482,16 +482,16 @@ namespace Questor.Modules.Actions
             {
                 if (item.Volume != 0)
                 {
-                    if (Logging.DebugLootValue) Logging.Log("UnloadLoot.Lootvalue","[" + x + "of" + y + "] ItemName [" + item.TypeName + "] ItemTypeID [" + item.TypeId + "] AveragePrice[" + (int)item.AveragePrice() + "]",Logging.Debug);
+                    if (Logging.DebugLootValue) Logging.Log(WeAreInThisStateForLogs(), "[" + x + "of" + y + "] ItemName [" + item.TypeName + "] ItemTypeID [" + item.TypeId + "] AveragePrice[" + (int)item.AveragePrice() + "]", Logging.Debug);
                     Statistics.LootValue += (int)item.AveragePrice() * Math.Max(item.Quantity, 1);
                 }
                 x++;
             }
 
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "foreach (DirectItem item in lootToMove) (done)", Logging.White);
+            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "foreach (DirectItem item in lootToMove) (done)", Logging.White);
             if (lootToMove.Any())
             {
-                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLootState.MoveLoot", "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
+                if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "if (lootToMove.Any() && !LootIsBeingMoved))", Logging.White);
 
                 if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName)) // if we do NOT have the loot hangar configured.
                 {
@@ -548,17 +548,17 @@ namespace Questor.Modules.Actions
                 if (lootToMove.Any() && !LootIsBeingMoved)
                 {
                     //Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count() + "] items in it now.", Logging.White);
-                    Logging.Log("UnloadLoot.MoveLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to [" + PutLootHere_Description + "]", Logging.White);
+                    Logging.Log(WeAreInThisStateForLogs(), "Moving [" + lootToMove.Count() + "] items from CargoHold to [" + PutLootHere_Description + "]", Logging.White);
                     LootIsBeingMoved = true;
                     PutLootHere.Add(lootToMove);
                     _lastUnloadAction = DateTime.UtcNow;
                     return false;
                 }
-                if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "1) if (lootToMove.Any()) is false", Logging.White);
+                if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "1) if (lootToMove.Any()) is false", Logging.White);
                 return false;
             }
 
-            if (Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "2) if (lootToMove.Any()) is false", Logging.White);
+            if (Logging.DebugUnloadLoot) Logging.Log(WeAreInThisStateForLogs(), "2) if (lootToMove.Any()) is false", Logging.White);
             return false;
         }
         
@@ -590,7 +590,7 @@ namespace Questor.Modules.Actions
             }
             catch (Exception ex)
             {
-                Logging.Log("UnloadLoot.StackLootHangar", "Exception [" + ex + "]", Logging.Debug);
+                Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Debug);
             }
 
             return false;
@@ -640,7 +640,7 @@ namespace Questor.Modules.Actions
             }
             catch (Exception exception)
             {
-                Logging.Log("UnloadLoot", "Exception [" + exception + "]", Logging.White);
+                Logging.Log("UnloadLoot.ProcessState", "Exception [" + exception + "]", Logging.White);
                 return false;
             }
         }

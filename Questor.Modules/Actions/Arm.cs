@@ -307,6 +307,8 @@ namespace Questor.Modules.Actions
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))
                     {
+                        if (Cache.Instance.AmmoHangar == null) return false;
+
                         if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "AmmoHangar is defined", Logging.Debug);
                         
                         if (Cache.Instance.AmmoHangar.Items.Any())
@@ -336,6 +338,8 @@ namespace Questor.Modules.Actions
                 {
                     if (!string.IsNullOrEmpty(Settings.Instance.LootHangarTabName) && Settings.Instance.LootHangarTabName != Settings.Instance.AmmoHangarTabName)
                     {
+                        if (Cache.Instance.AmmoHangar == null) return false;
+
                         if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "LootHangar is defined and is different from AmmoHangar", Logging.Debug);
                        
                         if (Cache.Instance.AmmoHangar.Items.Any())

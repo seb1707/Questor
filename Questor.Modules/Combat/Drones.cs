@@ -1166,14 +1166,22 @@ namespace Questor.Modules.Combat
                 }
 
                 // Are we done (for now) ?
-                if (!Combat.TargetedBy.All(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.IsInDroneRange) && !WarpScrambled && !Settings.Instance.FleetSupportSlave)
+                int TargetedByInDroneRangeCount = Combat.TargetedBy.Count(e => (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) && e.IsInDroneRange);
+                if (TargetedByInDroneRangeCount == 0 && !WarpScrambled && !Settings.Instance.FleetSupportSlave)
                 {
                     int TargtedByCount = 0;
-                    if (Combat.TargetedBy.Any())
+                    if (Combat.TargetedBy != null && Combat.TargetedBy.Any())
                     {
                         TargtedByCount = Combat.TargetedBy.Count();
+                        EntityCache __closestTargetedBy = Combat.TargetedBy.OrderBy(i => i.Distance).FirstOrDefault(e => !e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget));
+                        if (__closestTargetedBy != null)
+                        {
+                            Logging.Log("Drones", "The closest target that is targeting ME is at [" + __closestTargetedBy.Distance + "]k", Logging.Debug);
+                        }
                     }
+                    
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: There are [" + Combat.PotentialCombatTargets.Count(e => e.IsInDroneRange && (!e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget))) + "] PotentialCombatTargets not targeting us within My MaxDroneRange: [" + Math.Round(MaxDroneRange / 1000, 0) + "k] Targeting Range Is [" + Math.Round(Combat.MaxTargetRange / 1000, 0) + "k] We have [" + TargtedByCount + "] total things targeting us and [" + Combat.PotentialCombatTargets.Count(e => !e.IsSentry || (e.IsSentry && Combat.KillSentries) || (e.IsSentry && e.IsEwarTarget)) + "] total PotentialCombatTargets", Logging.Magenta);
+                    
                     if (Logging.DebugDrones)
                     {
                         foreach (EntityCache PCTInDroneRange in Combat.PotentialCombatTargets.Where(i => i.IsInDroneRange && i.IsTargetedBy))
@@ -1191,37 +1199,37 @@ namespace Questor.Modules.Combat
                     return true;
                 }
 
-                if (_activeDronesShieldTotalOnLastPulse > GetActiveDroneShieldTotal())
+                if (_activeDronesShieldTotalOnLastPulse > GetActiveDroneShieldTotal() + 5)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldTotal().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
-                if (_activeDronesArmorTotalOnLastPulse > GetActiveDroneArmorTotal())
+                if (_activeDronesArmorTotalOnLastPulse > GetActiveDroneArmorTotal() + 5)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorTotal().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
-                if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal())
+                if (_activeDronesStructureTotalOnLastPulse > GetActiveDroneStructureTotal() + 5)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructureTotalOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructureTotal().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
-                if (_activeDronesShieldPercentageOnLastPulse > GetActiveDroneShieldPercentage())
+                if (_activeDronesShieldPercentageOnLastPulse > GetActiveDroneShieldPercentage() + 1)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: shields! [Old: " + _activeDronesShieldPercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneShieldPercentage().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
-                if (_activeDronesArmorPercentageOnLastPulse > GetActiveDroneArmorPercentage())
+                if (_activeDronesArmorPercentageOnLastPulse > GetActiveDroneArmorPercentage() + 1)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: armor! [Old:" + _activeDronesArmorPercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneArmorPercentage().ToString("N2") + "]", Logging.Magenta);
                     return true;
                 }
 
-                if (_activeDronesStructurePercentageOnLastPulse > GetActiveDroneStructurePercentage())
+                if (_activeDronesStructurePercentageOnLastPulse > GetActiveDroneStructurePercentage() + 1)
                 {
                     Logging.Log("Drones", "Recalling [ " + Drones.ActiveDrones.Count() + " ] drones: structure! [Old:" + _activeDronesStructurePercentageOnLastPulse.ToString("N2") + "][New: " + GetActiveDroneStructurePercentage().ToString("N2") + "]", Logging.Magenta);
                     return true;

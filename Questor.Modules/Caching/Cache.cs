@@ -2100,7 +2100,7 @@ namespace Questor.Modules.Caching
             }
             catch (Exception exception)
             {
-                Logging.Log("Cache.allBookmarks", "Exception [" + exception + "]", Logging.Debug);
+                Logging.Log("Cache.EntitiesThatContainTheName", "Exception [" + exception + "]", Logging.Debug);
                 return null;
             }
         }

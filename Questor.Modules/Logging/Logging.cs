@@ -115,7 +115,7 @@ namespace Questor.Modules.Logging
                 }
 
                 colorLogLine = line;
-                Logging.redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
+                Logging.redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + FilterSensitiveInfo(colorLogLine));  //In memory Console Log with sensitive info redacted
                 
                 plainLogLine = FilterColorsFromLogs(line);
 
@@ -129,7 +129,7 @@ namespace Questor.Modules.Logging
                 //Logging.UseInnerspace = true;
                 if (Logging.UseInnerspace)
                 {
-                    InnerSpace.Echo(String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + colorLogLine));
+                    InnerSpace.Echo(Logging.redactedColorLogLine);
                 }
                 else // Write directly to the EVE Console window (if you want to see this you must be running EXEFile.exe without the /noconsole switch)
                 {
@@ -242,6 +242,16 @@ namespace Questor.Modules.Logging
                     line = line.Replace(Logging.MyCharacterName + ".xml", Logging.MyCharacterName.Substring(0, 2) + "_MyEVECharacterNameRedacted_.xml");
                 }
 
+                if (!string.IsNullOrEmpty(Logging.EVELoginUserName) && !string.IsNullOrEmpty(Logging.EVELoginUserName))
+                {
+                    line = line.Replace(Logging.EVELoginUserName, Logging.EVELoginUserName.Substring(0, 2) + "_MyEVELoginNameRedacted_");
+                }
+
+                if (!string.IsNullOrEmpty(Logging.EVELoginPassword) && !string.IsNullOrWhiteSpace(Logging.EVELoginPassword))
+                {
+                    line = line.Replace(Logging.EVELoginPassword, Logging.EVELoginPassword.Substring(0, 2) + "_MyEVELoginPasswordRedacted_");
+                }
+                
                 if (!string.IsNullOrEmpty(Logging.CharacterSettingsPath))
                 {
                     line = line.Replace(Logging.CharacterSettingsPath, Logging.CharacterSettingsPath.Substring(0, 2) + "_MySettingsFileNameRedacted_.xml");

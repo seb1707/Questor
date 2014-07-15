@@ -22,10 +22,7 @@ namespace Questor.Modules.Activities
         private static bool _questorScheduleSaysWeShouldLoginNow;
         public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
         public static DateTime EVEAccountLoginStarted = DateTime.UtcNow;
-        //public static DateTime EVECharacterSelected = DateTime.UtcNow;
         public static DateTime NextSlotActivate = DateTime.UtcNow;
-        //private static string _scriptFile;
-        //private static string _scriptAfterLoginFile;
         public static bool _loginOnly;
         public static bool _showHelp;
 
@@ -75,6 +72,9 @@ namespace Questor.Modules.Activities
             }
 
         }
+
+        public static bool _loadAdaptEVE;
+
         private static double _minutesToStart;
         private static bool? _readyToLoginEVEAccount;
 
@@ -113,10 +113,7 @@ namespace Questor.Modules.Activities
         public static DateTime StartTime = DateTime.MaxValue;
         public static DateTime StopTime = DateTime.MinValue;
         public static List<string> _QuestorParamaters;
-        public static bool standalone = true;
         public static string PreLoginSettingsINI;
-
-        public static bool Stop { get; set; }
 
         public static void OptionallyLoadPreLoginSettingsFromINI(IList<string> args)
         {
@@ -180,7 +177,7 @@ namespace Questor.Modules.Activities
                         catch (Exception exception)
                         {
                             Logging.Log("Startup", "exception [" + exception + "]", Logging.Orange);
-                            return false;
+                            continue;
                         }
                     }
                     
@@ -195,7 +192,7 @@ namespace Questor.Modules.Activities
                     catch (Exception exception)
                     {
                         Logging.Log("Startup", "exception [" + exception + "]", Logging.Orange);
-                        return false;
+                        continue;
                     }
                 }
             }
@@ -420,8 +417,10 @@ namespace Questor.Modules.Activities
         public static void LoginOnFrame(object sender, EventArgs e)
         {
             // New frame, invalidate old cache
+            //if (Logging.DebugOnframe) Logging.Log("LoginOnFrame", "EveryFrame: Stating Cache.InvalidateCache", Logging.White);
             Cache.Instance.InvalidateCache();
 
+            //if (Logging.DebugOnframe) Logging.Log("LoginOnFrame", "EveryFrame: Done with InvalidateCache", Logging.White);
             Time.Instance.LastFrame = DateTime.UtcNow;
             Time.Instance.LastSessionIsReady = DateTime.UtcNow;
             //update this regardless before we login there is no session
@@ -437,7 +436,7 @@ namespace Questor.Modules.Activities
 
             if (DateTime.UtcNow < _lastServerStatusCheckWasNotOK.AddSeconds(RandomNumber(10, 20)))
             {
-                Logging.Log("Startup", "lastServerStatusCheckWasNotOK = [" + _lastServerStatusCheckWasNotOK.ToShortTimeString() + "] waiting 10 to 20 seconds.", Logging.White);
+                Logging.Log("LoginOnFrame", "lastServerStatusCheckWasNotOK = [" + _lastServerStatusCheckWasNotOK.ToShortTimeString() + "] waiting 10 to 20 seconds.", Logging.White);
                 return;
             }
 
@@ -445,9 +444,12 @@ namespace Questor.Modules.Activities
 
             if (DateTime.UtcNow < _nextPulse)
             {
-                //Logging.Log("if (DateTime.UtcNow.Subtract(_lastPulse).TotalSeconds < _pulsedelay) then return");
+                if (Logging.DebugOnframe) Logging.Log("LoginOnFrame", "if (DateTime.UtcNow < _nextPulse)", Logging.White);
                 return;
             }
+
+            if (Logging.DebugOnframe) Logging.Log("LoginOnFrame", "Pulse...", Logging.White);
+            
 
             _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
@@ -487,6 +489,8 @@ namespace Questor.Modules.Activities
                 return;
             }
 
+            if (Logging.DebugOnframe) Logging.Log("LoginOnFrame", "before: if (Cache.Instance.DirectEve.Windows.Count != 0)", Logging.White);
+            
             // We should not get any windows
             if (Cache.Instance.DirectEve.Windows.Count != 0)
             {
@@ -509,7 +513,7 @@ namespace Questor.Modules.Activities
 
                     // Modal windows must be closed
                     // But lets only close known modal windows
-                    if (window.Name == "modal")
+                    if (window.IsModal)
                     {
                         bool close = false;
                         bool restart = false;
@@ -736,9 +740,8 @@ namespace Questor.Modules.Activities
                         //EVECharacterSelected = DateTime.UtcNow;
                         return;
                     }
-                    Logging.Log("Startup",
-                        "Character id/name [" + Logging.MyCharacterName + "] not found, retrying in 10 seconds",
-                        Logging.White);
+
+                    Logging.Log("Startup", "Character id/name [" + Logging.MyCharacterName + "] not found, retrying in 10 seconds", Logging.White);
                 }
             }
         }
@@ -782,11 +785,21 @@ namespace Questor.Modules.Activities
 
         public static bool PreLoginSettings(string iniFile)
         {
+            if (string.IsNullOrEmpty(iniFile))
+            {
+                Logging.Log("PreLoginSettings", "iniFile was not passed to PreLoginSettings", Logging.Debug);
+                return false;
+            }
+
             try
             {
                 if (!File.Exists(iniFile))
                 {
-                    Logging.Log("PreLoginSettings", "Could not find a file named [" + iniFile + "]", Logging.Debug);
+                    Logging.Log("PreLoginSettings", "Could not find inifile named [" + iniFile + "]", Logging.Debug);
+                }
+                else
+                {
+                    Logging.Log("PreLoginSettings", "found a inifile named [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_" + "]", Logging.Debug);
                 }
 
                 int index = 0;
@@ -816,51 +829,69 @@ namespace Questor.Modules.Activities
                     {
                         case "eveloginusername":
                             Logging.EVELoginUserName = sLine[1];
+                            Logging.Log("PreLoginSettings", "EVELoginUserName [" + Logging.EVELoginUserName + "]", Logging.Debug);
                             break;
 
                         case "eveloginpassword":
                             Logging.EVELoginPassword = sLine[1];
+                            Logging.Log("PreLoginSettings", "EVELoginPassword [" + Logging.EVELoginPassword + "]", Logging.Debug);
                             break;
 
                         case "characternametologin":
                             Logging.MyCharacterName = sLine[1];
+                            Logging.Log("PreLoginSettings", "MyCharacterName [" + Logging.MyCharacterName + "]", Logging.Debug);
                             break;
 
                         case "questorloginonly":
                             _loginOnly = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "_loginOnly [" + _loginOnly + "]", Logging.Debug);
                             break;
 
                         case "questorusescheduler":
                             _chantlingScheduler = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "_chantlingScheduler [" + _chantlingScheduler + "]", Logging.Debug);
                             break;
 
                         case "standaloneinstance":
                             _standaloneInstance = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "_standaloneInstance [" + _standaloneInstance + "]", Logging.Debug);
                             break;
 
                         case "enablevisualstyles":
                             Logging.EnableVisualStyles = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "EnableVisualStyles [" + Logging.EnableVisualStyles + "]", Logging.Debug);
                             break;
 
                         case "debugdisableautologin":
                             Logging.DebugDisableAutoLogin = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "DebugDisableAutoLogin [" + Logging.DebugDisableAutoLogin + "]", Logging.Debug);
+                            break;
+
+                        case "debugonframe":
+                            Logging.DebugOnframe = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "DebugOnframe [" + Logging.DebugOnframe + "]", Logging.Debug);
+                            break;
+
+                        case "loadadapteve":
+                            _loadAdaptEVE = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "_loadAdaptEVE [" + _loadAdaptEVE + "]", Logging.Debug);
                             break;
                     }
                 }
 
                 if (Logging.EVELoginUserName == null)
                 {
-                    Logging.Log("PreLoginSettings", "Missing: EVELoginUserName in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE Login UserName", Logging.Debug);
+                    Logging.Log("PreLoginSettings", "Missing: EVELoginUserName in [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_" + "]: questor cant possibly AutoLogin without the EVE Login UserName", Logging.Debug);
                 }
 
                 if (Logging.EVELoginPassword == null)
                 {
-                    Logging.Log("PreLoginSettings", "Missing: EVELoginPassword in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE Login Password!", Logging.Debug);
+                    Logging.Log("PreLoginSettings", "Missing: EVELoginPassword in [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_" + "]: questor cant possibly AutoLogin without the EVE Login Password!", Logging.Debug);
                 }
 
                 if (Logging.MyCharacterName == null)
                 {
-                    Logging.Log("PreLoginSettings", "Missing: CharacterNameToLogin in [" + iniFile + "]: questor cant possibly AutoLogin without the EVE CharacterName to choose", Logging.Debug);
+                    Logging.Log("PreLoginSettings", "Missing: CharacterNameToLogin in [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_" + "]: questor cant possibly AutoLogin without the EVE CharacterName to choose", Logging.Debug);
                 }
 
                 return true;

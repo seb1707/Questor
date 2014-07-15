@@ -512,7 +512,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         // Modal windows must be closed
                         // But lets only close known modal windows
-                        if (window.Name == "modal")
+                        if (window.IsModal)
                         {
                             bool close = false;
                             bool restart = false;
@@ -628,7 +628,14 @@ namespace Questor.Modules.BackgroundTasks
                                 // LP Store "Accept offer" dialog
                                 //
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
-                                sayOk |= window.Html.Contains("Repairing these items will cost");
+                                
+                                if (_States.CurrentArmState == ArmState.RepairShop || _States.CurrentPanicState == PanicState.Panic)
+                                {
+                                    sayOk |= window.Type.Contains("form.HybridWindow") && window.Caption.Contains("Set Quantity"); 
+                                    sayOk |= window.Html.Contains("Repairing these items will cost");
+                                    sayOk |= window.Html.Contains("How much would you like to repair? Full repair cost is");
+                                }
+
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
                                 sayOk |= window.Html.Contains("You have already selected a character for this session.");
                                 sayOk |= window.Html.Contains("If you decline or fail a mission from an agent");

@@ -477,6 +477,7 @@ namespace Questor.Modules.Logging
         public static bool DebugArm { get; set; }
         public static bool DebugAttachVSDebugger { get; set; }
         public static bool DebugAutoStart { get; set; }
+        public static bool DebugBeforeLogin { get; set; }
         public static bool DebugBlackList { get; set; }
         public static bool DebugCargoHold { get; set; }
         public static bool DebugChat { get; set; }

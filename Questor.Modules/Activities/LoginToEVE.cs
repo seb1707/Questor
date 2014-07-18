@@ -139,7 +139,10 @@ namespace Questor.Modules.Activities
             {
                 //Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
                 if (!PreLoginSettings(PreLoginSettingsINI)) Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + PreLoginSettingsINI + "]", Logging.Debug);
+                return;
             }
+
+            return;
         }
 
         public static bool LoadDirectEVEInstance()
@@ -860,6 +863,11 @@ namespace Questor.Modules.Activities
                         case "enablevisualstyles":
                             Logging.EnableVisualStyles = bool.Parse(sLine[1]);
                             Logging.Log("PreLoginSettings", "EnableVisualStyles [" + Logging.EnableVisualStyles + "]", Logging.Debug);
+                            break;
+
+                        case "debugbeforelogin":
+                            Logging.DebugBeforeLogin = bool.Parse(sLine[1]);
+                            Logging.Log("PreLoginSettings", "DebugBeforeLogin [" + Logging.DebugBeforeLogin + "]", Logging.Debug);
                             break;
 
                         case "debugdisableautologin":

@@ -1449,7 +1449,7 @@ namespace Questor.Modules.Combat
                     // We are out of ammo! :(
                     if (!correctAmmoInCargo.Any())
                     {
-                        Logging.Log("Combat", "ReloadNormalAmmo: not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "] Note: CurrentDamageType [" + MissionSettings.CurrentDamageType + "] FactionDamageType [" + MissionSettings.FactionDamageType ?? "n/a" + "]", Logging.Orange);
+                        Logging.Log("Combat", "ReloadNormalAmmo:: not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "] Note: CurrentDamageType [" + MissionSettings.CurrentDamageType + "]", Logging.Orange);
                         if (MissionSettings.FactionDamageType != null) Logging.Log("Combat", "FactionDamageType [" + MissionSettings.FactionDamageType + "] PocketDamageType overrides MissionDamageType overrides FactionDamageType", Logging.Orange);
                         if (MissionSettings.MissionDamageType != null) Logging.Log("Combat", "MissionDamageType [" + MissionSettings.MissionDamageType + "] PocketDamageType overrides MissionDamageType overrides FactionDamageType", Logging.Orange);
                         if (MissionSettings.PocketDamageType != null) Logging.Log("Combat", "PocketDamageType [" + MissionSettings.PocketDamageType + "] PocketDamageType overrides MissionDamageType overrides FactionDamageType", Logging.Orange);

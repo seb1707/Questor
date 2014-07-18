@@ -918,7 +918,7 @@ namespace Questor.Behaviors
 
                     if (_States.CurrentCombatState == CombatState.OutOfAmmo) // on mission
                     {
-                        Logging.Log("CombatMissionsBehavior.UnloadLoot", "We are out of ammo", Logging.Orange);
+                        Logging.Log("CombatMissionsBehavior.UnloadLoot", "_States.CurrentCombatState == CombatState.OutOfAmmo", Logging.Orange);
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Idle;
                         return;
                     }

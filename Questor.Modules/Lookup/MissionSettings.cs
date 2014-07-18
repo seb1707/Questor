@@ -574,6 +574,7 @@ namespace Questor.Modules.Lookup
                         {
                             if (FactionDamageType == null)
                             {
+                                Logging.Log("CurrentDamageType", "Note: ManualDamageType, PocketDamageType, MissionDamageType and FactionDamageType we all NULL, defaulting to EM ", Logging.Debug);
                                 return DamageType.EM;
                             }
 

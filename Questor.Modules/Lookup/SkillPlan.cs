@@ -222,13 +222,10 @@ namespace Questor.Modules.Lookup
 		                if (marketWindow == null)
 		                {
 		                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(10);
-
-		                    Logging.Log("buySkill", "Opening market window", Logging.White);
-
-		                    Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
-		                    Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
+                            Logging.Log("buySkill", "Opening market window", Logging.White);
+                            Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenMarket);
+                            Statistics.LogWindowActionToWindowLog("MarketWindow", "MarketWindow Opened");
 		                    return false;
-
 		                }
 
 		                if (!marketWindow.IsReady)
@@ -283,14 +280,14 @@ namespace Questor.Modules.Lookup
                                 return false;
 		                    }
 
-                            Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
+                            Logging.Log("buySkill", "order was null.", Logging.White);
                             buyingSkillTypeID = 0;
                             buyingSkillTypeName = string.Empty;
                             buyingIterator = 0;
 		                    return false;
 		                }
 
-		                Logging.Log("buySkill", "No skill could be found with median price ", Logging.White);
+		                Logging.Log("buySkill", "No orders for the skill could be found with a price less than 10 * the AveragePrice", Logging.White);
 		                buyingSkillTypeID = 0;
                         buyingSkillTypeName = string.Empty;
 		                buyingIterator = 0;

@@ -67,8 +67,8 @@ namespace Questor.Modules.Activities
             }
             set
             {
-                //Logging.Log("Startup", "! Logging.UseInnerspace = false; !", Logging.White);
-                Logging.UseInnerspace = false;
+                //Logging.Log("Startup", "Setting: UseInnerspace = [" + !value + "]", Logging.White);
+                Logging.UseInnerspace = !value;
             }
 
         }
@@ -115,13 +115,14 @@ namespace Questor.Modules.Activities
         public static List<string> _QuestorParamaters;
         public static string PreLoginSettingsINI;
 
-        public static void OptionallyLoadPreLoginSettingsFromINI(IList<string> args)
+        public static bool OptionallyLoadPreLoginSettingsFromINI(IList<string> args)
         {
             if (!string.IsNullOrEmpty(Logging.EVELoginUserName) &&
                 !string.IsNullOrEmpty(Logging.EVELoginPassword) &&
                 !string.IsNullOrEmpty(Logging.MyCharacterName))
             {
-                return;
+                Logging.Log("Startup", "EVELoginUserName, EVELoginPassword and MyCharacterName all specified at the command line, not loading settings from ini.", Logging.White);
+                return false;
             }
 
             //
@@ -137,12 +138,18 @@ namespace Questor.Modules.Activities
             }
             if (!string.IsNullOrEmpty(PreLoginSettingsINI) && File.Exists(PreLoginSettingsINI))
             {
-                //Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
-                if (!PreLoginSettings(PreLoginSettingsINI)) Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + PreLoginSettingsINI + "]", Logging.Debug);
-                return;
+                Logging.Log("Startup", "Found [" + PreLoginSettingsINI + "] loading Questor PreLogin Settings", Logging.White);
+                if (!PreLoginSettings(PreLoginSettingsINI))
+                {
+                    Logging.Log("Startup.PreLoginSettings", "Failed to load PreLogin settings from [" + PreLoginSettingsINI + "]", Logging.Debug);
+                    return false;    
+                }
+
+                Logging.Log("Startup", "Successfully loaded PreLogin Settings", Logging.White);
+                return true;
             }
 
-            return;
+            return false;
         }
 
         public static bool LoadDirectEVEInstance()
@@ -821,7 +828,10 @@ namespace Questor.Modules.Activities
                     if (string.IsNullOrEmpty(line))
                         continue;
 
+                    
+                    
                     string[] sLine = line.Split(new string[] { "=" }, StringSplitOptions.RemoveEmptyEntries);
+                    //Logging.Log("PreLoginSettings", "Processing line: [" + index + "] of [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_] Found Var: [" + sLine[0] + "] Found Value: [" + sLine[1] + "]", Logging.Debug);
                     //if (sLine.Count() != 2 && !sLine[0].Equals(ProxyUsername) && !sLine[0].Equals(ProxyPassword) )
                     if (sLine.Count() != 2)
                     {
@@ -877,7 +887,7 @@ namespace Questor.Modules.Activities
 
                         case "debugonframe":
                             Logging.DebugOnframe = bool.Parse(sLine[1]);
-                            Logging.Log("PreLoginSettings", "DebugOnframe [" + Logging.DebugOnframe + "]", Logging.Debug);
+                            Logging.Log("PreLoginSettings", "DebugOnframe: [" + Logging.DebugOnframe + "]", Logging.Debug);
                             break;
 
                         case "loadadapteve":
@@ -902,6 +912,7 @@ namespace Questor.Modules.Activities
                     Logging.Log("PreLoginSettings", "Missing: CharacterNameToLogin in [" + Path.GetFileName(iniFile).Substring(0, 4) + "_MyINIFileRedacted_" + "]: questor cant possibly AutoLogin without the EVE CharacterName to choose", Logging.Debug);
                 }
 
+                Logging.Log("PreLoginSettings", "Done reading ini", Logging.Debug);
                 return true;
             }
             catch (Exception exception)

@@ -59,7 +59,7 @@ namespace Questor.Modules.Actions
 					
 				case SkillTrainerState.BuyingSkill:
 					Logging.Log("SkillTrainer", "BuyingSkill", Logging.Debug);
-					if (!SkillPlan.BuySkill(SkillPlan.buyingSkillTypeID)) return;
+					if (!SkillPlan.BuySkill(SkillPlan.buyingSkillTypeID, SkillPlan.buyingSkillTypeName)) return;
 					_State.CurrentSkillTrainerState = SkillTrainerState.ReadCharacterSheetSkills;
 					break;
 
@@ -72,11 +72,6 @@ namespace Questor.Modules.Actions
 
 					
 				case SkillTrainerState.CheckTrainingQueue:
-					if(SkillPlan.skillWasInjected == true){
-						_State.CurrentSkillTrainerState = SkillTrainerState.ReadCharacterSheetSkills;
-						SkillPlan.skillWasInjected = false;
-					}
-					if(SkillPlan.buyingSkill == true) _State.CurrentSkillTrainerState = SkillTrainerState.BuyingSkill;
 					if (!SkillPlan.RetrieveSkillQueueInfo()) return;
 					if (!SkillPlan.CheckTrainingQueue("SkillTrainer")) return;
 

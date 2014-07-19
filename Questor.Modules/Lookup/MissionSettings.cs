@@ -313,6 +313,7 @@ namespace Questor.Modules.Lookup
             MissionSettings.FactionOptimalRange = null;
             MissionSettings.FactionOrbitDistance = null;
             MissionSettings.FactionDamageType = null;
+            MissionSettings.ManualDamageType = null;
         }
 
         public static void LoadMissionXMLData()
@@ -331,7 +332,12 @@ namespace Questor.Modules.Lookup
             MissionSettings.MissionOrbitDistance = null;
             MissionSettings.MissionOptimalRange = null;
             MissionSettings.MissionDamageType = null;
-
+            
+            //FactionDamageType, 
+            //MissionDamageType,
+            //PocketDamageType, 
+            //ManualDamageType
+            
             //
             // this loads the settings global to the mission, NOT individual pockets
             //
@@ -591,6 +597,9 @@ namespace Questor.Modules.Lookup
             }
         }
 
+        //
+        // FactionDamageType, MissionDamageType, PocketDamageType, ManualDamageType
+        //
         public static DamageType? FactionDamageType { get; set; }
         public static DamageType? MissionDamageType { get; set; }
         public static DamageType? PocketDamageType { get; set; }

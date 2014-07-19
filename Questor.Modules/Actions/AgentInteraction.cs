@@ -1093,7 +1093,7 @@ namespace Questor.Modules.Actions
 
                 foreach (DirectWindow window in Cache.Instance.Windows)
                 {
-                    if (window.Name == "modal")
+                    if (window.IsModal)
                     {
                         bool needHumanIntervention = false;
                         bool sayyes = false;
@@ -1151,9 +1151,12 @@ namespace Questor.Modules.Actions
                                     _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.Error;
                                 }
                             }
+
                             continue;
                         }
                     }
+
+                    continue;
                 }
 
                 switch (_States.CurrentAgentInteractionState)

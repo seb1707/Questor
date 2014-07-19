@@ -82,9 +82,15 @@ namespace Questor
 
             
             ParseArgs(args);
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "After: ParseArgs(args);", Logging.Debug);
-            LoginToEVE.OptionallyLoadPreLoginSettingsFromINI(args);
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "After: LoginToEVE.OptionallyLoadPreLoginSettingsFromINI(args);", Logging.Debug);
+            if (LoginToEVE.OptionallyLoadPreLoginSettingsFromINI(args))
+            {
+                if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "OptionallyLoadPreLoginSettingsFromINI was true", Logging.Debug);    
+            }
+            else
+            {
+                Logging.Log("Startup:", "OptionallyLoadPreLoginSettingsFromINI was false!", Logging.Debug);
+            }
+            
             //
             // Wait to login based on schedule info from schedules.xml
             //
@@ -101,14 +107,10 @@ namespace Questor
                 LoginToEVE.ReadyToLoginToEVEAccount = true;
             }
 
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "Before: if (!LoginToEVE.LoadDirectEVEInstance()) return;", Logging.Debug);
             if (!LoginToEVE.LoadDirectEVEInstance()) return;
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "After : if (!LoginToEVE.LoadDirectEVEInstance()) return;", Logging.Debug);
-
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "Before: if (!LoginToEVE.VerifyDirectEVESupportInstancesAvailable()) return;", Logging.Debug);
+            
             if (!LoginToEVE.VerifyDirectEVESupportInstancesAvailable()) return;
-            if (Logging.DebugBeforeLogin) Logging.Log("Startup:", "After : if (!LoginToEVE.VerifyDirectEVESupportInstancesAvailable()) return;", Logging.Debug);
-
+            
             if (!Logging.DebugDisableAutoLogin)
             {
                 try

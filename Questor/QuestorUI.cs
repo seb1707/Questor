@@ -1,5 +1,3 @@
-using Questor.Modules.Activities;
-using Questor.Modules.Combat;
 using Questor.Properties;
 
 namespace Questor
@@ -7,14 +5,15 @@ namespace Questor
     using System;
     using System.Diagnostics;
     using System.Globalization;
-    using System.Reflection;
     using System.Linq;
     using System.Windows.Forms;
     using System.IO;
     using LavishScriptAPI;
+    using global::Questor.Modules.Activities;
     using global::Questor.Modules.Actions;
     using global::Questor.Modules.Alerts;
     using global::Questor.Modules.Caching;
+    using global::Questor.Modules.Combat;
     using global::Questor.Modules.Logging;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.States;

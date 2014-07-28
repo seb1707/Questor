@@ -1,5 +1,4 @@
-﻿using Questor.Modules.BackgroundTasks;
-
+﻿
 namespace Questor.Modules.Actions
 {
     using System;

@@ -15,13 +15,11 @@ namespace Questor.Modules.Logging
     using System.Drawing;
     using System.IO;
     using System.Reflection;
-    using System.Text;
     using System.Threading;
     using System.Windows.Forms;
     //using Questor;
     //using Questor.Modules.Caching;
     //using Questor.Modules.Lookup;
-    using Questor.Modules.States;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 
@@ -164,11 +162,9 @@ namespace Questor.Modules.Logging
                                     {
                                         if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
                                     }
-                                    line = "";
                                 }
                                 else
                                 {
-                                    line = "Logging: Unable to write log to file yet as: ConsoleLogFile is not yet defined";
                                     if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
                                 }
                             }
@@ -206,7 +202,7 @@ namespace Questor.Modules.Logging
 
         public static void BasicLog(string module, string logmessage)
         {
-            Console.WriteLine(string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
+            Console.WriteLine("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage);
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFileRedacted != null)
             {
                 if (Directory.Exists(Logging.ConsoleLogPathRedacted))

@@ -83,7 +83,7 @@ namespace Questor.Modules.Activities
         private bool BookmarkPocketForSalvaging()
         {
             if (Logging.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "Entered: BookmarkPocketForSalvaging", Logging.Debug);
-            double RangeToConsiderWrecksDuringLootAll = 0;
+            double RangeToConsiderWrecksDuringLootAll;
             List<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
             if (tractorBeams.Count > 0)
             {
@@ -495,7 +495,18 @@ namespace Questor.Modules.Activities
 
                 if (ClosestPotentialCombatTarget == null) //otherwise just grab something close (excluding sentries)
                 {
-                    if (Logging.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(); [" + Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault().Name + "]", Logging.Debug);
+                    if (Combat.PotentialCombatTargets.Any())
+                    {
+                        if (Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault() != null)
+                        {
+                            EntityCache closestPCT = Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
+                            if (closestPCT != null)
+                            {
+                                if (Logging.DebugClearPocket) Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "ClosestPotentialCombatTarget = Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault(); [" + closestPCT.Name + "]", Logging.Debug);    
+                            }
+                        }    
+                    }
+
                     ClosestPotentialCombatTarget = Combat.PotentialCombatTargets.OrderBy(t => t.Nearest5kDistance).FirstOrDefault();
                 }
 
@@ -694,8 +705,7 @@ namespace Questor.Modules.Activities
                 return;
 
             //we cant move in bastion mode, do not try
-            List<ModuleCache> bastionModules = null;
-            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (bastionModules.Any(i => i.IsActive))
             {
                 Logging.Log("CombatMissionCtrl.MoveToBackground", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
@@ -724,7 +734,7 @@ namespace Questor.Modules.Activities
                 target = "Acceleration Gate";
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid).ToList();
             if (!targets.Any())
             {
                 // Unlike activate, no target just means next action
@@ -757,8 +767,7 @@ namespace Questor.Modules.Activities
                 return;
 
             //we cant move in bastion mode, do not try
-            List<ModuleCache> bastionModules = null;
-            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (bastionModules.Any(i => i.IsActive))
             {
                 Logging.Log("CombatMissionCtrl.MoveTo", "BastionMode is active, we cannot move, aborting attempt to Activate until bastion deactivates", Logging.Debug);
@@ -799,7 +808,7 @@ namespace Questor.Modules.Activities
                 stopWhenAggressed = false;
             }
 
-            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid.ToList());
+            IEnumerable<EntityCache> targets = Cache.Instance.EntitiesByName(target, Cache.Instance.EntitiesOnGrid).ToList();
             if (!targets.Any())
             {
                 Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "no entities found named [" + target + "] proceeding to next action", Logging.Teal);
@@ -1002,8 +1011,7 @@ namespace Questor.Modules.Activities
 
             if (Cache.Instance.Modules.Any())
             {
-                List<ModuleCache> bastionModules = null;
-                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (!bastionModules.Any() || bastionModules.Any(i => i.IsActive))
                 {
                     _done = true;
@@ -1479,7 +1487,7 @@ namespace Questor.Modules.Activities
                         //if (Combat.PreferredPrimaryWeaponTarget == null || String.IsNullOrEmpty(Cache.Instance.PreferredDroneTarget.Name) || Combat.PreferredPrimaryWeaponTarget.IsOnGridWithMe && Combat.PreferredPrimaryWeaponTarget != currentKillTarget)
                         //{
                             //Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "Adding [" + currentKillTarget.Name + "][" + Math.Round(currentKillTarget.Distance / 1000, 0) + "][" + Cache.Instance.MaskedID(currentKillTarget.Id) + "] groupID [" + currentKillTarget.GroupId + "] TypeID[" + currentKillTarget.TypeId + "] as PreferredPrimaryWeaponTarget", Logging.Teal);
-                            Combat.AddPrimaryWeaponPriorityTarget(killTargets.FirstOrDefault(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.Kill[" + PocketNumber + "]." + _pocketActions[_currentAction], true);
+                            Combat.AddPrimaryWeaponPriorityTarget(killTargets.FirstOrDefault(), PrimaryWeaponPriority.PriorityKillTarget, "CombatMissionCtrl.Kill[" + PocketNumber + "]." + _pocketActions[_currentAction]);
                             Combat.PreferredPrimaryWeaponTarget = killTargets.FirstOrDefault();
                         //}
                         //else 
@@ -1564,12 +1572,6 @@ namespace Questor.Modules.Activities
 
         private void KillClosestByNameAction(Actions.Action action)
         {
-            bool notTheClosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
-            {
-                notTheClosest = false;
-            }
-
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
 
             List<string> targetNames = action.GetParameterValues("target");
@@ -1617,11 +1619,6 @@ namespace Questor.Modules.Activities
         {
             if (Cache.Instance.NormalApproach) Cache.Instance.NormalApproach = false;
 
-            bool notTheClosest;
-            if (!bool.TryParse(action.GetParameterValue("notclosest"), out notTheClosest))
-            {
-                notTheClosest = false;
-            }
             //
             // the way this is currently written is will NOT stop after killing the first target as intended, it will clear all targets with the Name given, in this everything on grid
             //
@@ -1673,7 +1670,7 @@ namespace Questor.Modules.Activities
                     return;
                 }
 
-                IEnumerable<EntityCache> targetEntities = Cache.Instance.EntitiesByName(targetName, Cache.Instance.EntitiesOnGrid.ToList());
+                IEnumerable<EntityCache> targetEntities = Cache.Instance.EntitiesByName(targetName, Cache.Instance.EntitiesOnGrid).ToList();
                 if (targetEntities.Any())
                 {
                     Logging.Log("MissionController.DropItem", "We have [" + targetEntities.Count() + "] entities on grid that match our target by name: [" + targetName.FirstOrDefault() + "]", Logging.Orange);
@@ -1839,7 +1836,7 @@ namespace Questor.Modules.Activities
                     quantity = 1;
                 }
 
-                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
+                if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any(i => itemsToLoot != null && (itemsToLoot.Contains(i.TypeName) && (i.Quantity >= quantity))))
                 {
                     Logging.Log("CombatMissionCtrl[" + PocketNumber + "]." + _pocketActions[_currentAction], "We are done - we have the item(s)", Logging.Teal);
 
@@ -1873,7 +1870,7 @@ namespace Questor.Modules.Activities
                 {
                     foreach (EntityCache continerToLoot in containers)
                     {
-                        if (targetContainerNames != null && targetContainerNames.Any())
+                        if (targetContainerNames.Any())
                         {
                             foreach (string targetContainerName in targetContainerNames)
                             {
@@ -1908,7 +1905,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                if (itemsToLoot.Any())
+                if (itemsToLoot !=null && itemsToLoot.Any())
                 {
                     foreach (string _itemToLoot in itemsToLoot)
                     {
@@ -2127,7 +2124,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                EntityCache container = containers.FirstOrDefault(c => targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
+                EntityCache container = containers.FirstOrDefault(c => targetNames != null && targetNames.Contains(c.Name)) ?? containers.FirstOrDefault();
                 if (container != null)
                 {
                     if (container.Distance > (int)Distances.SafeScoopRange)

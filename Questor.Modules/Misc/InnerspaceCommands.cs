@@ -1,12 +1,11 @@
 ﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Questor.Modules.Activities;
-using Questor.Modules.Combat;
 
 namespace Questor.Modules.Misc
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using Questor.Modules.Activities;
     using Questor.Modules.Caching;
     using Questor.Modules.Combat;
     using Questor.Modules.Logging;

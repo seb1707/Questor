@@ -13,7 +13,6 @@ namespace Questor.Modules.Actions
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Xml.Linq;
     using DirectEve;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;

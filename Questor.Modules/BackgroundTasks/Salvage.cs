@@ -8,10 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Runtime.Remoting.Messaging;
-using System.Threading;
-using LavishSettingsAPI;
-
 namespace Questor.Modules.BackgroundTasks
 {
     using System;
@@ -118,7 +114,6 @@ namespace Questor.Modules.BackgroundTasks
                 _reserveCargoCapacity = value;
             }
         }
-        public static List<Ammo> Ammo { get; set; }
         private static int ModuleNumber { get; set; }
         public static bool LootOnlyWhatYouCanWithoutSlowingDownMissionCompletion { get; set; }
         public static int TractorBeamMinimumCapacitor { get; set; }
@@ -140,8 +135,7 @@ namespace Questor.Modules.BackgroundTasks
         public static void MoveIntoRangeOfWrecks() // DO NOT USE THIS ANYWHERE EXCEPT A PURPOSEFUL SALVAGE BEHAVIOR! - if you use this while in combat it will make you go poof quickly.
         {
             //we cant move in bastion mode, do not try
-            List<ModuleCache> bastionModules = null;
-            bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+            List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (bastionModules.Any(i => i.IsActive)) return;
 
             EntityCache closestWreck = Cache.Instance.UnlootedContainers.OrderBy(o => o.Distance).FirstOrDefault();
@@ -194,7 +188,7 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            IEnumerable<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam);
+            IEnumerable<ModuleCache> tractorBeams = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.TractorBeam).ToList();
             if (!tractorBeams.Any())
                 return;
 
@@ -205,7 +199,8 @@ namespace Questor.Modules.BackgroundTasks
             }
 
             double tractorBeamRange = tractorBeams.Min(t => t.OptimalRange);
-            List<EntityCache> wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
+            wrecks = null;
+            wrecks = Cache.Instance.Targets.Where(t => (t.GroupId == (int)Group.Wreck || t.GroupId == (int)Group.CargoContainer) && t.Distance < tractorBeamRange).ToList();
 
             int tractorsProcessedThisTick = 0;
             ModuleNumber = 0;
@@ -242,42 +237,50 @@ namespace Questor.Modules.BackgroundTasks
                 if (Cache.Instance.MyShipEntity.Velocity > 300)
                 {
                     if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "if (Cache.Instance.MyShip.Velocity > 300)", Logging.Teal);
-                    foreach (EntityCache unlootedcontainer in Cache.Instance.UnlootedContainers)
+                    if (Cache.Instance.UnlootedContainers.Any(unlootedcontainer => tractorBeam.TargetId == unlootedcontainer.Id))
                     {
-                        if (tractorBeam.TargetId == unlootedcontainer.Id)
-                        {
-                            currentWreckUnlooted = true;
-                            if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "if (tractorBeam.TargetId == unlootedcontainer.Id) break;", Logging.Teal);
-                            break;
-                        }
+                        currentWreckUnlooted = true;
+                        if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "if (tractorBeam.TargetId == unlootedcontainer.Id) break;", Logging.Teal);
                     }
                 }
-                else
-                {
-                    //if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams", "if (!Cache.Instance.MyShip.Velocity > 300)", Logging.Teal);
-                }
-
+                
                 // If the wreck no longer exists, or its within loot range then disable the tractor beam
                 // If the wreck no longer exist, beam should be deactivated automatically. Without our interaction.
-                if (tractorBeam.IsActive && (wreck == null || (wreck.Distance <= (int)Distances.SafeScoopRange && !currentWreckUnlooted)))
+                if (tractorBeam.IsActive)
                 {
-                    if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: IsActive [" + tractorBeam.IsActive + "] and the wreck [" + wreck.Name + "] is in SafeScoopRange [" + Math.Round(wreck.Distance / 1000, 0) + "]", Logging.Teal);
-                    //tractorBeams.Remove(tractorBeam);
-                    if (tractorBeam.Click())
+                    if (wreck == null || (wreck.Distance <= (int) Distances.SafeScoopRange && !currentWreckUnlooted && Cache.Instance.MyShipEntity.Velocity < 300))
                     {
-                        tractorsProcessedThisTick++;
-                        Time.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
-                        if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                        if (Logging.DebugTractorBeams)
                         {
-                            if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: Process Next Tractorbeam", Logging.Teal);
-                            continue;
+                            if (wreck != null)
+                            {
+                                Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: IsActive [" + tractorBeam.IsActive + "] and the wreck [" + wreck.Name ?? "null" + "] is in SafeScoopRange [" + Math.Round(wreck.Distance / 1000, 0) + "]", Logging.Teal);
+                            }
+                            else
+                            {
+                                Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: IsActive [" + tractorBeam.IsActive + "] on what? wreck was null!", Logging.Teal);    
+                            }
+                        }
+                            
+                        //tractorBeams.Remove(tractorBeam);
+                        if (tractorBeam.Click())
+                        {
+                            tractorsProcessedThisTick++;
+                            Time.Instance.NextTractorBeamAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.SalvageDelayBetweenActions_milliseconds);
+                            if (tractorsProcessedThisTick < Settings.Instance.NumberOfModulesToActivateInCycle)
+                            {
+                                if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: Process Next Tractorbeam", Logging.Teal);
+                                continue;
+                            }
+
+                            if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: We have processed [" + Settings.Instance.NumberOfModulesToActivateInCycle + "] tractors this tick, return", Logging.Teal);
+                            return;
                         }
 
-                        if (Logging.DebugTractorBeams) Logging.Log("Salvage.ActivateTractorBeams.Deactivating", "[" + ModuleNumber + "] Tractorbeam: We have processed [" + Settings.Instance.NumberOfModulesToActivateInCycle + "] tractors this tick, return", Logging.Teal);
-                        return;
+                        continue;
                     }
 
-                    return;
+                    continue;
                 }
 
                 wrecks.RemoveAll(w => w.Id == tractorBeam.TargetId);
@@ -954,7 +957,7 @@ namespace Questor.Modules.BackgroundTasks
                                             // Consider dropping ammo if it concerns the mission item!
                                             if (!_isMissionItem)
                                             {
-                                                worthLess.RemoveAll(wl => Ammo.Any(a => a.TypeId == wl.TypeId));
+                                                worthLess.RemoveAll(wl => Combat.Ammo.Any(a => a.TypeId == wl.TypeId));
                                             }
                                         }
 

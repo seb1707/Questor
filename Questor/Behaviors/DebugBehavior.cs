@@ -10,7 +10,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DirectEve;
 using Questor.Modules.Caching;
@@ -18,7 +17,6 @@ using Questor.Modules.Logging;
 using Questor.Modules.Lookup;
 using Questor.Modules.Activities;
 using Questor.Modules.States;
-using Questor.Modules.Combat;
 using Questor.Modules.Actions;
 using Questor.Modules.BackgroundTasks;
 
@@ -26,23 +24,12 @@ namespace Questor.Behaviors
 {
     public class DebugBehavior
     {
-        public DateTime LastAction;
-
-        public static long AgentID;
-
-        private readonly Stopwatch _watch;
 
         public bool PanicStateReset; //false;
 
-        private bool ValidSettings { get; set; }
-
-        public bool CloseQuestorFlag = true;
-
-        public string CharacterName { get; set; }
 
         public DebugBehavior()
         {
-            _watch = new Stopwatch();
 
             //
             // this is combat mission specific and needs to be generalized
@@ -278,20 +265,20 @@ namespace Questor.Behaviors
                                 _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                                 return;
                             }
-                            else if (Cache.Instance.InSpace)
+                            
+                            if (Cache.Instance.InSpace)
                             {
                                 Logging.Log("DebugBehavior.Traveler", "Arrived at destination (in space, Questor stopped)", Logging.White);
                                 _States.CurrentDebugBehaviorState = DebugBehaviorState.Error;
                                 return;
                             }
-                            else
-                            {
-                                Logging.Log("DebugBehavior.Traveler", "Arrived at destination", Logging.White);
-                                _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
-                                return;
-                            }
+                            
+                            Logging.Log("DebugBehavior.Traveler", "Arrived at destination", Logging.White);
+                            _States.CurrentDebugBehaviorState = DebugBehaviorState.Idle;
+                            return;
                         }
                     }
+
                     break;
 
                 case DebugBehaviorState.LogCombatTargets:

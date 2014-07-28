@@ -12,7 +12,6 @@ namespace Questor.Modules.Lookup
 {
     using System;
     using System.Xml.Linq;
-    using System.Linq;
     using DirectEve;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;
@@ -37,7 +36,7 @@ namespace Questor.Modules.Lookup
                 //
 
                 
-                DirectInvType __directInvTypeItem = null;
+                DirectInvType __directInvTypeItem;
                 Cache.Instance.DirectEve.InvTypes.TryGetValue(TypeId, out __directInvTypeItem);
                 if (__directInvTypeItem != null)
                 {

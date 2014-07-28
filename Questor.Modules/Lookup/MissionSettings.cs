@@ -13,7 +13,6 @@ using LavishScriptAPI;
 namespace Questor.Modules.Lookup
 {
     using System;
-    using System.Collections;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
@@ -214,7 +213,7 @@ namespace Questor.Modules.Lookup
 
         //public XDocument InvTypes;
         public static XDocument UnloadLootTheseItemsAreLootItems;
-        public static XDocument InvIgnore;
+        //public static XDocument InvIgnore;
         
         /// <summary>
         ///   Returns the mission objectives from
@@ -234,8 +233,8 @@ namespace Questor.Modules.Lookup
         //public static List<Ammo> FactionAmmoTypesToLoad { get; set; }
         
         public static int MissionsThisSession = 0;
-
         
+
         /// <summary>
         ///   Returns the first mission bookmark that starts with a certain string
         /// </summary>
@@ -378,19 +377,19 @@ namespace Questor.Modules.Lookup
                     }
 
                     MissionWeaponGroupId = (int?)missionXml.Root.Element("weaponGroupId") ?? 0;
-                    MissionUseDrones = (bool?) missionXml.Root.Element("useDrones") ?? null; 
-                    MissionKillSentries = (bool?)missionXml.Root.Element("killSentries" ?? null);
+                    MissionUseDrones = (bool?) missionXml.Root.Element("useDrones"); 
+                    MissionKillSentries = (bool?)missionXml.Root.Element("killSentries");
                     MissionWarpAtDistanceRange = (int?)missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
-                }
+                    MissionSettings.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? null;
 
-                MissionSettings.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? null;
-                IEnumerable<DamageType> damageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
-                if (damageTypesForThisMission.Any() && !AmmoTypesToLoad.Any())
-                {
-                    MissionDamageType = damageTypesForThisMission.FirstOrDefault();
-                    Logging.Log("AgentInteraction", "Mission XML specified the Mission Damagetype for [" + MissionName + "] is [" + MissionDamageType.ToString() + "]", Logging.White);
-                    LoadCorrectFactionOrMissionAmmo();
-                    loadedAmmo = true;
+                    IEnumerable<DamageType> damageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
+                    if (damageTypesForThisMission.Any() && !AmmoTypesToLoad.Any())
+                    {
+                        MissionDamageType = damageTypesForThisMission.FirstOrDefault();
+                        Logging.Log("AgentInteraction", "Mission XML specified the Mission Damagetype for [" + MissionName + "] is [" + MissionDamageType.ToString() + "]", Logging.White);
+                        LoadCorrectFactionOrMissionAmmo();
+                        loadedAmmo = true;
+                    }
                 }
             }
             catch (Exception ex)

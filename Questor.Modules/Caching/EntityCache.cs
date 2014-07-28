@@ -5183,7 +5183,7 @@ namespace Questor.Modules.Caching
                         }
 
                         _directEntity.Orbit(_orbitRange);
-                        Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round((double) (_orbitRange / 1000), 2) + "k][" + MaskedId + "]", Logging.Teal);
+                        Logging.Log("EntityCache", "Initiating Orbit [" + Name + "][at " + Math.Round(((double)_orbitRange / 1000), 2) + "k][" + MaskedId + "]", Logging.Teal);
                         Time.Instance.NextOrbit = DateTime.UtcNow.AddSeconds(10 + Cache.Instance.RandomNumber(1, 15));
                         Cache.Instance.Approaching = this;
                         return true;

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using System.Collections.Generic;
 using EasyHook;
 
 namespace D3DDetour

@@ -10,11 +10,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using DirectEve;
 using Questor.Modules.Caching;
-using Questor.Modules.Combat;
 using Questor.Modules.Logging;
 using Questor.Modules.Lookup;
 using Questor.Modules.Activities;

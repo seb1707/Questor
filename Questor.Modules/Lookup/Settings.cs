@@ -13,10 +13,8 @@ namespace Questor.Modules.Lookup
 {
     using System;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Threading;
     using System.Xml;
     using System.Xml.Linq;
@@ -114,8 +112,7 @@ namespace Questor.Modules.Lookup
         public List<string> CharacterNamesForMasterToInviteToFleet = new List<string>();
 
         public int NumberOfModulesToActivateInCycle = 4;
-        public int NoOfBookmarksDeletedAtOnce = 3;
-
+        
         //
         // Local Watch settings - if enabled
         //
@@ -186,8 +183,7 @@ namespace Questor.Modules.Lookup
         public bool LoginQuestorLavishScriptCmd { get; set; }
         public string LoginQuestorLavishScriptContents { get; set; }
         public bool MinimizeEveAfterStartingUp { get; set; }
-        public int SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
+        
         public string LavishIsBoxerCharacterSet { get; set; }
         public string LavishInnerspaceProfile { get; set; }
         public string LavishGame { get; set; }
@@ -1105,8 +1101,7 @@ namespace Questor.Modules.Lookup
 
                 WalletBalanceChangeLogOffDelay = (int?)CharacterSettingsXml.Element("walletbalancechangelogoffdelay") ?? (int?)CommonSettingsXml.Element("walletbalancechangelogoffdelay") ?? 30;
                 WalletBalanceChangeLogOffDelayLogoffOrExit = (string)CharacterSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? (string)CommonSettingsXml.Element("walletbalancechangelogoffdelayLogofforExit") ?? "exit";
-                SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
+                
                 //
                 // Enable / Disable the different types of logging that are available
                 //
@@ -1427,8 +1422,7 @@ namespace Questor.Modules.Lookup
 
                 WalletBalanceChangeLogOffDelay = 30;
                 WalletBalanceChangeLogOffDelayLogoffOrExit = "exit";
-                SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 240;
-
+                
                 //
                 // Value - Used in calculations
                 //

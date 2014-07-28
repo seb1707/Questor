@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 
 namespace EVE.Net.Character
@@ -42,14 +41,12 @@ namespace EVE.Net.Character
          {
              if (Settings.FailGracefully)
              {
-                 this.error = new APIError(0, "Invalid argument. One or more ids are required.");
+                 error = new APIError(0, "Invalid argument. One or more ids are required.");
                  return false;
              }
-             else
-             {
-                 this.error = new APIError(0, "Invalid argument. One or more ids are required.");
-                 throw new ArgumentException("Invalid argument. One or more ids are required.");
-             }
+
+             error = new APIError(0, "Invalid argument. One or more ids are required.");
+             throw new ArgumentException("Invalid argument. One or more ids are required.");
          }
 
          APIReader reader = new APIReader();

@@ -1,6 +1,4 @@
-﻿using System;
-using EasyHook;
-
+﻿
 namespace D3DDetour
 {
     public static class Pulse

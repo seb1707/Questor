@@ -1,5 +1,4 @@
 ﻿
-using System.Windows.Forms;
 
 namespace Questor.Modules.BackgroundTasks
 {
@@ -485,7 +484,6 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         Cleanup.ReasonToStopQuestor = "we are no longer in a valid session (not logged in) and we had been logged in. restarting";
                         Logging.Log("Cleanup", Cleanup.ReasonToStopQuestor, Logging.White);
-                        Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                         Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                         Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                         return;
@@ -660,7 +658,6 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorCMDExitGame = true;
                                 Cache.Instance.CloseQuestorEndProcess = true;
                                 Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were disconnected";
-                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 0;
                                 Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
                                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                                 return;
@@ -675,7 +672,6 @@ namespace Questor.Modules.BackgroundTasks
                                 Cache.Instance.CloseQuestorEndProcess = false;
                                 Cleanup.ReasonToStopQuestor = "A message from ccp indicated we were should restart";
                                 Cleanup.SignalToQuitQuestorAndEVEAndRestartInAMoment = true;
-                                Settings.Instance.SecondstoWaitAfterExitingCloseQuestorBeforeExitingEVE = 30;
                                 window.Close();
                                 Cleanup.CloseQuestor(Cleanup.ReasonToStopQuestor);
                                 return;

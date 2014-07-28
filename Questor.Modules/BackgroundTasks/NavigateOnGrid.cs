@@ -157,8 +157,7 @@ namespace Questor.Modules.BackgroundTasks
             if (DateTime.UtcNow > Time.Instance.NextOrbit)
             {
                 //we cant move in bastion mode, do not try
-                List<ModuleCache> bastionModules = null;
-                bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
+                List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
                 if (bastionModules.Any(i => i.IsActive)) return;
 
                 if (Logging.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);

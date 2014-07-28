@@ -9,7 +9,6 @@
 // -------------------------------------------------------------------------------
 
 
-using LavishVMAPI.Exceptions;
 using Questor.Modules.EVEInteration;
 
 namespace Questor.Modules.Caching
@@ -19,7 +18,6 @@ namespace Questor.Modules.Caching
     using System.Globalization;
     using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Xml.Linq;
     using System.Threading;
     using global::Questor.Modules.Actions;

@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Runtime.Remoting.Messaging;
-using System.Windows.Forms;
 using Questor.Modules.BackgroundTasks;
 using Questor.Modules.Combat;
 
@@ -22,7 +20,6 @@ namespace Questor.Modules.Actions
     using System.Linq;
     using System.Text.RegularExpressions;
     using System.Xml.Linq;
-    using System.Xml.XPath;
     using DirectEve;
     using global::Questor.Modules.Caching;
     using global::Questor.Modules.Logging;

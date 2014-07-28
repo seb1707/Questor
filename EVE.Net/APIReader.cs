@@ -416,7 +416,7 @@ namespace EVE.Net
                 }
                 catch (Exception e)
                 {
-                    (api_obj as APIObject).error = new APIError(0, "An unexpected error occured. Recorded error: " + e.ToString());
+                    (api_obj as APIObject).error = new APIError(0, "An unexpected error occurred. Recorded error: " + e.ToString());
                     if (!Settings.FailGracefully)
                     {
                         throw e;

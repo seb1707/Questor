@@ -14,7 +14,6 @@ namespace Questor.Modules.Caching
     using System;
     //using System.Collections.Generic;
     using DirectEve;
-    using Questor.Modules.Lookup;
     using Questor.Modules.Logging;
 
     public class EachWeaponsVolleyCache

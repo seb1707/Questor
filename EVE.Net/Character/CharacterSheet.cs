@@ -16,8 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-
-using EVE.Net.Corporation;
 using System.ComponentModel;
 
 namespace EVE.Net.Character

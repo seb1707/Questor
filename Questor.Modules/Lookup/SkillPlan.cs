@@ -29,7 +29,7 @@ namespace Questor.Modules.Lookup
 		/// </summary>
 
 		private static int iCount = 1;
-		public static int injectSkillBookAttempts = 0;
+		public static int injectSkillBookAttempts;
 		private static DateTime _nextSkillTrainingAction = DateTime.MinValue;
 		private static DateTime _nextRetrieveSkillQueueInfoAction = DateTime.MinValue;
 		private static DateTime _nextRetrieveCharactersheetInfoAction = DateTime.MinValue;
@@ -88,7 +88,7 @@ namespace Questor.Modules.Lookup
                 IEnumerable<DirectItem> items = Cache.Instance.ItemHangar.Items.Where(k => k.TypeId == skillID).ToList();
                 if (DoWeHaveThisSkillAlreadyInOurItemHangar(skillID))
                 {
-                    if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillID.ToString() + "] found in ItemHangar", Logging.Debug);
+                    if (Logging.DebugSkillTraining) Logging.Log("InjectSkillBook", "SkillBook [" + skillID + "] found in ItemHangar", Logging.Debug);
                     DirectItem SkillBookToInject = items.FirstOrDefault(s => s.TypeId == skillID);
                     if (SkillBookToInject != null)
                     {
@@ -246,52 +246,61 @@ namespace Questor.Modules.Lookup
 		                // Get the median sell price
 		                DirectInvType type;
 		                Cache.Instance.DirectEve.InvTypes.TryGetValue(skillID, out type);
-		                double? maxPrice = type.AveragePrice*10;
-		                Logging.Log("buySkill", "maxPrice " + maxPrice.ToString(), Logging.White);
-
-		                // Do we have orders?
-		                IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
-		                if (orders.Any())
+		                double? maxPrice = 0;
+                        if (type != null)
 		                {
-                            DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
-		                    if (order != null)
-		                    {
-                                //
-                                // do we have the isk to perform this transaction? - not as silly as you think, some skills are expensive!
-                                //
-		                        if (order.Price < Cache.Instance.MyWalletBalance)
-		                        {
-                                    order.Buy(1, DirectOrderRange.Station);
-                                    Logging.Log("buySkill", "Buying skill with typeid & waiting 20 seconds ( to ensure we do not buy the skillbook twice ) " + skillID, Logging.White);
+                            maxPrice = type.AveragePrice * 10;
+                            Logging.Log("buySkill", "maxPrice " + maxPrice.ToString(), Logging.White);
+                            // Do we have orders?
+                            IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
+                            if (orders.Any())
+                            {
+                                DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();
+                                if (order != null)
+                                {
+                                    //
+                                    // do we have the isk to perform this transaction? - not as silly as you think, some skills are expensive!
+                                    //
+                                    if (order.Price < Cache.Instance.MyWalletBalance)
+                                    {
+                                        order.Buy(1, DirectOrderRange.Station);
+                                        Logging.Log("buySkill", "Buying skill with typeid & waiting 20 seconds ( to ensure we do not buy the skillbook twice ) " + skillID, Logging.White);
+                                        buyingSkillTypeID = 0;
+                                        buyingSkillTypeName = string.Empty;
+                                        buyingIterator = 0;
+                                        // Wait for the order to go through
+                                        _nextRetrieveCharactersheetInfoAction = DateTime.MinValue;
+                                        // ensure we get the character sheet update
+                                        _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(20);
+                                        return true;
+                                    }
+
+                                    Logging.Log("buySkill", "We do not have enough isk to purchase [" + typeName + "] at [" + Math.Round(order.Price, 0) + "] isk. We have [" + Math.Round(Cache.Instance.MyWalletBalance, 0) + "] isk", Logging.White);
                                     buyingSkillTypeID = 0;
                                     buyingSkillTypeName = string.Empty;
                                     buyingIterator = 0;
-                                    // Wait for the order to go through
-                                    _nextRetrieveCharactersheetInfoAction = DateTime.MinValue;
-                                    // ensure we get the character sheet update
-                                    _nextSkillTrainingAction = DateTime.UtcNow.AddSeconds(20);
-                                    return true;
-		                        }
+                                    return false;
+                                }
 
-                                Logging.Log("buySkill", "We do not have enough isk to purchase [" + typeName + "] at [" + Math.Round(order.Price, 0) + "] isk. We have [" + Math.Round(Cache.Instance.MyWalletBalance, 0) + "] isk", Logging.White);
+                                Logging.Log("buySkill", "order was null.", Logging.White);
                                 buyingSkillTypeID = 0;
                                 buyingSkillTypeName = string.Empty;
                                 buyingIterator = 0;
                                 return false;
-		                    }
+                            }
 
-                            Logging.Log("buySkill", "order was null.", Logging.White);
+                            Logging.Log("buySkill", "No orders for the skill could be found with a price less than 10 * the AveragePrice", Logging.White);
                             buyingSkillTypeID = 0;
                             buyingSkillTypeName = string.Empty;
                             buyingIterator = 0;
-		                    return false;
+                            return false;
 		                }
 
-		                Logging.Log("buySkill", "No orders for the skill could be found with a price less than 10 * the AveragePrice", Logging.White);
-		                buyingSkillTypeID = 0;
+                        Logging.Log("buySkill", "no skill could be found with a typeid of [" + buyingSkillTypeID + "]", Logging.White);
+                        buyingSkillTypeID = 0;
                         buyingSkillTypeName = string.Empty;
-		                buyingIterator = 0;
-		                return false;
+                        buyingIterator = 0;
+                        return false;
 		            }
 		        }
 
@@ -433,14 +442,11 @@ namespace Questor.Modules.Lookup
 		
 		public static bool SkillAlreadyQueued(KeyValuePair<string, int> skill)
         {
-		    foreach (DirectSkill queuedskill in MySkillQueue)
-			{
-				if (queuedskill.TypeName == skill.Key && queuedskill.Level >= skill.Value)
-				{
-					if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyQueued", "Skill already in queue [" + skill.Key + "]", Logging.White);
-					return true;
-				}
-			}
+		    if (MySkillQueue.Any(queuedskill => queuedskill.TypeName == skill.Key && queuedskill.Level >= skill.Value))
+		    {
+		        if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyQueued", "Skill already in queue [" + skill.Key + "]", Logging.White);
+		        return true;
+		    }
 
 			if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyQueued", "Skill not in queue  [" + skill.Key + "]", Logging.White);
 			return false;
@@ -450,13 +456,10 @@ namespace Questor.Modules.Lookup
         {
 		    try
 		    {
-                foreach (DirectSkill knownskill in MyCharacterSheetSkills)
+                if (MyCharacterSheetSkills.Any(knownskill => knownskill.TypeName == skill.Key))
                 {
-                    if (knownskill.TypeName == skill.Key)
-                    {
-                        if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We already have this skill injected:  [" + skill.Key + "]", Logging.White);
-                        return true;
-                    }
+                    if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We already have this skill injected:  [" + skill.Key + "]", Logging.White);
+                    return true;
                 }
 
                 if (Logging.DebugSkillTraining) Logging.Log("SkillAlreadyInCharacterSheet", "We DON'T have this skill already injected:  [" + skill.Key + "]", Logging.White);
@@ -515,14 +518,11 @@ namespace Questor.Modules.Lookup
 
 		public static bool SkillIsBelowPlannedLevel(KeyValuePair<string, int> skill)
         {
-		    foreach (DirectSkill knownskill in MyCharacterSheetSkills)
-			{
-				if (knownskill.TypeName == skill.Key && knownskill.Level < skill.Value)
-				{
-					if (Logging.DebugSkillTraining) Logging.Log("SkillIsBelowPlannedLevel", "Skill is below planned level:  [" + skill.Key + "]", Logging.White);
-					return true;
-				}
-			}
+		    if (MyCharacterSheetSkills.Any(knownskill => knownskill.TypeName == skill.Key && knownskill.Level < skill.Value))
+		    {
+		        if (Logging.DebugSkillTraining) Logging.Log("SkillIsBelowPlannedLevel", "Skill is below planned level:  [" + skill.Key + "]", Logging.White);
+		        return true;
+		    }
 			
             if (Logging.DebugSkillTraining) Logging.Log("SkillIsBelowPlannedLevel", "Skill is not below planned level:  [" + skill.Key + "]", Logging.White);
 			return false;
@@ -713,7 +713,7 @@ namespace Questor.Modules.Lookup
                 {
                     if (Logging.DebugSkillTraining) Logging.Log("readMyCharacterSheetSkills", "Updating Character sheet again", Logging.Teal);
                     MyCharacterSheetSkills = Cache.Instance.DirectEve.Skills.MySkills;
-                    _nextRetrieveCharactersheetInfoAction.AddSeconds(13);
+                    _nextRetrieveCharactersheetInfoAction = DateTime.UtcNow.AddSeconds(13);
                     return true;
                 }
 

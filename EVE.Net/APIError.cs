@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace EVE.Net
 {
     public class APIError
@@ -11,8 +8,8 @@ namespace EVE.Net
 
         public APIError(int code, string msg)
         {
-            this.errorCode = code;
-            this.errorMsg = msg;
+            errorCode = code;
+            errorMsg = msg;
         }
     }
 }

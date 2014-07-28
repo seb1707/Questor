@@ -8,15 +8,9 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
-using Questor.Modules.Lookup;
-
 namespace QuestorManager.Actions
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using DirectEve;
-    using Questor.Modules.Caching;
     using Questor.Modules.Logging;
     using Questor.Modules.Actions;
     using Questor.Modules.States;

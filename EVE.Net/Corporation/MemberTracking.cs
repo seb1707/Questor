@@ -46,7 +46,7 @@ namespace EVE.Net.Corporation
          StringBuilder sb = new StringBuilder();
          sb.AppendFormat("keyID={0}&vCode={1}", keyID, vCode);
 
-         if ( extended_ != null && extended_.Value == true )
+         if ( extended_ != null && extended_.Value)
             sb.Append("&extended=1");
 
          return reader.Query(Uri, this, sb.ToString());

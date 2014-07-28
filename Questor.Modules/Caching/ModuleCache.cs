@@ -15,7 +15,6 @@ namespace Questor.Modules.Caching
     using System;
     using System.Linq;
     using DirectEve;
-    using global::Questor.Modules.BackgroundTasks;
     using global::Questor.Modules.Combat;
     using global::Questor.Modules.Lookup;
     using global::Questor.Modules.Logging;

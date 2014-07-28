@@ -1,7 +1,4 @@
 ﻿
-using System.Reflection;
-using LavishSettingsAPI;
-using Questor.Modules.Activities;
 
 namespace Questor.Modules.Logging
 {
@@ -11,7 +8,7 @@ namespace Questor.Modules.Logging
     using System.IO;
     using System.Globalization;
     using System.Collections.Generic;
-    using Questor.Modules.Actions;
+    using Questor.Modules.Activities;
     using Questor.Modules.BackgroundTasks;
     using Questor.Modules.Caching;
     using Questor.Modules.Combat;
@@ -534,7 +531,10 @@ namespace Questor.Modules.Logging
                     DirectInvType ammoType;
                     Cache.Instance.DirectEve.InvTypes.TryGetValue(item.TypeId, out ammoType);
                     if (ammo1 != null) Statistics.AmmoConsumption = (ammo1.Quantity - item.Quantity);
-                    Statistics.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.AmmoConsumption;
+                    if (ammoType != null)
+                    {
+                        Statistics.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.AmmoConsumption;
+                    }
                 }
             }
             catch (Exception exception)

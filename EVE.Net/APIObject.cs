@@ -14,7 +14,6 @@
 //
 
 using System;
-using System.Globalization;
 
 namespace EVE.Net
 {

@@ -11,7 +11,6 @@
 namespace Questor.Modules.Actions
 {
     using System.Xml.Linq;
-    using Questor.Modules.Lookup;
     using Questor.Modules.Logging;
     using System;
 

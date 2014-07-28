@@ -8,12 +8,12 @@
 //  </copyright>
 //-------------------------------------------------------------------------------
 
-using Questor.Modules.Lookup;
+//using Questor.Modules.Lookup;
 
 namespace Questor.Modules.Caching
 {
-    using System.Collections.Generic;
-    using DirectEve;
+    //using System.Collections.Generic;
+    //using DirectEve;
 
     
     //public class ItemCacheMarket : ItemCache

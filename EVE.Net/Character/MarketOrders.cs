@@ -28,7 +28,7 @@ namespace EVE.Net.Character
       public MarketOrders(string keyid, string vcode, string actorid)
          : base(keyid, vcode, actorid) { }
 
-      public static readonly Dictionary<int, string> OrderStateMap = new Dictionary<int,string>()
+      public static readonly Dictionary<int, string> OrderStateMap = new Dictionary<int,string>
       {
          {0, "open/active"},
          {1, "closed"},

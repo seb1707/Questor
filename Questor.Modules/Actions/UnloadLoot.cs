@@ -8,8 +8,6 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
-using System.Configuration;
-
 namespace Questor.Modules.Actions
 {
     using System;

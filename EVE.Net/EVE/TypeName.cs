@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 
 namespace EVE.Net
@@ -41,14 +40,12 @@ namespace EVE.Net
          {
              if (Settings.FailGracefully)
              {
-                 this.error = new APIError(0, "Invalid argument. One or more typeIDs are required.");
+                 error = new APIError(0, "Invalid argument. One or more typeIDs are required.");
                  return false;
              }
-             else
-             {
-                 this.error = new APIError(0, "Invalid argument. One or more character IDs are required.");
-                 throw new ArgumentException("Invalid argument. One or more typeIDs are required.");
-             }
+             
+             error = new APIError(0, "Invalid argument. One or more character IDs are required.");
+             throw new ArgumentException("Invalid argument. One or more typeIDs are required.");
          }
 
          APIReader reader = new APIReader();

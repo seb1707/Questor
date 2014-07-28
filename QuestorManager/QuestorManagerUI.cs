@@ -73,8 +73,6 @@ namespace QuestorManager
         //private readonly ListItems _item;
         private DateTime _lastAction;
 
-        public string CharacterName { get; set; }
-
         private string _selectHangar = "Local Hangar";
 
         public QuestorManagerUI()
@@ -87,11 +85,7 @@ namespace QuestorManager
             _buy = new Buy();
             _sell = new Sell();
             _valuedump = new ValueDump(this);
-            //_valuedump = new ValueDump();
             _buylpi = new BuyLPI(this);
-            //_buylpi = new BuyLPI();
-            //_defense = new Defense();
-            //_cleanup = new Cleanup();
             List = new List<ListItems>();
             Items = new List<ItemCache>();
             //ItemsToSell = new List<ItemCache>();
@@ -103,7 +97,7 @@ namespace QuestorManager
             //
             try
             {
-                MissionSettings.InvIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
+               //MissionSettings.InvIgnore = XDocument.Load(Settings.Instance.Path + "\\InvIgnore.xml"); //items to ignore
             }
             catch (Exception exception)
             {
@@ -176,7 +170,7 @@ namespace QuestorManager
                 {
                     Settings.Instance.LoadSettings();
                 }
-                CharacterName = Cache.Instance.DirectEve.Me.Name;
+                if (Cache.Instance.DirectEve.Me.Name != null) Logging.MyCharacterName = Cache.Instance.DirectEve.Me.Name;
 
                 // Check 3D rendering
                 if (Cache.Instance.DirectEve.Session.IsInSpace && Cache.Instance.DirectEve.Rendering3D != !Settings.Instance.Disable3D)
@@ -622,6 +616,7 @@ namespace QuestorManager
         
         private ListViewItem[] Filter<T>(IEnumerable<string> search, IEnumerable<T> list, Func<T, string> getTitle, Func<T, string> getType)
         {
+            search = search.ToList();
             if (list == null)
             {
                 return new ListViewItem[0];

@@ -16,7 +16,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.ComponentModel;
 
 namespace EVE.Net.Character
@@ -29,7 +28,7 @@ namespace EVE.Net.Character
       public Notifications(string keyid, string vcode, string actorid)
          : base(keyid, vcode, actorid) { }
 
-      public static readonly Dictionary<int, string> NotificationIDMap = new Dictionary<int, string>()
+      public static readonly Dictionary<int, string> NotificationIDMap = new Dictionary<int, string>
       {
          {2, "Character deleted"},
          {3, "Give medal to character"},

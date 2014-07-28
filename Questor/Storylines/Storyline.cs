@@ -339,11 +339,11 @@
                     }
                     missionsInJournal = missionsInJournal.Where(m => m.Type.Contains("Storyline")).ToList();
                     Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions available", Logging.Yellow);
-                    missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Logging.FilterPath(m.Name).ToLower()));
+                    missionsInJournal = missionsInJournal.Where(m => _storylines.ContainsKey(Logging.FilterPath(m.Name).ToLower())).ToList();
                     Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do", Logging.Yellow);
                     missionsInJournal = missionsInJournal.Where(m => MissionSettings.MissionBlacklist.All(b => b.ToLower() != Logging.FilterPath(m.Name).ToLower())).ToList();
                     Logging.Log("Storyline", "Currently have  [" + missionsInJournal.Count() + "] storyline missions questor knows how to do and are not blacklisted", Logging.Yellow);
-
+                    missionsInJournal.ToList();
                     //missions = missions.Where(m => !Settings.Instance.MissionGreylist.Any(b => b.ToLower() == Logging.FilterPath(m.Name).ToLower()));
                     return missionsInJournal.FirstOrDefault();
                 }

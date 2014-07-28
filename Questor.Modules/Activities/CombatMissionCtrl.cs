@@ -111,6 +111,13 @@ namespace Questor.Modules.Activities
             if (Salvage.CreateSalvageBookmarks)
             {
                 if (Logging.DebugSalvage) Logging.Log("BookmarkPocketForSalvaging", "CreateSalvageBookmarks [" + Salvage.CreateSalvageBookmarks + "]", Logging.Debug);
+
+                if (MissionSettings.ThisMissionIsNotWorthSalvaging())
+                {
+                    Logging.Log("BookmarkPocketForSalvaging", "[" + MissionSettings.MissionName + "] is a mission not worth salvaging, skipping salvage bookmark creation", Logging.Debug);
+                    return true;
+                }
+                
                 // Nothing to loot
                 if (Cache.Instance.UnlootedContainers.Count() < Salvage.MinimumWreckCount)
                 {

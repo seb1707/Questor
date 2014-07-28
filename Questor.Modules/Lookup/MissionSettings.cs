@@ -234,6 +234,33 @@ namespace Questor.Modules.Lookup
         
         public static int MissionsThisSession = 0;
         
+        public static bool ThisMissionIsNotWorthSalvaging()
+        {
+            if (MissionSettings.MissionName != null)
+            {
+                if (MissionSettings.MissionName.Contains("Attack of the Drones"))
+                {
+                    Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
+                    return true;
+                }
+
+                if (MissionSettings.MissionName.Contains("Infiltrated Outposts"))
+                {
+                    Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
+                    return true;
+                }
+
+                if (MissionSettings.MissionName.Contains("Rogue Drone harassment"))
+                {
+                    Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
+                    return true;
+                }
+
+                return false;
+            }
+
+            return false;
+        }
 
         /// <summary>
         ///   Returns the first mission bookmark that starts with a certain string

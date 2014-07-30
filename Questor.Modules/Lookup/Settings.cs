@@ -66,9 +66,6 @@ namespace Questor.Modules.Lookup
         public bool QuestorSettingsExists = true;
         public bool QuestorManagerExists = true;
 
-        public string characterNameForLogs = "NoCharacterNameDefinedYet";
-            
-        
         public string TargetSelectionMethod { get; set; }
         public bool DetailedCurrentTargetHealthLogging { get; set; }
         public bool DefendWhileTraveling { get; set; }
@@ -261,19 +258,6 @@ namespace Questor.Modules.Lookup
         {
             try
             {
-                if (!String.IsNullOrEmpty(Settings.Instance.CharacterName))
-                {
-                    characterNameForLogs = Logging.FilterPath(Settings.Instance.CharacterName);
-                }
-                else if (!string.IsNullOrEmpty(CharacterName))
-                {
-                    characterNameForLogs = Logging.FilterPath(CharacterName);
-                }
-                else
-                {
-                    characterNameForLogs = "UnknownCharacterName";
-                }
-
                 Settings.Instance.CommonSettingsFileName = (string)CharacterSettingsXml.Element("commonSettingsFileName") ?? "common.xml";
                 Settings.Instance.CommonSettingsPath = System.IO.Path.Combine(Settings.Instance.Path, Settings.Instance.CommonSettingsFileName);
 
@@ -1106,7 +1090,7 @@ namespace Questor.Modules.Lookup
                 // Enable / Disable the different types of logging that are available
                 //
                 Logging.InnerspaceGeneratedConsoleLog = (bool?)CharacterSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? (bool?)CommonSettingsXml.Element("innerspaceGeneratedConsoleLog") ?? false; // save the innerspace generated console log to file
-                Logging.SaveConsoleLog = (bool?)CharacterSettingsXml.Element("saveLog") ?? (bool?)CommonSettingsXml.Element("saveLog") ?? true; // save the console log to file
+                //Logging.SaveConsoleLog = (bool?)CharacterSettingsXml.Element("saveLog") ?? (bool?)CommonSettingsXml.Element("saveLog") ?? true; // save the console log to file
                 Logging.SaveLogRedacted = (bool?)CharacterSettingsXml.Element("saveLogRedacted") ?? (bool?)CommonSettingsXml.Element("saveLogRedacted") ?? true; // save the console log redacted to file
                 Statistics.SessionsLog = (bool?)CharacterSettingsXml.Element("SessionsLog") ?? (bool?)CommonSettingsXml.Element("SessionsLog") ?? true;
                 Statistics.DroneStatsLog = (bool?)CharacterSettingsXml.Element("DroneStatsLog") ?? (bool?)CommonSettingsXml.Element("DroneStatsLog") ?? true;
@@ -1153,7 +1137,7 @@ namespace Questor.Modules.Lookup
                 // number of days of console logs to keep (anything older will be deleted on startup)
                 //
                 Logging.ConsoleLogDaysOfLogsToKeep = (int?)CharacterSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? (int?)CommonSettingsXml.Element("consoleLogDaysOfLogsToKeep") ?? 14;
-                Logging.tryToLogToFile = (bool?)CharacterSettingsXml.Element("tryToLogToFile") ?? (bool?)CommonSettingsXml.Element("tryToLogToFile") ?? true;
+                //Logging.tryToLogToFile = (bool?)CharacterSettingsXml.Element("tryToLogToFile") ?? (bool?)CommonSettingsXml.Element("tryToLogToFile") ?? true;
 
                 Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
                 Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
@@ -1355,7 +1339,7 @@ namespace Questor.Modules.Lookup
 
                 // Console Log Settings
                 //
-                Logging.SaveConsoleLog = true; // save the console log to file
+                //Logging.SaveConsoleLog = true; // save the console log to file
                 MaxLineConsole = 1000;
                 //
                 // Agent Standings and Mission Settings
@@ -1719,45 +1703,28 @@ namespace Questor.Modules.Lookup
                 }
             }
 
-            //"-RandomName-" + Cache.Instance.RandomNumber(1,500) + "-of-500"
-            if (characterNameForLogs == "AtLoginScreenNoCharactersLoggedInYet")
-            {
-                characterNameForLogs = characterNameForLogs + "-randomName-" + RandomNumber(1, 500) + "-of-500";
-            }
-
-            //
-            // Log location and log names defined here
-            //
-            Logging.SessionDataCachePath = Logging.PathToCurrentDirectory + "\\SessionDataCache\\" + characterNameForLogs + "\\";
-            Logging.Logpath = Logging.PathToCurrentDirectory + "\\log\\" + characterNameForLogs + "\\";
-
-            //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
-            Logging.ConsoleLogPath = System.IO.Path.Combine(Logging.Logpath, "Console\\");
-            Logging.ConsoleLogFile = System.IO.Path.Combine(Logging.ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + characterNameForLogs + "-" + "console" + ".log");
-            Logging.ConsoleLogPathRedacted = System.IO.Path.Combine(Logging.Logpath, "Console\\");
-            Logging.ConsoleLogFileRedacted = System.IO.Path.Combine(Logging.ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + "redacted" + "-" + "console" + ".log");
             Statistics.SessionsLogPath = Logging.Logpath;
-            Statistics.SessionsLogFile = System.IO.Path.Combine(Statistics.SessionsLogPath, characterNameForLogs + ".Sessions.log");
+            Statistics.SessionsLogFile = System.IO.Path.Combine(Statistics.SessionsLogPath, Logging.characterNameForLogs + ".Sessions.log");
             Statistics.DroneStatsLogPath = Logging.Logpath;
-            Statistics.DroneStatslogFile = System.IO.Path.Combine(Statistics.DroneStatsLogPath, characterNameForLogs + ".DroneStats.log");
+            Statistics.DroneStatslogFile = System.IO.Path.Combine(Statistics.DroneStatsLogPath, Logging.characterNameForLogs + ".DroneStats.log");
             Statistics.VolleyStatsLogPath = System.IO.Path.Combine(Logging.Logpath, "VolleyStats\\");
-            Statistics.VolleyStatslogFile = System.IO.Path.Combine(Statistics.VolleyStatsLogPath, characterNameForLogs + ".VolleyStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
+            Statistics.VolleyStatslogFile = System.IO.Path.Combine(Statistics.VolleyStatsLogPath, Logging.characterNameForLogs + ".VolleyStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
             Statistics.WindowStatsLogPath = System.IO.Path.Combine(Logging.Logpath, "WindowStats\\");
-            Statistics.WindowStatslogFile = System.IO.Path.Combine(Statistics.WindowStatsLogPath, characterNameForLogs + ".WindowStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
+            Statistics.WindowStatslogFile = System.IO.Path.Combine(Statistics.WindowStatsLogPath, Logging.characterNameForLogs + ".WindowStats-DayOfYear[" + DateTime.UtcNow.DayOfYear + "].log");
             Statistics.WreckLootStatisticsPath = Logging.Logpath;
-            Statistics.WreckLootStatisticsFile = System.IO.Path.Combine(Statistics.WreckLootStatisticsPath, characterNameForLogs + ".WreckLootStatisticsDump.log");
+            Statistics.WreckLootStatisticsFile = System.IO.Path.Combine(Statistics.WreckLootStatisticsPath, Logging.characterNameForLogs + ".WreckLootStatisticsDump.log");
             Statistics.MissionStats1LogPath = System.IO.Path.Combine(Logging.Logpath, "MissionStats\\");
-            Statistics.MissionStats1LogFile = System.IO.Path.Combine(Statistics.MissionStats1LogPath, characterNameForLogs + ".Statistics.log");
+            Statistics.MissionStats1LogFile = System.IO.Path.Combine(Statistics.MissionStats1LogPath, Logging.characterNameForLogs + ".Statistics.log");
             Statistics.MissionStats2LogPath = System.IO.Path.Combine(Logging.Logpath, "MissionStats\\");
-            Statistics.MissionStats2LogFile = System.IO.Path.Combine(Statistics.MissionStats2LogPath, characterNameForLogs + ".DatedStatistics.log");
+            Statistics.MissionStats2LogFile = System.IO.Path.Combine(Statistics.MissionStats2LogPath, Logging.characterNameForLogs + ".DatedStatistics.log");
             Statistics.MissionStats3LogPath = System.IO.Path.Combine(Logging.Logpath, "MissionStats\\");
-            Statistics.MissionStats3LogFile = System.IO.Path.Combine(Statistics.MissionStats3LogPath, characterNameForLogs + ".CustomDatedStatistics.csv");
+            Statistics.MissionStats3LogFile = System.IO.Path.Combine(Statistics.MissionStats3LogPath, Logging.characterNameForLogs + ".CustomDatedStatistics.csv");
             Statistics.MissionDungeonIdLogPath = System.IO.Path.Combine(Logging.Logpath, "MissionStats\\");
-            Statistics.MissionDungeonIdLogFile = System.IO.Path.Combine(Statistics.MissionDungeonIdLogPath, characterNameForLogs + "Mission-DungeonId-list.csv");
+            Statistics.MissionDungeonIdLogFile = System.IO.Path.Combine(Statistics.MissionDungeonIdLogPath, Logging.characterNameForLogs + "Mission-DungeonId-list.csv");
             Statistics.PocketStatisticsPath = System.IO.Path.Combine(Logging.Logpath, "PocketStats\\");
-            Statistics.PocketStatisticsFile = System.IO.Path.Combine(Statistics.PocketStatisticsPath, characterNameForLogs + "pocketstats-combined.csv");
+            Statistics.PocketStatisticsFile = System.IO.Path.Combine(Statistics.PocketStatisticsPath, Logging.characterNameForLogs + "pocketstats-combined.csv");
             Statistics.PocketObjectStatisticsPath = System.IO.Path.Combine(Logging.Logpath, "PocketObjectStats\\");
-            Statistics.PocketObjectStatisticsFile = System.IO.Path.Combine(Statistics.PocketObjectStatisticsPath, characterNameForLogs + "PocketObjectStats-combined.csv");
+            Statistics.PocketObjectStatisticsFile = System.IO.Path.Combine(Statistics.PocketObjectStatisticsPath, Logging.characterNameForLogs + "PocketObjectStats-combined.csv");
             Statistics.MissionDetailsHtmlPath = System.IO.Path.Combine(Logging.Logpath, "MissionDetailsHTML\\");
 
             try

@@ -457,7 +457,7 @@ namespace Questor.Modules.Logging
                         Directory.CreateDirectory(VolleyStatsLogPath);
                     }
 
-                    VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, Settings.Instance.characterNameForLogs + ".VolleyStats[" + DateTime.UtcNow.DayOfYear + "].log");
+                    VolleyStatslogFile = System.IO.Path.Combine(VolleyStatsLogPath, Logging.characterNameForLogs + ".VolleyStats[" + DateTime.UtcNow.DayOfYear + "].log");
 
                     if (!File.Exists(VolleyStatslogFile))
                     {

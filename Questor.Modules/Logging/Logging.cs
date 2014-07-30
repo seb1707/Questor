@@ -8,6 +8,8 @@
 //   </copyright>
 // -------------------------------------------------------------------------------
 
+using Questor.Modules.Lookup;
+
 namespace Questor.Modules.Logging
 {
     using System;
@@ -15,28 +17,18 @@ namespace Questor.Modules.Logging
     using System.Drawing;
     using System.IO;
     using System.Reflection;
+    using System.Runtime.InteropServices;
     using System.Threading;
     using System.Windows.Forms;
-    //using Questor;
-    //using Questor.Modules.Caching;
-    //using Questor.Modules.Lookup;
     using InnerSpaceAPI;
     using LavishScriptAPI;
 
     public static class Logging
     {
-        public static int LoggingInstances = 0;
-
         static Logging()
         {
-            Interlocked.Increment(ref LoggingInstances);
             Logging.PathToCurrentDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         }
-
-        //~Logging()
-        //{
-        //    Interlocked.Decrement(ref LoggingInstances);
-        //}
 
         public static string PathToCurrentDirectory;
         public static bool DebugMaintainConsoleLogs { get; set; }
@@ -61,13 +53,9 @@ namespace Questor.Modules.Logging
 
         public static string CharacterSettingsPath;
 
-        public static bool tryToLogToFile = true;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
-        //public static List<string> _QuestorParamaters;
 
         private static string colorLogLine;
         private static string plainLogLine;
-        //private static string ConsoleLogText;
-        public static bool SaveConsoleLog;  //we should set this to a sane value (via get { blah } when we are pre-login.... 
         public static bool ConsoleLogOpened = false;
         public static string ExtConsole { get; set; }
         //public static string ConsoleLog { get; set; }
@@ -94,13 +82,52 @@ namespace Questor.Modules.Logging
         //
         public static int ConsoleLogDaysOfLogsToKeep { get; set; }
 
+        private static string _characterNameForLogs;
+        public static string characterNameForLogs
+        {
+            get
+            {
+                if (String.IsNullOrEmpty(_characterNameForLogs))
+                {
+                    if (String.IsNullOrEmpty(Logging.MyCharacterName))
+                    {
+                        if (String.IsNullOrEmpty(Settings.Instance.CharacterName))
+                        {
+                            return "_PreLogin-UnknownCharacterName_";
+                        }
+
+                        return Logging.FilterPath(Settings.Instance.CharacterName);
+                    }
+
+                    return Logging.FilterPath(Logging.MyCharacterName);
+                }
+
+                return _characterNameForLogs;
+            }
+            set
+            {
+                _characterNameForLogs = value;
+            }
+        }
 
         //public  void Log(string line)
         //public static void Log(string module, string line, string color = Logging.White)
-        public static void Log(string module, string line, string color, bool verbose = false)
+        public static void Log(string DescriptionOfWhere, string line, string color, bool verbose = false)
         {
             try
             {
+                //
+                // Log location and log names defined here
+                //
+                Logging.SessionDataCachePath = Logging.PathToCurrentDirectory + "\\SessionDataCache\\" + characterNameForLogs + "\\";
+                Logging.Logpath = Logging.PathToCurrentDirectory + "\\log\\" + characterNameForLogs + "\\";
+
+                //logpath_s = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\log\\";
+                Logging.ConsoleLogPath = System.IO.Path.Combine(Logging.Logpath, "Console\\");
+                Logging.ConsoleLogFile = System.IO.Path.Combine(Logging.ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + characterNameForLogs + "-" + "console" + ".log");
+                Logging.ConsoleLogPathRedacted = System.IO.Path.Combine(Logging.Logpath, "Console\\");
+                Logging.ConsoleLogFileRedacted = System.IO.Path.Combine(Logging.ConsoleLogPath, string.Format("{0:MM-dd-yyyy}", DateTime.Today) + "-" + "redacted" + "-" + "console" + ".log");
+
                 DateTimeForLogs = DateTime.Now;
 
                 if (verbose) //tons of info
@@ -109,23 +136,20 @@ namespace Questor.Modules.Logging
                     // verbose text logging - with line numbers, filenames and Methods listed ON EVERY LOGGING LINE - this is ALOT more detail
                     //
                     System.Diagnostics.StackFrame sf = new System.Diagnostics.StackFrame(1, true);
-                    module += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
+                    DescriptionOfWhere += "-[line" + sf.GetFileLineNumber().ToString() + "]in[" + System.IO.Path.GetFileName(sf.GetFileName()) + "][" + sf.GetMethod().Name + "]";
                 }
 
                 colorLogLine = line;
-                Logging.redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + module + Logging.Orange + "] " + color + FilterSensitiveInfo(colorLogLine));  //In memory Console Log with sensitive info redacted
+                Logging.redactedColorLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, Logging.Orange + "[" + Logging.Yellow + DescriptionOfWhere + Logging.Orange + "] " + color + FilterSensitiveInfo(colorLogLine));  //In memory Console Log with sensitive info redacted
                 
                 plainLogLine = FilterColorsFromLogs(line);
-
-                Logging.redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + module + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
-
+                Logging.redactedPlainLogLine = String.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "[" + DescriptionOfWhere + "] " + FilterSensitiveInfo(plainLogLine) + "\r\n");  //In memory Console Log with sensitive info redacted
                 Logging.ExtConsole = Logging.redactedPlainLogLine;
                 
                 //
-                // Innerspace Console logging
+                // Log To Screen
                 //
-                //Logging.UseInnerspace = true;
-                if (Logging.UseInnerspace)
+                if (Logging.UseInnerspace) //Write logging entry to the Innerspace Console window
                 {
                     InnerSpace.Echo(Logging.redactedColorLogLine);
                 }
@@ -133,71 +157,85 @@ namespace Questor.Modules.Logging
                 {
                     Console.Write(Logging.redactedPlainLogLine);
                 }
-                
-                if (Logging.tryToLogToFile)
+
+                //
+                // Log To File
+                //
+                if (!Logging.ConsoleLogOpened)
                 {
-                    if (Logging.SaveConsoleLog)//(Settings.Instance.SaveConsoleLog)
-                    {
-                        if (!Logging.ConsoleLogOpened)
-                        {
-                            //
-                            // begin logging to file
-                            //
-                            if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
-                            {
-                                if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
-                                {
-                                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
-                                    LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
-                                }
-
-                                if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
-                                {
-                                    Directory.CreateDirectory(Logging.ConsoleLogPath);
-                                    if (Directory.Exists(Logging.ConsoleLogPath))
-                                    {
-                                        Logging.ConsoleLogOpened = true;
-                                    }
-                                    else
-                                    {
-                                        if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
-                                    }
-                                }
-                                else
-                                {
-                                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, colorLogLine));
-                                }
-                            }
-                        }
-
-                        if (Logging.ConsoleLogOpened)
-                        {
-                            //
-                            // log file ready: add next logging entry...
-                            //
-                            //
-                            // normal text logging
-                            //
-                            if (Logging.ConsoleLogFile != null && !verbose) //normal
-                            {
-                                File.AppendAllText(Logging.ConsoleLogFile, Logging.redactedPlainLogLine); //Write In Memory Console log to File
-                            }
-
-                            //
-                            // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
-                            //
-                            if (Logging.ConsoleLogFileRedacted != null)
-                            {
-                                File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedPlainLogLine);               //Write In Memory Console log to File
-                            }
-                        }
-                    }
+                    PrepareConsoleLog();    
+                }
+                
+                if (Logging.ConsoleLogOpened)
+                {
+                    WriteToConsoleLog();
                 }
             }
             catch (Exception exception)
             {
-                BasicLog(module, exception.Message);
+                BasicLog(DescriptionOfWhere, exception.Message);
             }
+        }
+
+        private static bool PrepareConsoleLog()
+        {
+            //
+            // begin logging to file
+            //
+            if (Logging.ConsoleLogPath != null && Logging.ConsoleLogFile != null)
+            {
+                if (Logging.InnerspaceGeneratedConsoleLog && Logging.UseInnerspace)
+                {
+                    InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "log " + Logging.ConsoleLogFile + "-innerspace-generated.log"));
+                    LavishScript.ExecuteCommand("log " + Logging.ConsoleLogFile + "-innerspace-generated.log");
+                }
+
+                if (!string.IsNullOrEmpty(Logging.ConsoleLogFile))
+                {
+                    Directory.CreateDirectory(Logging.ConsoleLogPath);
+                    if (Directory.Exists(Logging.ConsoleLogPath))
+                    {
+                        Logging.ConsoleLogOpened = true;
+                        return true;
+                    }
+                    
+                    if (Logging.UseInnerspace) InnerSpace.Echo(string.Format("{0:HH:mm:ss} {1}", DateTimeForLogs, "Logging: Unable to find (or create): " + Logging.ConsoleLogPath));
+                }
+
+                //
+                // manually echo an error here?
+                //
+                return false;
+            }
+
+            //
+            // manually echo an error here?
+            //
+            return false;
+        }
+
+        private static void WriteToConsoleLog()
+        {
+            //
+            // log file ready: add next logging entry...
+            //
+            //
+            // normal text logging
+            //
+            if (Logging.ConsoleLogFile != null) //normal
+            {
+                File.AppendAllText(Logging.ConsoleLogFile, Logging.redactedPlainLogLine); //Write In Memory Console log entry to File
+            }
+
+            //
+            // redacted text logging - sensitive info removed so you can generally paste the contents of this log publicly w/o fear of easily exposing user identifiable info
+            //
+            if (Logging.ConsoleLogFileRedacted != null)
+            {
+                File.AppendAllText(Logging.ConsoleLogFileRedacted, Logging.redactedPlainLogLine); //Write In Memory Console log entry to File
+            }
+
+            return;
         }
 
         public static void BasicLog(string module, string logmessage)
@@ -205,7 +243,7 @@ namespace Questor.Modules.Logging
             Console.WriteLine("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage);
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFileRedacted != null)
             {
-                if (Directory.Exists(Logging.ConsoleLogPathRedacted))
+                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFileRedacted)))
                 {
                     File.AppendAllText(Logging.ConsoleLogFileRedacted, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow,"[" + module + "] " + logmessage));
                 }
@@ -213,7 +251,7 @@ namespace Questor.Modules.Logging
 
             if (Logging.SaveLogRedacted && Logging.ConsoleLogFile != null)
             {
-                if (Directory.Exists(Logging.ConsoleLogPath))
+                if (Directory.Exists(Path.GetDirectoryName(Logging.ConsoleLogFile)))
                 {
                     File.AppendAllText(Logging.ConsoleLogFile, string.Format("{0:HH:mm:ss} {1}", DateTime.UtcNow, "[" + module + "] " + logmessage));
                 }
@@ -222,6 +260,12 @@ namespace Questor.Modules.Logging
 
         //path = path.Replace(Environment.CommandLine, "");
         //path = path.Replace(Environment.GetCommandLineArgs(), "");
+
+        public static void InvalidateCache()
+        {
+            Logging._characterNameForLogs = string.Empty;
+            return;
+        }
 
         public static string FilterSensitiveInfo(string line)
         {
@@ -458,18 +502,54 @@ namespace Questor.Modules.Logging
             }
         }
 
+        public static void ShowConsoleWindow()
+        {
+            Logging.Log("AdaptEVE", "Showing Console Window", Logging.White);
+            IntPtr handle = GetConsoleWindow();
+            if (handle == IntPtr.Zero)
+            {
+                AllocConsole();
+            }
+            else
+            {
+                ShowWindow(handle, SW_SHOW);
+            }
+        }
+
+        public static void HideConsoleWindow()
+        {
+            Logging.Log("AdaptEVE", "Hiding Console Window", Logging.White);
+            IntPtr handle = GetConsoleWindow();
+            ShowWindow(handle, SW_HIDE);
+        }
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool AllocConsole();
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetConsoleWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        const int SW_HIDE = 0;
+        const int SW_SHOW = 5;
+
         //
         // Debug Variables
         //
         public static bool DebugActivateGate { get; set; }
         public static bool DebugActivateWeapons { get; set; }
         public static bool DebugActivateBastion { get; set; }
+        public static bool DebugAdaptEVE { get; set; }
+        public static bool DebugAdaptEVEDLL { get; set; }
         public static bool DebugAddDronePriorityTarget { get; set; }
         public static bool DebugAddPrimaryWeaponPriorityTarget { get; set; }
         public static bool DebugAgentInteractionReplyToAgent { get; set; }
         public static bool DebugAllMissionsOnBlackList { get; set; }
         public static bool DebugAllMissionsOnGreyList { get; set; }
         public static bool DebugAmmo { get; set; }
+        public static bool DebugAppDomains { get; set; }
         public static bool DebugArm { get; set; }
         public static bool DebugAttachVSDebugger { get; set; }
         public static bool DebugAutoStart { get; set; }
@@ -531,6 +611,7 @@ namespace Questor.Modules.Logging
         public static bool DebugPotentialCombatTargets { get; set; }
         public static bool DebugPreferredPrimaryWeaponTarget { get; set; }
         public static bool DebugPreLogin { get; set; }
+        public static bool DebugQuestorLoader { get; set; }
         public static bool DebugQuestorManager { get; set; }
         public static bool DebugReloadAll { get; set; }
         public static bool DebugReloadorChangeAmmo { get; set; }

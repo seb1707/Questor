@@ -256,17 +256,13 @@ namespace Questor.Behaviors
                             if (Cache.Instance.InStation && (DateTime.UtcNow > _nextBookmarksrefresh))
                             {
                                 _nextBookmarksrefresh = DateTime.UtcNow.AddMinutes(Cache.Instance.RandomNumber(18, 24));
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Bookmark refresh in [" +
-                                               Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Bookmark refresh in [" + Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
                                 Cache.Instance.DirectEve.RefreshBookmarks();
                             }
                             else
                             {
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Bookmark refresh in [" +
-                                               Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
-
-                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Salvage Trip Scheduled in [" +
-                                               Math.Round(Time.Instance.NextSalvageTrip.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Bookmark refresh in [" + Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
+                                Logging.Log("DedicatedBookmarkSalvagerBehavior", "Next Salvage Trip Scheduled in [" + Math.Round(Time.Instance.NextSalvageTrip.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
                             }
                         }
 

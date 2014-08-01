@@ -1591,6 +1591,7 @@ namespace Questor.Modules.Actions
             }
 
             //if (!Cleanup.CloseInventoryWindows()) return false;
+            _States.CurrentArmState = ArmState.Done;
             return false;
         }
 

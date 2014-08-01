@@ -1035,7 +1035,7 @@ namespace Questor.Behaviors
                 if (Cache.Instance.InStation && (DateTime.UtcNow > _nextBookmarksrefresh))
                 {
                     _nextBookmarksrefresh = DateTime.UtcNow.AddMinutes(Cache.Instance.RandomNumber(2, 4));
-                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Next Bookmark refresh in [" + Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
+                    Logging.Log("CombatMissionsBehavior.BeginAftermissionSalvaging", "Refreshing Bookmarks Now: Next Bookmark refresh in [" + Math.Round(_nextBookmarksrefresh.Subtract(DateTime.UtcNow).TotalMinutes, 0) + "min]", Logging.White);
                     Cache.Instance.DirectEve.RefreshBookmarks();
                     return;
                 }

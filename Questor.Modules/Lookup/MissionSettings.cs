@@ -238,19 +238,19 @@ namespace Questor.Modules.Lookup
         {
             if (MissionSettings.MissionName != null)
             {
-                if (MissionSettings.MissionName.Contains("Attack of the Drones"))
+                if (MissionSettings.MissionName.ToLower().Contains("Attack of the Drones".ToLower()))
                 {
                     Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
                     return true;
                 }
 
-                if (MissionSettings.MissionName.Contains("Infiltrated Outposts"))
+                if (MissionSettings.MissionName.ToLower().Contains("Infiltrated Outposts".ToLower()))
                 {
                     Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
                     return true;
                 }
 
-                if (MissionSettings.MissionName.Contains("Rogue Drone harassment"))
+                if (MissionSettings.MissionName.ToLower().Contains("Rogue Drone Harassment".ToLower()))
                 {
                     Logging.Log("MissionSettings", "Do not salvage a drones mission as they are crap now", Logging.Purple);
                     return true;

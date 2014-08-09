@@ -210,16 +210,22 @@ namespace Questor.Modules.BackgroundTasks
                     //
                 }
                 
-                if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < MinimumCapacitorPct && Cache.Instance.ActiveShip.GroupId != 31)
+                if (Cache.Instance.InMission && Cache.Instance.ActiveShip.CapacitorPercentage < MinimumCapacitorPct)
                 {
-                    // Only check for cap-panic while in a mission, not while doing anything else
-                    Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
+                    if (Cache.Instance.ActiveShip.GroupId != (int) Group.Shuttle)
+                    {
+                        if (DateTime.UtcNow > Time.Instance.LastInWarp.AddSeconds(30))
+                        {
+                            // Only check for cap-panic while in a mission, not while doing anything else
+                            Logging.Log("Panic", "Start panicking, capacitor [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] below [" + MinimumCapacitorPct + "%] S[" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] A[" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] C[" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%]", Logging.Red);
 
-                    //Questor.panic_attempts_this_mission;
-                    Statistics.PanicAttemptsThisMission++;
-                    Statistics.PanicAttemptsThisPocket++;
-                    _States.CurrentPanicState = PanicState.StartPanicking;
-                    return true;
+                            //Questor.panic_attempts_this_mission;
+                            Statistics.PanicAttemptsThisMission++;
+                            Statistics.PanicAttemptsThisPocket++;
+                            _States.CurrentPanicState = PanicState.StartPanicking;
+                            return true;    
+                        }
+                    }
                 }
 
                 if (Cache.Instance.ActiveShip.ShieldPercentage < MinimumShieldPct)

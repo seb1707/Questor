@@ -517,7 +517,9 @@ namespace Questor.Modules.Caching
                 {
                     if (!IsActive) //it is not yet active, this click should activate it.
                     {
+                        _module.Click();
                         Time.Instance.LastActivatedTimeStamp[ItemId] = DateTime.UtcNow;
+                        return true;
                     }
 
                     if (Time.Instance.LastClickedTimeStamp != null) Time.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;

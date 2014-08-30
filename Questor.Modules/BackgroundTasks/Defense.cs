@@ -610,30 +610,36 @@ namespace Questor.Modules.BackgroundTasks
                                                                                    i.GroupId == (int) Group.CapacitorInjector || 
                                                                                    i.GroupId == (int) Group.ArmorRepairer))
             {
+                ModuleNumber++;
+                if (repairModule.IsActive)
+                {
+                    if (Logging.DebugDefense) Logging.Log("ActivateRepairModules", "[" + ModuleNumber + "][" + repairModule.TypeName + "] is currently Active, continue", Logging.Debug);
+                    continue;
+                }
+
                 if (repairModule.InLimboState)
                 {
-                    if (Logging.DebugDefense) Logging.Log("ActivateRepairModules", "repairModule named [" + repairModule.TypeName + "] is InLimboState, continue", Logging.Debug);
+                    if (Logging.DebugDefense) Logging.Log("ActivateRepairModules", "[" + ModuleNumber + "][" + repairModule.TypeName + "] is InLimboState, continue", Logging.Debug);
                     continue;
                 }
 
                 double perc;
                 double cap;
+                cap = Cache.Instance.ActiveShip.CapacitorPercentage;
+
                 if (repairModule.GroupId == (int)Group.ShieldBoosters || 
                     repairModule.GroupId == (int)Group.AncillaryShieldBooster || 
                     repairModule.GroupId == (int)Group.CapacitorInjector)
                 {
-                    ModuleNumber++;
-                    perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
+                    perc = Cache.Instance.ActiveShip.ShieldPercentage;                    
                 }
                 else if (repairModule.GroupId == (int) Group.ArmorRepairer)
                 {
-                    ModuleNumber++;
                     perc = Cache.Instance.ActiveShip.ArmorPercentage;
-                    cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else
                 {
+                    //we should never get here. All rep modules will be either shield or armor rep oriented... if we do, move on to the next module.
                     continue;
                 }
 
@@ -652,8 +658,9 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
                 }
+                
                 // Shield/Armor recharging
-                else if (!repairModule.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
+                if (!repairModule.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
                 {
                     if (Cache.Instance.ActiveShip.ShieldPercentage < Statistics.LowestShieldPercentageThisPocket)
                     {
@@ -1012,7 +1019,13 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (Logging.DebugDefense) Logging.Log("Defense", "Starting ActivateRepairModules();", Logging.White);
+            int targetedByCount = 0;
+            if (Combat.TargetedBy.Any())
+            {
+                targetedByCount = Combat.TargetedBy.Count();    
+            }
+
+            if (Logging.DebugDefense) Logging.Log("Defense", "Starting ActivateRepairModules() Current Health Stats: Shields: [" + Math.Round(Cache.Instance.ActiveShip.ShieldPercentage, 0) + "%] Armor: [" + Math.Round(Cache.Instance.ActiveShip.ArmorPercentage, 0) + "%] Cap: [" + Math.Round(Cache.Instance.ActiveShip.CapacitorPercentage, 0) + "%] We are TargetedBy [" + targetedByCount + "] entities", Logging.White);
             ActivateRepairModules();
             if (Logging.DebugDefense) Logging.Log("Defense", "Starting ActivateOnce();", Logging.White);
             ActivateOnce();

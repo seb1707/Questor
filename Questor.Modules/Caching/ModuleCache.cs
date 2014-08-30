@@ -521,7 +521,7 @@ namespace Questor.Modules.Caching
                     }
 
                     if (Time.Instance.LastClickedTimeStamp != null) Time.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;
-                    return _module.Click();
+                    return true;
                 }
 
                 return false;

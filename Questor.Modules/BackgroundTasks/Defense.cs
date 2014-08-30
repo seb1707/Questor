@@ -9,6 +9,7 @@
 // -------------------------------------------------------------------------------
 
 
+using System.Runtime.Remoting.Messaging;
 using Questor.Modules.Actions;
 
 namespace Questor.Modules.BackgroundTasks
@@ -609,43 +610,49 @@ namespace Questor.Modules.BackgroundTasks
                 return;
 
             ModuleNumber = 0;
-            foreach (ModuleCache module in Cache.Instance.Modules)
+            foreach (ModuleCache repairModule in Cache.Instance.Modules)
             {
-                if (module.InLimboState)
+                if (repairModule.InLimboState)
                     continue;
 
                 double perc;
                 double cap;
-                if (module.GroupId == (int)Group.ShieldBoosters || 
-                    module.GroupId == (int)Group.AncillaryShieldBooster || 
-                    module.GroupId == (int)Group.CapacitorInjector)
+                if (repairModule.GroupId == (int)Group.ShieldBoosters || 
+                    repairModule.GroupId == (int)Group.AncillaryShieldBooster || 
+                    repairModule.GroupId == (int)Group.CapacitorInjector)
                 {
                     ModuleNumber++;
                     perc = Cache.Instance.ActiveShip.ShieldPercentage;
                     cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
-                else if (module.GroupId == (int)Group.ArmorRepairer)
+                else if (repairModule.GroupId == (int) Group.ArmorRepairer)
                 {
                     ModuleNumber++;
                     perc = Cache.Instance.ActiveShip.ArmorPercentage;
                     cap = Cache.Instance.ActiveShip.CapacitorPercentage;
                 }
                 else
+                {
                     continue;
+                }
 
                 // Module is either for Cap or Tank recharging, so we look at these separated (or random things will happen, like cap recharging when we need to repair but cap is near max) 
                 // Cap recharging
                 bool inCombat = Cache.Instance.EntitiesOnGrid.Any(i => i.IsTargetedBy) || Combat.PotentialCombatTargets.Any();
-                if (!module.IsActive && inCombat && cap < InjectCapPerc && module.GroupId == (int)Group.CapacitorInjector && module.CurrentCharges > 0)
+                if (!repairModule.IsActive && inCombat && cap < InjectCapPerc && repairModule.GroupId == (int)Group.CapacitorInjector && repairModule.CurrentCharges > 0)
                 {
-                    if (module.Click())
+                    //
+                    // Activate Cap Injector
+                    //
+                    if (repairModule.Click())
                     {
                         perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                        Logging.Log("Defense", "Cap: [" + Math.Round(cap, 0) + "%] Capacitor Booster: [" + ModuleNumber + "] activated", Logging.White);    
+                        Logging.Log("Defense", "Cap: [" + Math.Round(cap, 0) + "%] Capacitor Booster: [" + ModuleNumber + "] activated", Logging.White);
+                        return;
                     }
                 }
                 // Shield/Armor recharging
-                else if (!module.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
+                else if (!repairModule.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
                 {
                     if (Cache.Instance.ActiveShip.ShieldPercentage < Statistics.LowestShieldPercentageThisPocket)
                     {
@@ -653,75 +660,96 @@ namespace Questor.Modules.BackgroundTasks
                         Statistics.LowestShieldPercentageThisMission = Cache.Instance.ActiveShip.ShieldPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
+
                     if (Cache.Instance.ActiveShip.ArmorPercentage < Statistics.LowestArmorPercentageThisPocket)
                     {
                         Statistics.LowestArmorPercentageThisPocket = Cache.Instance.ActiveShip.ArmorPercentage;
                         Statistics.LowestArmorPercentageThisMission = Cache.Instance.ActiveShip.ArmorPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
+
                     if (Cache.Instance.ActiveShip.CapacitorPercentage < Statistics.LowestCapacitorPercentageThisPocket)
                     {
                         Statistics.LowestCapacitorPercentageThisPocket = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Statistics.LowestCapacitorPercentageThisMission = Cache.Instance.ActiveShip.CapacitorPercentage;
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
                     }
-                    if ((Cache.Instance.UnlootedContainers != null) && Statistics.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
-                        Statistics.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
 
-                    if (module.GroupId == (int)Group.AncillaryShieldBooster) //this needs to have a huge delay and it currently does not.
+                    if ((Cache.Instance.UnlootedContainers != null) && Statistics.WrecksThisPocket != Cache.Instance.UnlootedContainers.Count())
                     {
-                        if (module.CurrentCharges > 0)
+                        Statistics.WrecksThisPocket = Cache.Instance.UnlootedContainers.Count();
+                    }
+
+                    if (repairModule.GroupId == (int)Group.AncillaryShieldBooster) //this needs to have a huge delay and it currently does not.
+                    {
+                        if (repairModule.CurrentCharges > 0)
                         {
-                            if (module.Click())
+                            //
+                            // Activate Ancillary Shield Booster
+                            //
+                            if (repairModule.Click())
                             {
-                                return;    
+                                Logging.Log("Defense", "Shield: [" + Math.Round(perc, 0) + "%] Ancillary Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
+                                Time.Instance.StartedBoosting = DateTime.UtcNow;
+                                Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                return;
                             }
                         }
                     }
 
                     //
-                    // if capacitor is really really low, do not make it worse
+                    // if capacitor is really very low, do not make it worse
                     //
-                    if (Cache.Instance.ActiveShip.Capacitor < 25)
-                        continue;
-
-                    if (Cache.Instance.ActiveShip.CapacitorPercentage < 3)
-                        continue;
-
-                    if (module.GroupId == (int) Group.ShieldBoosters || module.GroupId == (int) Group.ArmorRepairer)
+                    if (Cache.Instance.ActiveShip.Capacitor == 0 || Cache.Instance.ActiveShip.Capacitor < 25)
                     {
-                        if (module.Click())
+                        if (Logging.DebugDefense) Logging.Log("Defense", "if (Cache.Instance.ActiveShip.Capacitor [" + Cache.Instance.ActiveShip.Capacitor + "] < 25)", Logging.Debug);
+                        continue;
+                    }
+
+                    if (Cache.Instance.ActiveShip.CapacitorPercentage == 0 || Cache.Instance.ActiveShip.CapacitorPercentage < 3)
+                    {
+                        if (Logging.DebugDefense) Logging.Log("Defense", "if (Cache.Instance.ActiveShip.CapacitorPercentage [" + Cache.Instance.ActiveShip.CapacitorPercentage + "] < 3)", Logging.Debug);
+                        continue;
+                    }
+
+                    if (repairModule.GroupId == (int) Group.ShieldBoosters || repairModule.GroupId == (int) Group.ArmorRepairer)
+                    {
+                        //
+                        // Activate Repair Module (shields or armor)
+                        //
+                        if (repairModule.Click())
                         {
+                            if (repairModule.GroupId == (int)Group.ShieldBoosters || repairModule.GroupId == (int)Group.AncillaryShieldBooster)
+                            {
+                                perc = Cache.Instance.ActiveShip.ShieldPercentage;
+                                Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
+                                if (Cache.Instance.ActiveShip.ArmorPercentage * 100 < 100)
+                                {
+                                    Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
+                                }
+                            }
+                            else if (repairModule.GroupId == (int)Group.ArmorRepairer)
+                            {
+                                perc = Cache.Instance.ActiveShip.ArmorPercentage;
+                                Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
+                                int aggressiveEntities = Cache.Instance.EntitiesOnGrid.Count(e => e.IsAttacking && e.IsPlayer);
+                                if (aggressiveEntities == 0 && Cache.Instance.EntitiesOnGrid.Count(e => e.IsStation) == 1)
+                                {
+                                    Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
+                                    Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds", Logging.White);
+                                }
+                                if (Cache.Instance.ActiveShip.StructurePercentage * 100 < 100)
+                                {
+                                    Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
+                                }
+                            }
+                            
                             Time.Instance.StartedBoosting = DateTime.UtcNow;
                             Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                            return;
                         }
                     }
                     
-                    if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.AncillaryShieldBooster)
-                    {
-                        perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                        Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
-                        if (Cache.Instance.ActiveShip.ArmorPercentage * 100 < 100)
-                        {
-                            Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
-                        }
-                    }
-                    else if (module.GroupId == (int)Group.ArmorRepairer)
-                    {
-                        perc = Cache.Instance.ActiveShip.ArmorPercentage;
-                        Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
-                        int aggressiveEntities = Cache.Instance.EntitiesOnGrid.Count(e => e.IsAttacking && e.IsPlayer);
-                        if (aggressiveEntities == 0 && Cache.Instance.EntitiesOnGrid.Count(e => e.IsStation) == 1)
-                        {
-                            Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(15);
-                            Logging.Log("Defense", "Repairing Armor outside station with no aggro (yet): delaying docking for [15]seconds", Logging.White);
-                        }
-                        if (Cache.Instance.ActiveShip.StructurePercentage * 100 < 100)
-                        {
-                            Arm.NeedRepair = true; //triggers repairing during panic recovery, and arm
-                        }
-                    }
-
                     //Logging.Log("LowestShieldPercentage(pocket) [ " + Cache.Instance.lowest_shield_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestArmorPercentage(pocket) [ " + Cache.Instance.lowest_armor_percentage_this_pocket + " ] ");
                     //Logging.Log("LowestCapacitorPercentage(pocket) [ " + Cache.Instance.lowest_capacitor_percentage_this_pocket + " ] ");
@@ -731,20 +759,23 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
-                if (module.IsActive && (perc >= DeactivateRepairModulesAtThisPerc || module.GroupId == (int)Group.CapacitorInjector))
+                if (repairModule.IsActive && (perc >= DeactivateRepairModulesAtThisPerc || repairModule.GroupId == (int)Group.CapacitorInjector))
                 {
-                    if (module.Click())
+                    //
+                    // Deactivate Module
+                    //
+                    if (repairModule.Click())
                     {
                         Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                         Statistics.RepairCycleTimeThisPocket = Statistics.RepairCycleTimeThisPocket + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
                         Statistics.RepairCycleTimeThisMission = Statistics.RepairCycleTimeThisMission + ((int)DateTime.UtcNow.Subtract(Time.Instance.StartedBoosting).TotalSeconds);
                         Time.Instance.LastKnownGoodConnectedTime = DateTime.UtcNow;
-                        if (module.GroupId == (int)Group.ShieldBoosters || module.GroupId == (int)Group.CapacitorInjector)
+                        if (repairModule.GroupId == (int)Group.ShieldBoosters || repairModule.GroupId == (int)Group.CapacitorInjector)
                         {
                             perc = Cache.Instance.ActiveShip.ShieldPercentage;
                             Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                         }
-                        else if (module.GroupId == (int)Group.ArmorRepairer)
+                        else if (repairModule.GroupId == (int)Group.ArmorRepairer)
                         {
                             perc = Cache.Instance.ActiveShip.ArmorPercentage;
                             Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);

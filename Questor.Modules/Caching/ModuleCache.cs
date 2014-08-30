@@ -475,14 +475,39 @@ namespace Questor.Modules.Caching
             try
             {
                 if (InLimboState || ClickCountThisFrame > 0)
+                {
+                    if (Logging.DebugDefense) Logging.Log("ModuleCache.Click", "if (InLimboState || ClickCountThisFrame > 0)", Logging.Debug);
                     return false;
+                }
+
+                if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(5))
+                {
+                    if (Logging.DebugDefense) Logging.Log("ModuleCache.Click", "if (DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(5))", Logging.Debug);
+                    return false;
+                }
+
+                if (DateTime.UtcNow < Time.Instance.NextActivateModules)
+                {
+                    if (Logging.DebugDefense) Logging.Log("ModuleCache.Click", "if (DateTime.UtcNow < Time.Instance.NextActivateModules)", Logging.Debug);
+                    return false;
+                }
 
                 if (Time.Instance.LastClickedTimeStamp != null && Time.Instance.LastClickedTimeStamp.ContainsKey(ItemId))
                 {
                     if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))
                     {
-                        //if (Logging.DebugEntityCache) Logging.Log("ModuleCache", "TypeName: [" + _module.TypeName + "] we last clicked this module less than 3 seconds ago, wait.", Logging.Debug);
+                        if (Logging.DebugDefense) Logging.Log("ModuleCache.Click", "if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(Settings.Instance.EnforcedDelayBetweenModuleClicks))", Logging.Debug);
                         return false;
+                    }
+
+                    if (_module.Duration != null)
+                    {
+                        double CycleTime = (double)_module.Duration + 500;
+                        if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(CycleTime))
+                        {
+                            if (Logging.DebugDefense) Logging.Log("ModuleCache.Click", "if (DateTime.UtcNow < Time.Instance.LastClickedTimeStamp[ItemId].AddMilliseconds(CycleTime))", Logging.Debug);
+                            return false;
+                        }
                     }
                 }
 

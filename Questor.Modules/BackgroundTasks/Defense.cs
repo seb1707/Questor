@@ -115,7 +115,7 @@ namespace Questor.Modules.BackgroundTasks
         private static void ActivateOnce()
         {
             //if (Logging.DebugLoadScripts) Logging.Log("Defense", "spam", Logging.White);
-            if (DateTime.UtcNow < Time.Instance.NextActivateSupportModules) //if we just did something wait a fraction of a second
+            if (DateTime.UtcNow < Time.Instance.NextActivateModules) //if we just did something wait a fraction of a second
                 return;
 
             ModuleNumber = 0;
@@ -155,14 +155,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -198,14 +198,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -233,14 +233,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -268,14 +268,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -303,14 +303,14 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(2);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(2);
                                         return;    
                                     }
                                 }
 
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline)
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -338,7 +338,7 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(500);
                                         return;    
                                     }
                                 }
@@ -346,7 +346,7 @@ namespace Questor.Modules.BackgroundTasks
                                 bool inCombat = Combat.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -374,7 +374,7 @@ namespace Questor.Modules.BackgroundTasks
                                 {
                                     if (module.Click())
                                     {
-                                        Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(500);
+                                        Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(500);
                                         return;    
                                     }
                                 }
@@ -382,7 +382,7 @@ namespace Questor.Modules.BackgroundTasks
                                 bool inCombat = Combat.TargetedBy.Any();
                                 if (module.IsActive || module.IsDeactivating || module.IsChangingAmmo || module.InLimboState || module.IsGoingOnline || !module.IsOnline || (inCombat && module.CurrentCharges > 0))
                                 {
-                                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                     ModuleNumber++;
                                     continue;
                                 }
@@ -405,7 +405,7 @@ namespace Questor.Modules.BackgroundTasks
                     }
                 }
                 ModuleNumber++;
-                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                 continue;
             }
 
@@ -426,7 +426,7 @@ namespace Questor.Modules.BackgroundTasks
 
                 ModuleNumber++;
 
-                if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] Module TypeID [" + module.TypeId + "] GroupId [" + module.GroupId + "] Found", Logging.Debug);
+                if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] Module TypeID [" + module.TypeId + "] GroupId [" + module.GroupId + "] Activatable [" + module.IsActivatable + "] Found", Logging.Debug);
                 if (!activate)
                 {
                     if (Logging.DebugDefense) Logging.Log("DefenseActivateOnce", "[" + ModuleNumber + "] is not activatable, proceed to next module", Logging.Debug);
@@ -465,7 +465,7 @@ namespace Questor.Modules.BackgroundTasks
                 else
                 {
                     //
-                    // if capacitor is really really low, do not make it worse
+                    // if capacitor is really low, do not make it worse
                     //
                     if (Cache.Instance.ActiveShip.Capacitor < 45)
                     {
@@ -495,7 +495,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 if (module.Click())
                 {
-                    Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
+                    Time.Instance.NextActivateModules = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                     if (Logging.DebugDefense) Logging.Log("Defense", "Defensive module activated: [" + ModuleNumber + "]", Logging.White);
                     return;    
                 }

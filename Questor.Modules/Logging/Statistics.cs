@@ -867,7 +867,7 @@ namespace Questor.Modules.Logging
                 }
             }
 
-            if (AgentLPRetrievalAttempts > 10)
+            if (AgentLPRetrievalAttempts > 5)
             {
                 Logging.Log("Statistics", "WriteMissionStatistics: We do not have loyalty points with the current agent yet, still -1, attempt # [" + AgentLPRetrievalAttempts + "] giving up", Logging.White);
                 AgentLPRetrievalAttempts = 0;

@@ -1989,13 +1989,13 @@
             this.greylistedmissionsdeclinedlbl.Name = "greylistedmissionsdeclinedlbl";
             this.greylistedmissionsdeclinedlbl.Size = new System.Drawing.Size(108, 13);
             this.greylistedmissionsdeclinedlbl.TabIndex = 13;
-            this.greylistedmissionsdeclinedlbl.Text = "Greylisted # Declined";
+            this.greylistedmissionsdeclinedlbl.Text = "GreyListed # Declined";
             // 
             // LastBlacklistedMissionDeclinedData
             // 
             this.LastBlacklistedMissionDeclinedData.AutoSize = true;
             this.LastBlacklistedMissionDeclinedData.Location = new System.Drawing.Point(582, 184);
-            this.LastBlacklistedMissionDeclinedData.Name = "LastBlacklistedMissionDeclinedData";
+            this.LastBlacklistedMissionDeclinedData.Name = "LastBlackListedMissionDeclinedData";
             this.LastBlacklistedMissionDeclinedData.Size = new System.Drawing.Size(24, 13);
             this.LastBlacklistedMissionDeclinedData.TabIndex = 12;
             this.LastBlacklistedMissionDeclinedData.Text = "n/a";
@@ -2004,7 +2004,7 @@
             // 
             this.LastGreylistedMissionDeclinedData.AutoSize = true;
             this.LastGreylistedMissionDeclinedData.Location = new System.Drawing.Point(581, 125);
-            this.LastGreylistedMissionDeclinedData.Name = "LastGreylistedMissionDeclinedData";
+            this.LastGreylistedMissionDeclinedData.Name = "LastGreyListedMissionDeclinedData";
             this.LastGreylistedMissionDeclinedData.Size = new System.Drawing.Size(24, 13);
             this.LastGreylistedMissionDeclinedData.TabIndex = 11;
             this.LastGreylistedMissionDeclinedData.Text = "n/a";
@@ -2013,19 +2013,19 @@
             // 
             this.LastBlacklistedMissionDeclinedlbl.AutoSize = true;
             this.LastBlacklistedMissionDeclinedlbl.Location = new System.Drawing.Point(462, 184);
-            this.LastBlacklistedMissionDeclinedlbl.Name = "LastBlacklistedMissionDeclinedlbl";
+            this.LastBlacklistedMissionDeclinedlbl.Name = "LastBlackListedMissionDeclinedlbl";
             this.LastBlacklistedMissionDeclinedlbl.Size = new System.Drawing.Size(114, 13);
             this.LastBlacklistedMissionDeclinedlbl.TabIndex = 10;
-            this.LastBlacklistedMissionDeclinedlbl.Text = "Last Blacklist Declined";
+            this.LastBlacklistedMissionDeclinedlbl.Text = "Last BlackList Declined";
             // 
             // LastGreylistedMissionDeclinedlbl
             // 
             this.LastGreylistedMissionDeclinedlbl.AutoSize = true;
             this.LastGreylistedMissionDeclinedlbl.Location = new System.Drawing.Point(466, 125);
-            this.LastGreylistedMissionDeclinedlbl.Name = "LastGreylistedMissionDeclinedlbl";
+            this.LastGreylistedMissionDeclinedlbl.Name = "LastGreyListedMissionDeclinedlbl";
             this.LastGreylistedMissionDeclinedlbl.Size = new System.Drawing.Size(109, 13);
             this.LastGreylistedMissionDeclinedlbl.TabIndex = 9;
-            this.LastGreylistedMissionDeclinedlbl.Text = "Last Greylist Declined";
+            this.LastGreylistedMissionDeclinedlbl.Text = "Last GreyList Declined";
             // 
             // MinAgentGreyListStandingsData
             // 

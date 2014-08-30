@@ -4973,7 +4973,7 @@ namespace Questor.Modules.Caching
                                 Time.Instance.WehaveMoved = DateTime.UtcNow.AddDays(-7);
                                 Time.Instance.NextJumpAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(8, 12));
                                 Time.Instance.NextTravelerAction = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
-                                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
+                                Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                                 return true;
                             }
 
@@ -5362,7 +5362,9 @@ namespace Questor.Modules.Caching
                                 _directEntity.Dock();
                                 Time.Instance.WehaveMoved = DateTime.UtcNow;
                                 Time.Instance.NextDockAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
+                                Time.Instance.NextApproachAction = DateTime.UtcNow.AddSeconds(Time.Instance.DockingDelay_seconds);
                                 Time.Instance.LastSessionChange = DateTime.UtcNow;
+                                Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(Time.Instance.TravelerJumpedGateNextCommandDelay_seconds);
                             //}
 
                             //Logging.Log("Dock", "[" + Name + "][" + Distance +"] is not in docking range, aborting docking request", Logging.Debug);

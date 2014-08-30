@@ -166,15 +166,15 @@ namespace Questor.Modules.Lookup
 
                 if (xmlElementGreyListSection != null)
                 {
-                    Logging.Log("Settings", "Loading Mission Greylist", Logging.White);
+                    Logging.Log("Settings", "Loading Mission GreyList", Logging.White);
                     int i = 1;
                     foreach (XElement GreylistedMission in xmlElementGreyListSection.Elements("mission"))
                     {
                         MissionGreylist.Add(Logging.FilterPath((string)GreylistedMission));
-                        if (Logging.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] Greylisted mission Name [" + Logging.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
+                        if (Logging.DebugGreyList) Logging.Log("Settings.LoadGreyList", "[" + i + "] GreyListed mission Name [" + Logging.FilterPath((string)GreylistedMission) + "]", Logging.Teal);
                         i++;
                     }
-                    Logging.Log("Settings", "        Mission Greylist now has [" + MissionGreylist.Count + "] entries", Logging.White);
+                    Logging.Log("Settings", "        Mission GreyList now has [" + MissionGreylist.Count + "] entries", Logging.White);
                 }
                 //}
             }

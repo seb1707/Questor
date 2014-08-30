@@ -158,7 +158,7 @@ namespace Questor.Modules.Activities
                     }
                 }
 
-                Time.Instance.NextActivateSupportModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
+                Time.Instance.NextActivateModules = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(2, 3));
 
                 // We are not yet in space, wait for it
                 return;

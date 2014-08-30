@@ -851,7 +851,7 @@ namespace Questor.Behaviors
                         if (Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId) != null)
                         {
                             Cache.Instance.MissionSolarSystem = Cache.Instance.DirectEve.Navigation.GetLocation(Traveler.Destination.SolarSystemId);
-                            Logging.Log("CombatMissionsBehavior", "MissionSolarSystem is [" + Cache.Instance.MissionSolarSystem + "]", Logging.White);
+                            Logging.Log("CombatMissionsBehavior", "MissionSolarSystem is [" + Cache.Instance.MissionSolarSystem.Name + "]", Logging.White);
                         }
                     }
                     else

@@ -2608,7 +2608,7 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (!Cache.Instance.InSpace && Cache.Instance.InStation)
+                    if (SafeToUseStationHangars() && !Cache.Instance.InSpace && Cache.Instance.InStation)
                     {
                         if (Cache.Instance._itemHangar == null)
                         {
@@ -2638,6 +2638,21 @@ namespace Questor.Modules.Caching
             }
 
             set { _itemHangar = value; }
+        }
+
+        public bool SafeToUseStationHangars()
+        {
+            if (DateTime.UtcNow < Time.Instance.NextDockAction.AddSeconds(10)) //yes we are adding 10 more seconds...
+            {
+                return false;
+            }
+
+            if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(15))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public bool ReadyItemsHangarSingleInstance(string module)
@@ -3070,7 +3085,7 @@ namespace Questor.Modules.Caching
                         return null;
                     }
 
-                    if (!Cache.Instance.InSpace && Cache.Instance.InStation)
+                    if (SafeToUseStationHangars() && !Cache.Instance.InSpace && Cache.Instance.InStation)
                     {
                         if (Cache.Instance._shipHangar == null)
                         {
@@ -3975,7 +3990,7 @@ namespace Questor.Modules.Caching
                     if (lootHangarWindow != null)
                     {
                         lootHangarWindow.Close();
-                        Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                        Statistics.LogWindowActionToWindowLog("LootHangar", "Closing LootHangar [" + Settings.Instance.LootHangarTabName + "]");
                         return false;
                     }
 
@@ -4148,7 +4163,7 @@ namespace Questor.Modules.Caching
                             {
                                 // if open command it to close
                                 Cache.Instance.corpLootHangarSecondaryWindow.Close();
-                                Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                                Statistics.LogWindowActionToWindowLog("LootHangar", "Closing LootHangar [" + Settings.Instance.LootHangarTabName + "]");
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2 + Cache.Instance.RandomNumber(1, 3));
                                 Logging.Log(module, "Closing Corporate Loot Hangar: waiting [" + Math.Round(Time.Instance.NextOpenHangarAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                                 return false;
@@ -4175,7 +4190,7 @@ namespace Questor.Modules.Caching
                         if (lootHangarWindow != null)
                         {
                             lootHangarWindow.Close();
-                            Statistics.LogWindowActionToWindowLog("LootHangar", "Closing Loothangar [" + Settings.Instance.LootHangarTabName + "]");
+                            Statistics.LogWindowActionToWindowLog("LootHangar", "Closing LootHangar [" + Settings.Instance.LootHangarTabName + "]");
                             return false;
                         }
                         return true;

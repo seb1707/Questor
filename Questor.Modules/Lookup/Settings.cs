@@ -578,11 +578,11 @@ namespace Questor.Modules.Lookup
                         LootHangarTabName = (string)CharacterSettingsXml.Element("lootHangar") ?? (string)CommonSettingsXml.Element("lootHangar");
                         if (string.IsNullOrEmpty(Settings.Instance.LootHangarTabName))
                         {
-                            Logging.Log("Settings", "Loothangar [" + "ItemsHangar" + "]", Logging.White);
+                            Logging.Log("Settings", "LootHangar [" + "ItemsHangar" + "]", Logging.White);
                         }
                         else
                         {
-                            Logging.Log("Settings", "Loothangar [" + Settings.Instance.LootHangarTabName + "]", Logging.White);
+                            Logging.Log("Settings", "LootHangar [" + Settings.Instance.LootHangarTabName + "]", Logging.White);
                         }
                         AmmoHangarTabName = (string)CharacterSettingsXml.Element("ammoHangar") ?? (string)CommonSettingsXml.Element("ammoHangar");
                         if (string.IsNullOrEmpty(Settings.Instance.AmmoHangarTabName))

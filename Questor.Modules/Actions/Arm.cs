@@ -1301,7 +1301,6 @@ namespace Questor.Modules.Actions
                         AmmoItems = AmmoHangarItems.ToList();
                     }
 
-                    AmmoHangarItems = AmmoHangarItems.ToList();
                     if (Logging.DebugArm) Logging.Log("Arm.MoveAmmo", "Ammohangar has [" + AmmoHangarItems.Count() + "] items with the right typeID [" + CurrentAmmoToLoad.TypeId + "] for this ammoType. MoveAmmo will use AmmoHangar", Logging.Debug);
                     if (!AmmoHangarItems.Any())
                     {

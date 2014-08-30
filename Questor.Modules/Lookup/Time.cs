@@ -24,7 +24,7 @@ namespace Questor.Modules.Lookup
         public int WarpScrambledNoDelay_seconds = 10;                       // Time after you are no longer warp scrambled to consider it IMPORTANT That you warp soon
         public int RemoveBookmarkDelay_seconds = 5;                         // Delay between each removal of a bookmark
         public int QuestorPulseInSpace_milliseconds = 600;                  // Used to delay the next pulse, units: milliseconds. Default is 600
-        public int QuestorPulseInStation_milliseconds = 400;                // Used to delay the next pulse, units: milliseconds. Default is 600
+        public int QuestorPulseInStation_milliseconds = 400;                // Used to delay the next pulse, units: milliseconds. Default is 400
         public int DefenceDelay_milliseconds = 1500;                        // Delay between defence actions
         public int AfterburnerDelay_milliseconds = 3500;                    //
         public int RepModuleDelay_milliseconds = 2500;                      //
@@ -33,8 +33,8 @@ namespace Questor.Modules.Lookup
         public int TargetsAreFullDelay_seconds = 5;                         // Delay used when we have determined that all our targeting slots are full
         public int DelayBetweenSalvagingSessions_minutes = 10;              //
         public int OrbitDelay_seconds = 15;                                 // This is the delay between orbit commands, units: seconds. Default is 15
-        public int DockingDelay_seconds = 10;                               // This is the delay between docking attempts, units: seconds. Default is 5
-        public int WarptoDelay_seconds = 10;                                // This is the delay between warpto commands, units: seconds. Default is 5
+        public int DockingDelay_seconds = 17;                               // This is the delay between docking attempts, units: seconds. Default is 15
+        public int WarptoDelay_seconds = 10;                                // This is the delay between warpto commands, units: seconds. Default is 10
         public int WeaponDelay_milliseconds = 220;                          //
         public int NosDelay_milliseconds = 220;                             //
         public int WebDelay_milliseconds = 220;                             //
@@ -147,7 +147,7 @@ namespace Questor.Modules.Lookup
         public DateTime NextLootAction { get; set; }
         public DateTime NextAfterburnerAction { get; set; }
         public DateTime NextRepModuleAction { get; set; }
-        public DateTime NextActivateSupportModules { get; set; }
+        public DateTime NextActivateModules { get; set; }
         public DateTime NextRemoveBookmarkAction { get; set; }
         public DateTime NextApproachAction { get; set; }
         public DateTime NextOrbit { get; set; }

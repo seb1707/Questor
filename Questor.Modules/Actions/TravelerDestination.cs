@@ -411,6 +411,7 @@ namespace Questor.Modules.Actions
                 if (bookmark.WarpTo(MissionSettings.MissionWarpAtDistanceRange*1000))
                 {
                     Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + " At " + MissionSettings.MissionWarpAtDistanceRange + Logging.Green + " km]", Logging.Green);
+                    return true;
                 }
             }
             else
@@ -418,6 +419,7 @@ namespace Questor.Modules.Actions
                 if (bookmark.WarpTo())
                 {
                     Logging.Log("TravelerDestination.BookmarkDestination", "Warping to bookmark [" + Logging.Yellow + bookmark.Title + Logging.Green + "][" + Logging.Yellow + Math.Round((distance / 1000) / 149598000, 2) + Logging.Green + " AU away]", Logging.Green);
+                    return true;
                 }
             }
 

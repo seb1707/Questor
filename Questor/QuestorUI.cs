@@ -230,7 +230,7 @@ namespace Questor
                         NextSalvageActionData.Text = Time.Instance.NextSalvageAction.ToLongTimeString();
                         NextLootActionData.Text = Time.Instance.NextLootAction.ToLongTimeString();
                         LastJettisonData.Text = Time.Instance.LastJettison.ToLongTimeString();
-                        NextActivateSupportModulesData.Text = Time.Instance.NextActivateSupportModules.ToLongTimeString();
+                        NextActivateSupportModulesData.Text = Time.Instance.NextActivateModules.ToLongTimeString();
                         NextApproachActionData.Text = Time.Instance.NextApproachAction.ToLongTimeString();
                         NextOrbitData.Text = Time.Instance.NextOrbit.ToLongTimeString();
                         NextWarpToData.Text = Time.Instance.NextWarpAction.ToLongTimeString();

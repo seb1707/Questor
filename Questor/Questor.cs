@@ -473,7 +473,7 @@ namespace Questor
                 return false;
             }
 
-            if (Cache.Instance.InStation && DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulseInStation_milliseconds) //default: 100ms
+            if (Cache.Instance.InStation && DateTime.UtcNow.Subtract(_lastQuestorPulse).TotalMilliseconds < Time.Instance.QuestorPulseInStation_milliseconds) //default: 400ms
             {
                 return false;
             }

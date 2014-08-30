@@ -51,6 +51,8 @@ namespace Questor.Modules.Actions
         private static DateTime _lastAgentAction;
         private static DateTime _waitingOnAgentResponseTimer = DateTime.UtcNow;
         private static DateTime _waitingOnMissionTimer = DateTime.UtcNow;
+        private static DateTime _agentWindowLastReady = DateTime.UtcNow.AddDays(-1);
+        private static DateTime _lastAgentInteractionPulse = DateTime.UtcNow.AddDays(-1);
 
         private static int LoyaltyPointCounter;
         public static float StandingsNeededToAccessLevel1Agent { get; set; }
@@ -959,6 +961,7 @@ namespace Questor.Modules.Actions
 
         public static bool OpenAgentWindow(string module)
         {
+            int _delayInSeconds = 0;
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(20) && !Cache.Instance.InSpace) // we wait 20 seconds after we last thought we were in space before trying to do anything in station
             {
                 return false;
@@ -974,6 +977,7 @@ namespace Questor.Modules.Actions
 
                 if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
                 AgentInteraction.Agent.InteractWith();
+                _delayInSeconds = 2;
                 _lastAgentAction = DateTime.UtcNow;
                 Statistics.LogWindowActionToWindowLog("AgentWindow", "Opening AgentWindow");
                 return false;
@@ -984,12 +988,18 @@ namespace Questor.Modules.Actions
                 return false;
             }
 
-            if (AgentInteraction.Agent.Window.IsReady && AgentInteraction.AgentId == AgentInteraction.Agent.AgentId)
+            if (AgentInteraction.Agent.Window.IsReady && AgentInteraction.AgentId == AgentInteraction.Agent.AgentId && DateTime.UtcNow > _agentWindowLastReady.AddSeconds(_delayInSeconds + 2))
             {
-                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready", Logging.Yellow);
-                return true;
+                _agentWindowLastReady = DateTime.UtcNow;
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready: set _agentWindowLastReady = DateTime.UtcNow;", Logging.Yellow);
             }
 
+            if (DateTime.UtcNow < _agentWindowLastReady.AddSeconds(10) && DateTime.UtcNow > _agentWindowLastReady.AddSeconds(_delayInSeconds))
+            {
+                if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "AgentWindow is ready: it has been more than 2 seco0nds since the agent window was ready. continue.", Logging.Yellow);
+                return true;
+            }
+            
             return false;
         }
 
@@ -1073,6 +1083,13 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                if (DateTime.UtcNow.Subtract(_lastAgentInteractionPulse).TotalMilliseconds < 1000)
+                {
+                    return;
+                }
+
+                _lastAgentInteractionPulse = DateTime.UtcNow;
+
                 if (!Cache.Instance.InStation)
                 {
                     return;

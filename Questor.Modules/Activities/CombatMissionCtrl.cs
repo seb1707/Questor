@@ -1724,11 +1724,14 @@ namespace Questor.Modules.Activities
                         {
                             Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(6, 10));
 
-                            DirectContainer container = null;
+                            DirectContainer containerWeWillDropInto = null;
 
-                            container = Cache.Instance.DirectEve.GetContainer(closest.Id);
+                            containerWeWillDropInto = Cache.Instance.DirectEve.GetContainer(closest.Id);
 
-                            if (container == null)
+                            //
+                            // the container we are going to drop something into must exist
+                            //
+                            if (containerWeWillDropInto == null)
                             {
                                 Logging.Log("MissionController.DropItem", "if (container == null)", Logging.White);
                                 return;
@@ -1743,6 +1746,9 @@ namespace Questor.Modules.Activities
                                 return;
                             }
 
+                            //
+                            // if we are going to drop something into the can we MUST already have it in our cargohold
+                            //
                             if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.Items.Any())
                             {
                                 //int CurrentShipsCargoItemCount = 0;
@@ -1761,22 +1767,29 @@ namespace Questor.Modules.Activities
                                 {
                                     ItemNumber++;
                                     Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] Found [" + CurrentShipsCargoItem.Quantity + "][" + CurrentShipsCargoItem.TypeName + "] in Current Ships Cargo: StackSize: [" + CurrentShipsCargoItem.Stacksize + "] We are looking for: [" + items.FirstOrDefault() + "]", Logging.Debug);
-                                    if (CurrentShipsCargoItem.TypeName.ToLower() == items.FirstOrDefault().ToLower())
+                                    if (items.Any() && items.FirstOrDefault() != null)
                                     {
-                                        Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] container.Capacity [" + container.Capacity + "] ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.Debug);
-                                        if (!ItemsHaveBeenMoved)
+                                        string NameOfItemToDropIntoContainer = items.FirstOrDefault();
+                                        if (NameOfItemToDropIntoContainer != null)
                                         {
-                                            Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + container.TypeName, Logging.White);
-                                            //
-                                            // THIS IS NOT WORKING - EXCEPTION/ERROR IN CLIENT... 
-                                            //
-                                            //container.Add(CurrentShipsCargoItem, quantity);
-                                            Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
-                                            ItemsHaveBeenMoved = true;
-                                            return;
-                                        }
+                                            if (CurrentShipsCargoItem.TypeName.ToLower() == NameOfItemToDropIntoContainer.ToLower())
+                                            {
+                                                Logging.Log("MissionController.DropItem", "[" + ItemNumber + "] container.Capacity [" + containerWeWillDropInto.Capacity + "] ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.Debug);
+                                                if (!ItemsHaveBeenMoved)
+                                                {
+                                                    Logging.Log("MissionController.DropItem", "Moving Items: " + items.FirstOrDefault() + " from cargo ship to " + containerWeWillDropInto.TypeName, Logging.White);
+                                                    //
+                                                    // THIS IS NOT WORKING - EXCEPTION/ERROR IN CLIENT... 
+                                                    //
+                                                    containerWeWillDropInto.Add(CurrentShipsCargoItem, quantity);
+                                                    Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(4, 6));
+                                                    ItemsHaveBeenMoved = true;
+                                                    return;
+                                                }
 
-                                        return;
+                                                return;
+                                            }
+                                        }
                                     }
                                 }
                             }

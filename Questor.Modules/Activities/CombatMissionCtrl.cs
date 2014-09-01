@@ -1722,18 +1722,28 @@ namespace Questor.Modules.Activities
                     {
                         if (DateTime.UtcNow > Time.Instance.NextOpenContainerInSpaceAction)
                         {
-                            Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddSeconds(Cache.Instance.RandomNumber(6, 10));
-
                             DirectContainer containerWeWillDropInto = null;
 
                             containerWeWillDropInto = Cache.Instance.DirectEve.GetContainer(closest.Id);
-
                             //
                             // the container we are going to drop something into must exist
                             //
                             if (containerWeWillDropInto == null)
                             {
                                 Logging.Log("MissionController.DropItem", "if (container == null)", Logging.White);
+                                return;
+                            }
+
+                            //
+                            // open the container so we have a window!
+                            //
+                            if (containerWeWillDropInto.Window == null)
+                            {
+                                if (closest.OpenCargo())
+                                {
+                                    Time.Instance.NextOpenContainerInSpaceAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
+                                }
+
                                 return;
                             }
 

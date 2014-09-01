@@ -1747,6 +1747,12 @@ namespace Questor.Modules.Activities
                                 return;
                             }
 
+                            if (!containerWeWillDropInto.Window.IsReady)
+                            {
+                                Logging.Log("MissionController.DropItem", "LootWrecks: containerWeWillDropInto.Window is not ready, waiting", Logging.White);
+                                return;
+                            }
+
                             if (ItemsHaveBeenMoved)
                             {
                                 Logging.Log("MissionController.DropItem", "We have Dropped the items: ItemsHaveBeenMoved [" + ItemsHaveBeenMoved + "]", Logging.White);

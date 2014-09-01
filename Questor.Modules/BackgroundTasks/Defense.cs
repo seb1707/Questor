@@ -611,11 +611,11 @@ namespace Questor.Modules.BackgroundTasks
                                                                                    i.GroupId == (int) Group.ArmorRepairer))
             {
                 ModuleNumber++;
-                if (repairModule.IsActive)
-                {
-                    if (Logging.DebugDefense) Logging.Log("ActivateRepairModules", "[" + ModuleNumber + "][" + repairModule.TypeName + "] is currently Active, continue", Logging.Debug);
-                    continue;
-                }
+                //if (repairModule.IsActive)
+                //{
+                //    if (Logging.DebugDefense) Logging.Log("ActivateRepairModules", "[" + ModuleNumber + "][" + repairModule.TypeName + "] is currently Active, continue", Logging.Debug);
+                //    continue;
+                //}
 
                 if (repairModule.InLimboState)
                 {

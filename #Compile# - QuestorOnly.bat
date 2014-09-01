@@ -21,7 +21,7 @@ del .\bin\release\*.* /Q
 set nameofproject=Questor
 set csproj=.\questor\Questor.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 1 of 3 builds
+Echo Done building %nameofproject% - see above for any errors - 1 of 2 builds
 pause
 ::
 :: Build Project 2
@@ -29,17 +29,8 @@ pause
 set nameofproject=Questor.Modules
 set csproj=.\Questor.Modules\Questor.Modules.csproj
 "%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 2 of 3 builds
+Echo Done building %nameofproject% - see above for any errors - 2 of 2 builds
 pause
-::
-:: Build Project 3
-::
-set nameofproject=QuestorDLL
-set csproj=.\questor\QuestorDLL.csproj
-"%msbuild4%" "%csproj%" /p:configuration="%releasetype%" /target:Clean;Build
-Echo Done building %nameofproject% - see above for any errors - 3 of 3 builds
-pause
-
 
 if not exist output mkdir output >>nul 2>>nul
 :: Echo deleting old build from the output directory

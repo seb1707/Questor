@@ -658,10 +658,13 @@ namespace Questor.Modules.BackgroundTasks
                         return;
                     }
                 }
-                
-                // Shield/Armor recharging
+
+                //
+                // Do we need to Activate Shield/Armor rep?
+                //
                 if (!repairModule.IsActive && ((inCombat && perc < ActivateRepairModulesAtThisPerc) || (!inCombat && perc < DeactivateRepairModulesAtThisPerc && cap > Panic.SafeCapacitorPct)))
                 {
+                    
                     if (Cache.Instance.ActiveShip.ShieldPercentage < Statistics.LowestShieldPercentageThisPocket)
                     {
                         Statistics.LowestShieldPercentageThisPocket = Cache.Instance.ActiveShip.ShieldPercentage;
@@ -765,6 +768,9 @@ namespace Questor.Modules.BackgroundTasks
                     return;
                 }
 
+                //
+                // Do we need to DeActivate Shield/Armor rep?
+                //
                 if (repairModule.IsActive && (perc >= DeactivateRepairModulesAtThisPerc || repairModule.GroupId == (int)Group.CapacitorInjector))
                 {
                     //

@@ -138,6 +138,12 @@ namespace Questor.Modules.BackgroundTasks
             List<ModuleCache> bastionModules = Cache.Instance.Modules.Where(m => m.GroupId == (int)Group.Bastion && m.IsOnline).ToList();
             if (bastionModules.Any(i => i.IsActive)) return;
 
+            if (!Cache.Instance.UnlootedContainers.Any())
+            {
+                Logging.Log("Salvage.NavigateIntorangeOfWrecks", "There are 0 UnlootedContainers left on the field: no UnlootedContainers to approach.", Logging.White);
+                return;
+            }
+
             EntityCache closestWreck = Cache.Instance.UnlootedContainers.OrderBy(o => o.Distance).FirstOrDefault();
             if (closestWreck != null && (Math.Round(closestWreck.Distance, 0) > (int)Distances.SafeScoopRange))
             {
@@ -781,6 +787,7 @@ namespace Questor.Modules.BackgroundTasks
                     if (containersInRangeCount < 1) Logging.Log("Salvage", "Debug: containersInRange count [" + containersInRangeCount + "]", Logging.Teal);
                     if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
                 }
+
                 if (Cache.Instance.CurrentShipsCargo == null) return;
 
                 List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
@@ -847,16 +854,13 @@ namespace Questor.Modules.BackgroundTasks
                         if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is not ready", Logging.White);
                         return;
                     }
-
-
+                    
                     if (Cache.Instance.ContainerInSpace.Window.IsReady)
                     {
                         Logging.Log("Salvage", "Opened container [" + containerEntity.Name + "][" + Math.Round(containerEntity.Distance / 1000, 0) + "k][ID: " + containerEntity.MaskedId + "]", Logging.White);
                         if (Logging.DebugLootWrecks) Logging.Log("Salvage", "LootWrecks: Cache.Instance.ContainerInSpace.Window is ready", Logging.White);
                         OpenedContainers[containerEntity.Id] = DateTime.UtcNow;
                         Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
-
-
 
                         // List its items
                         IEnumerable<ItemCache> items = Cache.Instance.ContainerInSpace.Items.Select(i => new ItemCache(i)).ToList();
@@ -921,17 +925,7 @@ namespace Questor.Modules.BackgroundTasks
                                     if ((freeCargoCapacity - item.TotalVolume) <= (item.IsMissionItem ? 0 : ReserveCargoCapacity))
                                     {
                                         Logging.Log("Salvage.LootWrecks", "We Need More m3: FreeCargoCapacity [" + freeCargoCapacity + "] - [" + item.Name + "][" + item.TotalVolume + "total][" + item.Volume + "each]", Logging.Debug);
-                                        //
-                                        // I have no idea what problem this solved (a long long time ago, but its not doing anything useful that I can tell)
-                                        //
-                                        // We can't drop items in this container anyway, well get it after its salvaged
-                                        //if (!_isMissionItem && containerEntity.GroupId != (int)Group.CargoContainer)
-                                        //{
-                                        //    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "[" + item.Name + "] is not the mission item and this appears to be a container (in a container!): ignore it until after its salvaged", Logging.Teal);
-                                        //    Cache.Instance.LootedContainers.Add(containerEntity.Id);
-                                        //    continue;
-                                        //}
-
+                                        
                                         // Make a list of items which are worth less
                                         List<ItemCache> worthLess = null;
                                         if (_isMissionItem)
@@ -1135,8 +1129,6 @@ namespace Questor.Modules.BackgroundTasks
                 return;
 
             _lastSalvageProcessState = DateTime.UtcNow;
-
-
 
             // Nothing to salvage in stations
             if (Cache.Instance.InStation)

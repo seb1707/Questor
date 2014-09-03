@@ -44,11 +44,8 @@ namespace Questor.Modules.Actions
 
                     // Is the ship hangar open?
                     if (Cache.Instance.ShipHangar == null) break;
-
                     Logging.Log("SwitchShip", "Activating combat ship", Logging.White);
-
                     _States.CurrentSwitchShipState = SwitchShipState.ActivateCombatShip;
-
                     break;
 
                 case SwitchShipState.ActivateCombatShip:
@@ -65,13 +62,18 @@ namespace Questor.Modules.Actions
                                 List<DirectItem> ships = Cache.Instance.ShipHangar.Items;
                                 if (ships != null && ships.Any())
                                 {
-                                    foreach (DirectItem ship in ships.Where(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName))
+                                    DirectItem shipToActivate = ships.FirstOrDefault(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName);
+                                    if (shipToActivate != null)
                                     {
-                                        Logging.Log("SwitchShip", "Making [" + ship.GivenName + "] active", Logging.White);
-                                        ship.ActivateShip();
+                                        Logging.Log("SwitchShip", "Making [" + shipToActivate.GivenName + "] active", Logging.White);
+                                        shipToActivate.ActivateShip();
                                         Logging.Log("SwitchShip", "Activated", Logging.White);
                                         _lastSwitchShipAction = DateTime.UtcNow;
                                         return;
+                                    }
+                                    else
+                                    {
+                                        Logging.Log("SwitchShip", "Missing ship named [" + shipName + "] in the local ShipHangar", Logging.Debug);
                                     }
                                 }
                             }

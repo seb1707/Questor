@@ -2622,10 +2622,18 @@ namespace Questor.Modules.Caching
                                 Statistics.LogWindowActionToWindowLog("Itemhangar", "Opening ItemHangar");
                                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                                 Time.Instance.LastOpenHangar = DateTime.UtcNow;
+                                return null;
                             }
+
+                            return null;
                         }
-                        
-                        return Cache.Instance._itemHangar;
+
+                        if (Instance.Windows.Any(i => i.Type == "form.StationItems") && DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
+                        {
+                            return Cache.Instance._itemHangar;
+                        }
+
+                        return null;
                     }
 
                     return null;
@@ -3092,25 +3100,32 @@ namespace Questor.Modules.Caching
                             Cache.Instance._shipHangar = Cache.Instance.DirectEve.GetShipHangar();
                         }
 
-                        if (Instance.Windows.All(i => i.Type != "form.StationShips"))
-                            // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
+                        if (Instance.Windows.All(i => i.Type != "form.StationShips")) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
                         {
-                            if (DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(10))
+                            if (DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
                             {
-                                Statistics.LogWindowActionToWindowLog("ShipHangar", "Opening Shiphangar");
+                                Statistics.LogWindowActionToWindowLog("ShipHangar", "Opening ShipHangar");
                                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenShipHangar);
                                 Time.Instance.LastOpenHangar = DateTime.UtcNow;
+                                return null;
                             }
+
+                            return null;
                         }
 
-                        return Cache.Instance._shipHangar;
+                        if (Instance.Windows.Any(i => i.Type == "form.StationShips") && DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
+                        {
+                            return Cache.Instance._shipHangar;    
+                        }
+
+                        return null;
                     }
 
                     return null;
                 }
                 catch (Exception ex)
                 {
-                    Logging.Log("ItemHangar", "Exception [" + ex + "]", Logging.Debug);
+                    Logging.Log("OpenShipsHangar", "Exception [" + ex + "]", Logging.Debug);
                     return null;
                 }
             }

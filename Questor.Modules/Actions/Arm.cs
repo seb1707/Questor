@@ -1055,6 +1055,13 @@ namespace Questor.Modules.Actions
                     if (!Cache.Instance.RepairItems(WeAreInThisStateForLogs())) return false; //attempt to use repair facilities if avail in station
                 }
 
+                if (_States.CurrentSwitchShipState == SwitchShipState.ActivateCombatShip)
+                {
+                    ChangeArmState(ArmState.Done, true);
+                    _States.CurrentSwitchShipState = SwitchShipState.Done;
+                    return true;
+                }
+
                 ChangeArmState(ArmState.LoadSavedFitting, true);
                 return true;
             }

@@ -65,23 +65,28 @@ namespace Questor.Modules.Actions
                                     DirectItem shipToActivate = ships.FirstOrDefault(ship => ship.GivenName != null && ship.GivenName.ToLower() == shipName);
                                     if (shipToActivate != null)
                                     {
+                                        Cache.Instance.CloseCargoHold("SwitchShip");
                                         Logging.Log("SwitchShip", "Making [" + shipToActivate.GivenName + "] active", Logging.White);
                                         shipToActivate.ActivateShip();
                                         Logging.Log("SwitchShip", "Activated", Logging.White);
                                         _lastSwitchShipAction = DateTime.UtcNow;
                                         return;
                                     }
-                                    else
-                                    {
-                                        Logging.Log("SwitchShip", "Missing ship named [" + shipName + "] in the local ShipHangar", Logging.Debug);
-                                    }
+                                    
+                                    Logging.Log("SwitchShip", "Missing ship named [" + shipName + "] in the local ShipHangar", Logging.Debug);
+                                    return;
                                 }
+
+                                return;
                             }
+
+                            return;
                         }
+
+                        return;
                     }
 
                     _States.CurrentSwitchShipState = Settings.Instance.UseFittingManager ? SwitchShipState.OpenFittingWindow : SwitchShipState.Cleanup;
-
                     break;
 
                 case SwitchShipState.OpenFittingWindow:

@@ -3036,11 +3036,13 @@ namespace Questor.Modules.Caching
                     {
                         Logging.Log("CloseCargoHold", "waiting [" + Math.Round(Time.Instance.NextOpenCargoAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "sec]", Logging.White);
                     }
+
                     return false;
                 }
 
                 if (Cache.Instance.CurrentShipsCargo == null || Cache.Instance.CurrentShipsCargo.Window == null)
                 {
+                    Cache.Instance._currentShipsCargo = null;
                     Logging.Log("CloseCargoHold", "Cargohold was not open, no need to close", Logging.White);
                     return true;
                 }
@@ -3049,6 +3051,7 @@ namespace Questor.Modules.Caching
                 {
                     if (Cache.Instance.CurrentShipsCargo.Window == null)
                     {
+                        Cache.Instance._currentShipsCargo = null;
                         Logging.Log("CloseCargoHold", "Cargohold is closed", Logging.White);
                         return true;
                     }
@@ -3067,6 +3070,7 @@ namespace Questor.Modules.Caching
                         return false;
                     }
 
+                    Cache.Instance._currentShipsCargo = null;
                     Logging.Log("CloseCargoHold", "Cargohold is probably closed", Logging.White);
                     return true;
                 }

@@ -382,24 +382,20 @@ namespace Questor.Behaviors
         private void SwitchCMBState()
         {
             if (!Cache.Instance.InStation) return;
-
-            if (_States.CurrentSwitchShipState == SwitchShipState.Idle)
+            
+            if (_States.CurrentArmState == ArmState.Idle)
             {
                 Logging.Log("Switch", "Begin", Logging.White);
-                _States.CurrentSwitchShipState = SwitchShipState.ActivateCombatShip;
                 _States.CurrentArmState = ArmState.ActivateCombatShip;
+                Arm.SwitchShipsOnly = true;
             }
 
             Arm.ProcessState();
 
             if (_States.CurrentArmState == ArmState.Done)
             {
-                _States.CurrentSwitchShipState = SwitchShipState.Done;
-            }
-
-            if (_States.CurrentSwitchShipState == SwitchShipState.Done)
-            {
-                _States.CurrentSwitchShipState = SwitchShipState.Idle;
+                _States.CurrentArmState = ArmState.Idle;
+                Arm.SwitchShipsOnly = false;
                 ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.GotoBase);
                 return;
             }

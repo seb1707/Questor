@@ -46,6 +46,7 @@ namespace Questor.Modules.Actions
         private static bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
         private static bool CustomFittingFound;
         private static bool switchingShips;
+        private static bool SwitchShipsOnly;
         
         private static int ItemHangarRetries = 0;
         private static int DroneBayRetries = 0;
@@ -786,6 +787,7 @@ namespace Questor.Modules.Actions
                 DefaultFittingFound = false;      //Did we find the default fitting?
                 CustomFittingFound = false;
                 ItemsAreBeingMoved = false;
+                SwitchShipsOnly = false;
                 if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "Cache.Instance.BringOptionalMissionItemQuantity is [" + MissionSettings.BringOptionalMissionItemQuantity + "]", Logging.Debug);
                 ItemHangarRetries = 0;
                 DroneBayRetries = 0;
@@ -1036,6 +1038,7 @@ namespace Questor.Modules.Actions
 
                 if (!ActivateThisShip(Combat.CombatShipName)) return false;
 
+                if (SwitchShipsOnly) ChangeArmState(ArmState.Done, true);
                 ChangeArmState(ArmState.RepairShop, true);
                 return true;
             }

@@ -1076,7 +1076,7 @@ namespace Questor.Behaviors
 
             return;
         }
-        
+
         private void SalvageCMBState()
         {
             Salvage.SalvageAll = true;
@@ -1087,8 +1087,11 @@ namespace Questor.Behaviors
             if (deadlyNPC != null)
             {
                 // found NPCs that will likely kill out fragile salvage boat!
-                List<DirectBookmark> missionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: deleting on grid salvage bookmark", Logging.White);
+                List<DirectBookmark> missionSalvageBookmarks =
+                    Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                Logging.Log("CombatMissionsBehavior.Salvage",
+                    "could not be completed because of NPCs left in the mission: deleting on grid salvage bookmark",
+                    Logging.White);
 
                 if (Salvage.DeleteBookmarksWithNPC)
                 {
@@ -1099,7 +1102,9 @@ namespace Questor.Behaviors
                     return;
                 }
 
-                Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted", Logging.Orange);
+                Logging.Log("CombatMissionsBehavior.Salvage",
+                    "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted",
+                    Logging.Orange);
                 Salvage.SalvageAll = false;
                 Statistics.FinishedSalvaging = DateTime.UtcNow;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
@@ -1110,21 +1115,33 @@ namespace Questor.Behaviors
             {
                 if (Cache.Instance.CurrentShipsCargo != null && Cache.Instance.CurrentShipsCargo.UsedCapacity > 0)
                 {
-                    if ((Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) < Salvage.ReserveCargoCapacity + 10)
+                    if ((Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity) <
+                        Salvage.ReserveCargoCapacity + 10)
                     {
-                        Logging.Log("CombatMissionsBehavior.Salvage", "We are full: My Cargo is at [" + Math.Round(Cache.Instance.CurrentShipsCargo.UsedCapacity, 2) + "m3] of[" + Math.Round(Cache.Instance.CurrentShipsCargo.Capacity, 2) + "] Reserve [" + Math.Round((double)Salvage.ReserveCargoCapacity, 2) + "m3 + 10], go to base to unload", Logging.White);
+                        Logging.Log("CombatMissionsBehavior.Salvage",
+                            "We are full: My Cargo is at [" +
+                            Math.Round(Cache.Instance.CurrentShipsCargo.UsedCapacity, 2) + "m3] of[" +
+                            Math.Round(Cache.Instance.CurrentShipsCargo.Capacity, 2) + "] Reserve [" +
+                            Math.Round((double) Salvage.ReserveCargoCapacity, 2) + "m3 + 10], go to base to unload",
+                            Logging.White);
                         _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
-                        return;        
+                        return;
                     }
                 }
             }
 
             //if we have no salvagers check for UnlootedContainers before moving on
-            //if we have salvagers check for any wrecks before moving on
-            if ((!Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.UnlootedContainers.Any()) 
-               || Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.Wrecks.Any())
+            // (old - removed, if re-added we need to do this elsewhere to avoid getting stuck!) if we have salvagers check for any wrecks before moving on
+            if ((!Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.UnlootedContainers.Any()) || DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
+            //|| Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.Wrecks.Any())
             {
                 if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;
+
+                if (DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
+                {
+                    Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We have been salvaging this pocket for more than [" + Time.Instance.MaxSalvageMinutesPerPocket + "] min - moving on - something probably went wrong here somewhere. (debugSalvage might help narrow down what)", Logging.White);)    
+                }
+                
                 Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the pocket. UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] Wrecks [" + Cache.Instance.Wrecks + "] Salvagers? [" + Cache.Instance.MyShipEntity.SalvagersAvailable + "]", Logging.White);
                 Statistics.FinishedSalvaging = DateTime.UtcNow;
 
@@ -1167,7 +1184,6 @@ namespace Questor.Behaviors
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;
                 Traveler.Destination = null;
                 return;
-
             }
 
             if (Logging.DebugSalvage) Logging.Log("CombatMissionsBehavior", "salvage: we __cannot ever__ approach in salvage.cs so this section _is_ needed", Logging.White);

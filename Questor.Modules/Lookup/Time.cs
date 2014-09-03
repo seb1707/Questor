@@ -62,6 +62,7 @@ namespace Questor.Modules.Lookup
         public int SalvageStackItemsDelayBeforeResuming_seconds = 2;        // When stacking items in cargohold delay before proceeding, units: seconds. Default is 5
         public int SalvageStackItems_seconds = 150;                         // When salvaging stack items in your cargo every x seconds, units: seconds. Default is 180
         public int SalvageDelayBetweenActions_milliseconds = 500;           //
+        public int MaxSalvageMinutesPerPocket = 10;                         // Max Salvage TIme per pocket before moving on to the next pocket. Default is 10 min
         public int TravelerExitStationAmIInSpaceYet_seconds = 17;           // Traveler - Exit Station before you are in space delay, units: seconds. Default is 7
         public int TravelerNoStargatesFoundRetryDelay_seconds = 15;         // Traveler could not find any StarGates, retry when this time has elapsed, units: seconds. Default is 15
         public int TravelerJumpedGateNextCommandDelay_seconds = 15;         // Traveler jumped a gate - delay before assuming we have loaded grid, units: seconds. Default is 15

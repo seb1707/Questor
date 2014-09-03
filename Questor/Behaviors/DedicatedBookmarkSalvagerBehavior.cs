@@ -571,7 +571,14 @@ namespace Questor.Behaviors
                         _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.GotoBase;
                         break;
                     }
-                    
+
+                    if (DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
+                    {
+                        Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We have been salvaging this pocket for more than [" + Time.Instance.MaxSalvageMinutesPerPocket + "] min - moving on - something probably went wrong here somewhere. (debugSalvage might help narrow down what)", Logging.White);
+                        _States.CurrentDedicatedBookmarkSalvagerBehaviorState = DedicatedBookmarkSalvagerBehaviorState.CheckBookmarkAge;
+                        break;
+                    }
+
                     if (Cache.Instance.CurrentShipsCargo.IsValid)
                     {
                         if (Logging.DebugSalvage) Logging.Log("DedicatedSalvager", "CurrentCapacity [" + Cache.Instance.CurrentShipsCargo.Capacity + "] UsedCapacity [" + Cache.Instance.CurrentShipsCargo.UsedCapacity + "][" + Salvage.ReserveCargoCapacity + "]", Logging.Debug);

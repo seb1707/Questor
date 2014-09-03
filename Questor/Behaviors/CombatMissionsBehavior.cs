@@ -387,9 +387,15 @@ namespace Questor.Behaviors
             {
                 Logging.Log("Switch", "Begin", Logging.White);
                 _States.CurrentSwitchShipState = SwitchShipState.ActivateCombatShip;
+                _States.CurrentArmState = ArmState.ActivateCombatShip;
             }
 
-            _switchShip.ProcessState();
+            Arm.ProcessState();
+
+            if (_States.CurrentArmState == ArmState.Done)
+            {
+                _States.CurrentSwitchShipState = SwitchShipState.Done;
+            }
 
             if (_States.CurrentSwitchShipState == SwitchShipState.Done)
             {

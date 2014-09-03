@@ -723,7 +723,7 @@ namespace Questor.Modules.BackgroundTasks
         /// <summary>
         ///   Loot any wrecks & cargo containers close by
         /// </summary>
-        private static void LootWrecks(IEnumerable<EntityCache> EntitiesToLoot = null)
+        private static void LootWrecks()
         {
             try
             {
@@ -760,15 +760,6 @@ namespace Questor.Modules.BackgroundTasks
                 // Open a container in range
                 int containersProcessedThisTick = 0;
 
-                if (EntitiesToLoot != null)
-                {
-                    containersInRange = EntitiesToLoot.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
-                }
-                else
-                {
-                    containersInRange = Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).ToList();
-                }
-
                 if (Logging.DebugLootWrecks)
                 {
                     int containersInRangeCount = 0;
@@ -788,11 +779,26 @@ namespace Questor.Modules.BackgroundTasks
                     if (containersOutOfRangeCount < 1) Logging.Log("Salvage", "Debug: containersOutOfRange count [" + containersOutOfRangeCount + "]", Logging.Teal);
                 }
 
-                if (Cache.Instance.CurrentShipsCargo == null) return;
+                if (Cache.Instance.CurrentShipsCargo == null)
+                {
+                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (Cache.Instance.CurrentShipsCargo == null)", Logging.Teal);
+                    return;
+                }
 
-                List<ItemCache> shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
-                double freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
-                foreach (EntityCache containerEntity in containersInRange.OrderByDescending(i => i.IsLootTarget))
+
+                List<ItemCache> shipsCargo = new List<ItemCache>();
+                double freeCargoCapacity = 0;
+                if (Cache.Instance.CurrentShipsCargo.Items.Any())
+                {
+                    shipsCargo = Cache.Instance.CurrentShipsCargo.Items.Select(i => new ItemCache(i)).ToList();
+                    freeCargoCapacity = Cache.Instance.CurrentShipsCargo.Capacity - Cache.Instance.CurrentShipsCargo.UsedCapacity;
+                }
+                else
+                {
+                    if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (!Cache.Instance.CurrentShipsCargo.Items.Any()) - really? 0 items in cargo?", Logging.Teal);
+                }
+
+                foreach (EntityCache containerEntity in Cache.Instance.Containers.Where(e => e.Distance <= (int)Distances.SafeScoopRange).OrderByDescending(i => i.IsLootTarget))
                 {
                     containersProcessedThisTick++;
 
@@ -843,8 +849,11 @@ namespace Questor.Modules.BackgroundTasks
                     {
                         if (containerEntity.OpenCargo())
                         {
+                            if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (containerEntity.OpenCargo())", Logging.White);
                             Time.Instance.NextLootAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.LootingDelay_milliseconds);
                         }
+
+                        if (Logging.DebugLootWrecks) Logging.Log("Salvage.LootWrecks", "if (Cache.Instance.ContainerInSpace.Window == null)", Logging.White);
 
                         return;
                     }

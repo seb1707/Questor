@@ -386,7 +386,7 @@ namespace Questor.Behaviors
             if (_States.CurrentSwitchShipState == SwitchShipState.Idle)
             {
                 Logging.Log("Switch", "Begin", Logging.White);
-                _States.CurrentSwitchShipState = SwitchShipState.Begin;
+                _States.CurrentSwitchShipState = SwitchShipState.ActivateCombatShip;
             }
 
             _switchShip.ProcessState();

@@ -27,7 +27,6 @@ namespace Questor.Behaviors
 {
     public class CombatMissionsBehavior
     {
-        private readonly SwitchShip _switchShip;
         private readonly CourierMissionCtrl _courierMissionCtrl;
         
         private DateTime _lastPulse;
@@ -54,7 +53,6 @@ namespace Questor.Behaviors
             _lastPulse = DateTime.MinValue;
             _random = new Random();
             _courierMissionCtrl = new CourierMissionCtrl();
-            _switchShip = new SwitchShip();
             _combatMissionCtrl = new CombatMissionCtrl();
             _storyline = new Storyline();
             

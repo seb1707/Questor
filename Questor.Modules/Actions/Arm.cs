@@ -46,7 +46,7 @@ namespace Questor.Modules.Actions
         private static bool UseMissionShip; //false; // Were we successful in activating the mission specific ship?
         private static bool CustomFittingFound;
         private static bool switchingShips;
-        private static bool SwitchShipsOnly;
+        public static bool SwitchShipsOnly;
         
         private static int ItemHangarRetries = 0;
         private static int DroneBayRetries = 0;

@@ -152,7 +152,6 @@
     <Compile Include="States\DebugModuleState.cs" />
     <Compile Include="Lookup\Distances.cs" />
     <Compile Include="States\SwitchShipState.cs" />
-    <Compile Include="Actions\SwitchShip.cs" />
     <Compile Include="BackgroundTasks\Defense.cs" />
     <Compile Include="Combat\Drones.cs" />
     <Compile Include="States\DroneState.cs" />

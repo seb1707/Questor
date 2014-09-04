@@ -53,6 +53,7 @@ namespace Questor.Modules.Actions
         private static DateTime _waitingOnMissionTimer = DateTime.UtcNow;
         private static DateTime _agentWindowLastReady = DateTime.UtcNow.AddDays(-1);
         private static DateTime _lastAgentInteractionPulse = DateTime.UtcNow.AddDays(-1);
+        private static DateTime _lastAgentActionStateChange = DateTime.UtcNow.AddDays(-1);
 
         private static int LoyaltyPointCounter;
         public static float StandingsNeededToAccessLevel1Agent { get; set; }
@@ -214,6 +215,8 @@ namespace Questor.Modules.Actions
 
                 if (!OpenAgentWindow(module)) return;
 
+                if (DateTime.UtcNow < _lastAgentActionStateChange.AddSeconds(4)) return; //enforce a 4 sec wait after each state change
+
                 if (Purpose == AgentInteractionPurpose.AmmoCheck)
                 {
                     Logging.Log("AgentInteraction", "Checking ammo type", Logging.Yellow);
@@ -238,6 +241,8 @@ namespace Questor.Modules.Actions
             try
             {
                 if (!OpenAgentWindow(module)) return;
+
+                if (DateTime.UtcNow < _lastAgentActionStateChange.AddSeconds(4)) return; //enforce a 4 sec wait after each state change
 
                 if (Agent.Window.AgentResponses == null || !Agent.Window.AgentResponses.Any())
                 {
@@ -375,7 +380,8 @@ namespace Questor.Modules.Actions
                     }
                     else
                     {
-                        Logging.Log("AgentInteraction", "Unexpected dialog options", Logging.Red);
+                        Logging.Log("AgentInteraction", "Unexpected dialog options: requesting mission since we have that button available", Logging.Red);
+                        request.Say();
                         ChangeAgentInteractionState(AgentInteractionState.UnexpectedDialogOptions, true);
                     }
                 }
@@ -649,6 +655,8 @@ namespace Questor.Modules.Actions
             {
                 if (!OpenAgentWindow(module)) return;
 
+                if (DateTime.UtcNow < _lastAgentActionStateChange.AddSeconds(4)) return; //enforce a 4 sec wait after each state change
+
                 List<DirectAgentResponse> responses = Agent.Window.AgentResponses;
                 if (responses == null || responses.Count == 0)
                     return;
@@ -689,6 +697,8 @@ namespace Questor.Modules.Actions
             try
             {
                 if (!OpenAgentWindow(module)) return;
+
+                if (DateTime.UtcNow < _lastAgentActionStateChange.AddSeconds(4)) return; //enforce a 4 sec wait after each state change
 
                 List<DirectAgentResponse> responses = Agent.Window.AgentResponses;
                 if (responses == null || responses.Count == 0)
@@ -1062,7 +1072,7 @@ namespace Questor.Modules.Actions
 
             try
             {
-                Arm.ClearDataBetweenStates();
+                _lastAgentActionStateChange = DateTime.UtcNow;
                 if (_States.CurrentAgentInteractionState != _AgentInteractionState)
                 {
                     _States.CurrentAgentInteractionState = _AgentInteractionState;

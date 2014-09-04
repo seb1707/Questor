@@ -977,7 +977,7 @@ namespace Questor.Modules.Actions
 
                 if (Logging.DebugAgentInteractionReplyToAgent) Logging.Log(module, "Attempting to Interact with the agent named [" + AgentInteraction.Agent.Name + "] in [" + Cache.Instance.DirectEve.GetLocationName(AgentInteraction.Agent.SolarSystemId) + "]", Logging.Yellow);
                 AgentInteraction.Agent.InteractWith();
-                _delayInSeconds = 2;
+                _delayInSeconds = 4;
                 _lastAgentAction = DateTime.UtcNow;
                 Statistics.LogWindowActionToWindowLog("AgentWindow", "Opening AgentWindow");
                 return false;

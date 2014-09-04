@@ -1139,7 +1139,7 @@ namespace Questor.Behaviors
 
                 if (DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
                 {
-                    Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We have been salvaging this pocket for more than [" + Time.Instance.MaxSalvageMinutesPerPocket + "] min - moving on - something probably went wrong here somewhere. (debugSalvage might help narrow down what)", Logging.White);)    
+                    Logging.Log("DedicatedBookmarkSalvageBehavior.Salvage", "We have been salvaging this pocket for more than [" + Time.Instance.MaxSalvageMinutesPerPocket + "] min - moving on - something probably went wrong here somewhere. (debugSalvage might help narrow down what)", Logging.White);
                 }
                 
                 Logging.Log("CombatMissionsBehavior.Salvage", "Finished salvaging the pocket. UnlootedContainers [" + Cache.Instance.UnlootedContainers.Count() + "] Wrecks [" + Cache.Instance.Wrecks + "] Salvagers? [" + Cache.Instance.MyShipEntity.SalvagersAvailable + "]", Logging.White);

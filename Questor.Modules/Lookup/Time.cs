@@ -84,8 +84,8 @@ namespace Questor.Modules.Lookup
         public int SkillTrainerPulse_milliseconds = 800;
         public int EVEAccountLoginDelayMinimum_seconds = 7;
         public int EVEAccountLoginDelayMaximum_seconds = 10;
-        public int CharacterSelectionDelayMinimum_seconds = 2;
-        public int CharacterSelectionDelayMaximum_seconds = 4;
+        public int CharacterSelectionDelayMinimum_seconds = 5;
+        public int CharacterSelectionDelayMaximum_seconds = 10;
         public int ReLogDelayMinimum_seconds = 35;                          //DO NOT set this lower than 20 or so seconds!
         public int ReLogDelayMaximum_seconds = 60;
         public int RecallDronesDelayBetweenRetries = 15;                    //Time between recall commands for drones when attempting to pull drones

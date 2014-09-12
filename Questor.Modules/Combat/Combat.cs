@@ -1088,18 +1088,21 @@ namespace Questor.Modules.Combat
             EntityCache primaryWeaponPriorityTarget = null;
             try
             {
-                primaryWeaponPriorityTarget = Combat.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Combat.MaxRange
-                                                                            && !p.IsIgnored
-                                                                            && p.IsReadyToShoot
-                                                                            && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Drones.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
-                                                                           .OrderByDescending(pt => pt.IsTargetedBy)
-                                                                           .ThenByDescending(pt => pt.IsCurrentTarget)
-                                                                           .ThenByDescending(pt => pt.IsInOptimalRange)
-                                                                           .ThenByDescending(pt => pt.IsEwarTarget)
-                                                                           .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
-                                                                           .ThenByDescending(pt => pt.TargetValue)
-                                                                           .ThenBy(pt => pt.Nearest5kDistance)
-                                                                           .FirstOrDefault();
+                if (Combat.PrimaryWeaponPriorityEntities != null && Combat.PrimaryWeaponPriorityEntities.Any())
+                {
+                    primaryWeaponPriorityTarget = Combat.PrimaryWeaponPriorityEntities.Where(p => p.Distance < Combat.MaxRange
+                                                                                && !p.IsIgnored
+                                                                                && p.IsReadyToShoot
+                                                                                && ((!p.IsNPCFrigate && !p.IsFrigate) || (!Drones.UseDrones && !p.IsTooCloseTooFastTooSmallToHit)))
+                                                                               .OrderByDescending(pt => pt.IsTargetedBy)
+                                                                               .ThenByDescending(pt => pt.IsCurrentTarget)
+                                                                               .ThenByDescending(pt => pt.IsInOptimalRange)
+                                                                               .ThenByDescending(pt => pt.IsEwarTarget)
+                                                                               .ThenBy(pt => pt.PrimaryWeaponPriorityLevel)
+                                                                               .ThenByDescending(pt => pt.TargetValue)
+                                                                               .ThenBy(pt => pt.Nearest5kDistance)
+                                                                               .FirstOrDefault();    
+                }
             }
             catch (NullReferenceException) { }  // Not sure why this happens, but seems to be no problem
 
@@ -2744,7 +2747,7 @@ namespace Questor.Modules.Combat
             //
             // Now lets deal with the priority targets
             //
-            if (Combat.PrimaryWeaponPriorityEntities.Any())
+            if (Combat.PrimaryWeaponPriorityEntities != null && Combat.PrimaryWeaponPriorityEntities.Any())
             {
                 if (Logging.DebugTargetCombatants) Logging.Log("Combat.TargetCombatants", "We have [" + Combat.PrimaryWeaponPriorityEntities.Count() + "] PWPT. We have [" + Cache.Instance.TotalTargetsandTargeting.Count() + "] TargetsAndTargeting. We have [" + Combat.PrimaryWeaponPriorityEntities.Count(i => i.IsTarget) + "] PWPT that are already targeted", Logging.Debug);
                 int PrimaryWeaponsPriorityTargetUnTargeted = Combat.PrimaryWeaponPriorityEntities.Count() - Cache.Instance.TotalTargetsandTargeting.Count(t => Combat.PrimaryWeaponPriorityEntities.Contains(t));

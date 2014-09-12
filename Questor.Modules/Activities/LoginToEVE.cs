@@ -463,10 +463,10 @@ namespace Questor.Modules.Activities
 
             _nextPulse = DateTime.UtcNow.AddMilliseconds(Time.Instance.QuestorBeforeLoginPulseDelay_milliseconds);
 
-            if (DateTime.UtcNow < QuestorProgramLaunched.AddSeconds(5))
+            if (DateTime.UtcNow < QuestorProgramLaunched.AddSeconds(7))
             {
                 //
-                // do not login for the first 5 seconds, wait...
+                // do not login for the first 7 seconds, wait...
                 //
                 return;
             }

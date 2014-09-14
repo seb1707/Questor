@@ -608,7 +608,7 @@ namespace Questor.Modules.BackgroundTasks
             foreach (ModuleCache repairModule in Cache.Instance.Modules.Where(i => i.GroupId == (int) Group.ShieldBoosters || 
                                                                                    i.GroupId == (int) Group.AncillaryShieldBooster || 
                                                                                    i.GroupId == (int) Group.CapacitorInjector || 
-                                                                                   i.GroupId == (int) Group.ArmorRepairer))
+                                                                                   i.GroupId == (int) Group.ArmorRepairer).Where(x => x.IsOnline))
             {
                 ModuleNumber++;
                 //if (repairModule.IsActive)
@@ -700,7 +700,7 @@ namespace Questor.Modules.BackgroundTasks
                             //
                             if (repairModule.Click())
                             {
-                                Logging.Log("Defense", "Shield: [" + Math.Round(perc, 0) + "%] Ancillary Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
+                                Logging.Log("Defense", "Perc: [" + Math.Round(perc, 0) + "%] Ancillary Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
                                 Time.Instance.StartedBoosting = DateTime.UtcNow;
                                 Time.Instance.NextRepModuleAction = DateTime.UtcNow.AddMilliseconds(Time.Instance.DefenceDelay_milliseconds);
                                 return;
@@ -725,6 +725,7 @@ namespace Questor.Modules.BackgroundTasks
 
                     if (repairModule.GroupId == (int) Group.ShieldBoosters || repairModule.GroupId == (int) Group.ArmorRepairer)
                     {
+                        if (Logging.DebugDefense) Logging.Log("Defense", "Perc: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Attempting to Click to Deactivate [" + ModuleNumber + "][" + repairModule.TypeName + "]", Logging.White);
                         //
                         // Activate Repair Module (shields or armor)
                         //
@@ -741,12 +742,12 @@ namespace Questor.Modules.BackgroundTasks
                             if (repairModule.GroupId == (int)Group.ShieldBoosters || repairModule.GroupId == (int)Group.AncillaryShieldBooster)
                             {
                                 perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                                Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
+                                Logging.Log("Defense", "Tank %: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] activated", Logging.White);
                             }
                             else if (repairModule.GroupId == (int)Group.ArmorRepairer)
                             {
                                 perc = Cache.Instance.ActiveShip.ArmorPercentage;
-                                Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
+                                Logging.Log("Defense", "Tank % [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] activated", Logging.White);
                                 int aggressiveEntities = Cache.Instance.EntitiesOnGrid.Count(e => e.IsAttacking && e.IsPlayer);
                                 if (aggressiveEntities == 0 && Cache.Instance.EntitiesOnGrid.Count(e => e.IsStation) == 1)
                                 {
@@ -773,6 +774,7 @@ namespace Questor.Modules.BackgroundTasks
                 //
                 if (repairModule.IsActive && (perc >= DeactivateRepairModulesAtThisPerc || repairModule.GroupId == (int)Group.CapacitorInjector))
                 {
+                    if (Logging.DebugDefense) Logging.Log("Defense", "Tank %: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Attempting to Click to Deactivate [" + ModuleNumber + "][" + repairModule.TypeName + "]", Logging.White);
                     //
                     // Deactivate Module
                     //
@@ -785,19 +787,18 @@ namespace Questor.Modules.BackgroundTasks
                         if (repairModule.GroupId == (int)Group.ShieldBoosters || repairModule.GroupId == (int)Group.CapacitorInjector)
                         {
                             perc = Cache.Instance.ActiveShip.ShieldPercentage;
-                            Logging.Log("Defense", "Shields: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
+                            Logging.Log("Defense", "Tank %: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Shield Booster: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                         }
                         else if (repairModule.GroupId == (int)Group.ArmorRepairer)
                         {
                             perc = Cache.Instance.ActiveShip.ArmorPercentage;
-                            Logging.Log("Defense", "Armor: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
+                            Logging.Log("Defense", "Tank %: [" + Math.Round(perc, 0) + "%] Cap: [" + Math.Round(cap, 0) + "%] Armor Repairer: [" + ModuleNumber + "] deactivated [" + Math.Round(Time.Instance.NextRepModuleAction.Subtract(DateTime.UtcNow).TotalSeconds, 0) + "] sec reactivation delay", Logging.White);
                         }
 
                         //Cache.Instance.repair_cycle_time_this_pocket = Cache.Instance.repair_cycle_time_this_pocket + ((int)watch.Elapsed);
                         //Cache.Instance.repair_cycle_time_this_mission = Cache.Instance.repair_cycle_time_this_mission + watch.Elapsed.TotalMinutes;
                         return;    
                     }
-                    
                 }
 
                 continue;
@@ -994,15 +995,15 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (Defense.DoNotBreakInvul && DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(30) )
-            {
-                if (Logging.DebugDefense) Logging.Log("Defense", "DoNotBreakInvul == true, not running defense yet as that will break invulnerability", Logging.White);
-                return;
-            }
-
             if (DateTime.UtcNow.Subtract(_lastCloaked).TotalSeconds < 2)
             {
                 if (Logging.DebugDefense) Logging.Log("Defense", "we are cloaked.... waiting.", Logging.White);
+                return;
+            }
+
+            if (Defense.DoNotBreakInvul && DateTime.UtcNow < Time.Instance.LastSessionChange.AddSeconds(30) )
+            {
+                if (Logging.DebugDefense) Logging.Log("Defense", "DoNotBreakInvul == true, not running defense yet as that will break invulnerability", Logging.White);
                 return;
             }
 
@@ -1017,7 +1018,10 @@ namespace Questor.Modules.BackgroundTasks
                 return;
             }
 
-            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Combat.TargetedBy.Any())
+            if (Cache.Instance.ActiveShip.CapacitorPercentage < 10 && !Combat.TargetedBy.Any() && (Cache.Instance.Modules.Where(i => i.GroupId == (int) Group.ShieldBoosters || 
+                                                                                                                                     i.GroupId == (int) Group.AncillaryShieldBooster || 
+                                                                                                                                     i.GroupId == (int) Group.CapacitorInjector || 
+                                                                                                                                     i.GroupId == (int) Group.ArmorRepairer).All(x => !x.IsActive)))
             {
                 if (Logging.DebugDefense) Logging.Log("Defense", "Cap is SO low that we should not care about hardeners/boosters as we are not being targeted anyhow)", Logging.White);
                 return;

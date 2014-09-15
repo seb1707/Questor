@@ -378,7 +378,7 @@ namespace Questor.Behaviors
                     // If we are out of ammo, return to base, Arm should then grab the right ammo / crystals / drones
                     if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                     {
-                        Logging.Log("Combat", "Out of Ammo!", Logging.Orange);
+                        Logging.Log("Mining", "Out of Ammo! - Not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                         _States.CurrentMiningState = MiningState.GotoBase;
                     }
 

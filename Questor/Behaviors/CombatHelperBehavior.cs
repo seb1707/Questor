@@ -333,7 +333,7 @@ namespace Questor.Behaviors
                         // If we are out of ammo, return to base (do we want to do this with combat helper?!)
                         if (_States.CurrentCombatState == CombatState.OutOfAmmo)
                         {
-                            Logging.Log("Combat", "Out of Ammo!", Logging.Orange);
+                            Logging.Log("CombatHelper", "Out of Ammo! - Not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                             _States.CurrentCombatHelperBehaviorState = CombatHelperBehaviorState.GotoBase;
 
                             // Clear looted containers

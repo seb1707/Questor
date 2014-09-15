@@ -251,7 +251,7 @@ namespace Questor.Storylines
                         // Clear looted containers
                         Cache.Instance.LootedContainers.Clear();
 
-                        Logging.Log("GenericCombatStoryline", "Out of Ammo!", Logging.Orange);
+                        Logging.Log("GenericCombatStoryline", "Out of Ammo! - Not enough [" + MissionSettings.CurrentDamageType + "] ammo in cargohold: MinimumCharges: [" + Combat.MinimumAmmoCharges + "]", Logging.Orange);
                         return StorylineState.ReturnToAgent;
                     }
 

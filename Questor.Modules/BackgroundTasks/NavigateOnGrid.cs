@@ -154,6 +154,12 @@ namespace Questor.Modules.BackgroundTasks
 
         public static void OrbitGateorTarget(EntityCache target, string module)
         {
+            int OrbitDistanceToUse = NavigateOnGrid.OrbitDistance;
+            if (!Combat.PotentialCombatTargets.Any())
+            {
+                OrbitDistanceToUse = 500;
+            }
+
             if (DateTime.UtcNow > Time.Instance.NextOrbit)
             {
                 //we cant move in bastion mode, do not try
@@ -161,12 +167,12 @@ namespace Questor.Modules.BackgroundTasks
                 if (bastionModules.Any(i => i.IsActive)) return;
 
                 if (Logging.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "OrbitGateorTarget Started", Logging.White);
-                if (NavigateOnGrid.OrbitDistance == 0)
+                if (OrbitDistanceToUse == 0)
                 {
-                    NavigateOnGrid.OrbitDistance = 2000;
+                    OrbitDistanceToUse = 2000;
                 }
 
-                if (target.Distance + NavigateOnGrid.OrbitDistance < Combat.MaxRange - 5000)
+                if (target.Distance + OrbitDistanceToUse < Combat.MaxRange - 5000)
                 {
                     if (Logging.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "if (target.Distance + Cache.Instance.OrbitDistance < Combat.MaxRange - 5000)", Logging.White);
 
@@ -192,9 +198,9 @@ namespace Questor.Modules.BackgroundTasks
 
                         if (NavigateOnGrid.OrbitStructure && structure != null)
                         {
-                            if (structure.Orbit(NavigateOnGrid.OrbitDistance))
+                            if (structure.Orbit(OrbitDistanceToUse))
                             {
-                                Logging.Log(module, "Initiating Orbit [" + structure.Name + "][at " + Math.Round((double)NavigateOnGrid.OrbitDistance / 1000, 0) + "k][" + structure.MaskedId + "]", Logging.Teal);
+                                Logging.Log(module, "Initiating Orbit [" + structure.Name + "][at " + Math.Round((double)OrbitDistanceToUse / 1000, 0) + "k][" + structure.MaskedId + "]", Logging.Teal);
                                 return;    
                             }
 
@@ -206,9 +212,9 @@ namespace Questor.Modules.BackgroundTasks
                         //
                         if (NavigateOnGrid.SpeedTank)
                         {
-                            if (target.Orbit(NavigateOnGrid.OrbitDistance))
+                            if (target.Orbit(OrbitDistanceToUse))
                             {
-                                Logging.Log(module, "Initiating Orbit [" + target.Name + "][at " + Math.Round((double)NavigateOnGrid.OrbitDistance / 1000, 0) + "k][ID: " + target.MaskedId + "]", Logging.Teal);
+                                Logging.Log(module, "Initiating Orbit [" + target.Name + "][at " + Math.Round((double)OrbitDistanceToUse / 1000, 0) + "k][ID: " + target.MaskedId + "]", Logging.Teal);
                                 return;    
                             }
                             
@@ -236,7 +242,7 @@ namespace Questor.Modules.BackgroundTasks
                 }
                 else
                 {
-                    if (target.Orbit(NavigateOnGrid.OrbitDistance))
+                    if (target.Orbit(OrbitDistanceToUse))
                     {
                         Logging.Log(module, "Out of range. ignoring orbit around structure.", Logging.Teal);
                         return;
@@ -282,12 +288,14 @@ namespace Questor.Modules.BackgroundTasks
 
                     return;
                 }
+
                 if (target.Distance < Combat.MaxRange && !Cache.Instance.IsOrbiting(target.Id))
                 {
                     if (Logging.DebugNavigateOnGrid) Logging.Log("NavigateOnGrid", "NavigateIntoRange: SpeedTank: orbitdistance is [" + NavigateOnGrid.OrbitDistance + "]", Logging.White);
                     OrbitGateorTarget(target, module);
                     return;
                 }
+
                 return;
             }
             else //if we are not speed tanking then check optimalrange setting, if that is not set use the less of targeting range and weapons range to dictate engagement range

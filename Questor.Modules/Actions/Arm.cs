@@ -792,7 +792,8 @@ namespace Questor.Modules.Actions
                 ItemHangarRetries = 0;
                 DroneBayRetries = 0;
                 RefreshMissionItems(AgentInteraction.AgentId);
-                
+                _States.CurrentCombatState = CombatState.Idle;
+
                 if (_States.CurrentQuestorState == QuestorState.DedicatedBookmarkSalvagerBehavior)
                 {
                     ChangeArmState(ArmState.ActivateSalvageShip);

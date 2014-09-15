@@ -1132,7 +1132,7 @@ namespace Questor.Behaviors
 
             //if we have no salvagers check for UnlootedContainers before moving on
             // (old - removed, if re-added we need to do this elsewhere to avoid getting stuck!) if we have salvagers check for any wrecks before moving on
-            if ((!Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.UnlootedContainers.Any()) || DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
+            if ((!Cache.Instance.MyShipEntity.SalvagersAvailable || !Cache.Instance.UnlootedContainers.Any()) || DateTime.UtcNow > Time.Instance.LastInWarp.AddMinutes(Time.Instance.MaxSalvageMinutesPerPocket))
             //|| Cache.Instance.MyShipEntity.SalvagersAvailable && !Cache.Instance.Wrecks.Any())
             {
                 if (!Cache.Instance.DeleteBookmarksOnGrid("CombatMissionsBehavior.Salvage")) return;

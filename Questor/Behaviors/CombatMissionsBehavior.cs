@@ -388,10 +388,12 @@ namespace Questor.Behaviors
                 Arm.SwitchShipsOnly = true;
             }
 
+            if (Logging.DebugArm) Logging.Log("Arm." +  _States.CurrentArmState,"CombatMissionBehavior.Switch is Entering Arm.Processstate",Logging.Debug);
             Arm.ProcessState();
 
             if (_States.CurrentArmState == ArmState.Done)
             {
+                Logging.Log("Switch", "Done", Logging.White);
                 _States.CurrentArmState = ArmState.Idle;
                 Arm.SwitchShipsOnly = false;
                 ChangeCombatMissionBehaviorState(CombatMissionsBehaviorState.GotoBase);
@@ -1087,11 +1089,8 @@ namespace Questor.Behaviors
             if (deadlyNPC != null)
             {
                 // found NPCs that will likely kill out fragile salvage boat!
-                List<DirectBookmark> missionSalvageBookmarks =
-                    Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
-                Logging.Log("CombatMissionsBehavior.Salvage",
-                    "could not be completed because of NPCs left in the mission: deleting on grid salvage bookmark",
-                    Logging.White);
+                List<DirectBookmark> missionSalvageBookmarks = Cache.Instance.BookmarksByLabel(Settings.Instance.BookmarkPrefix + " ");
+                Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: deleting on grid salvage bookmark", Logging.White);
 
                 if (Salvage.DeleteBookmarksWithNPC)
                 {
@@ -1102,9 +1101,7 @@ namespace Questor.Behaviors
                     return;
                 }
 
-                Logging.Log("CombatMissionsBehavior.Salvage",
-                    "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted",
-                    Logging.Orange);
+                Logging.Log("CombatMissionsBehavior.Salvage", "could not be completed because of NPCs left in the mission: on grid salvage bookmark not deleted", Logging.Orange);
                 Salvage.SalvageAll = false;
                 Statistics.FinishedSalvaging = DateTime.UtcNow;
                 _States.CurrentCombatMissionBehaviorState = CombatMissionsBehaviorState.GotoBase;

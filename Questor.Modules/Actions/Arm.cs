@@ -516,19 +516,26 @@ namespace Questor.Modules.Actions
 
                 if (string.IsNullOrEmpty(MoveItemTypeName))
                 {
+                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (string.IsNullOrEmpty(MoveItemTypeName))", Logging.Debug);
                     ChangeArmState(StateToChangeToWhenDoneMoving);
                     return false;
                 }
 
                 if (ItemsAreBeingMoved)
                 {
+                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (ItemsAreBeingMoved)", Logging.Debug);
                     if (!WaitForLockedItems(StateWeWereCalledFrom)) return false;
                     return true;
                 }
 
                 if (Cache.Instance.ItemHangar == null) return false;
-                if (Drones.DroneBay == null) return false;
-
+                if (Drones.DroneBay == null)
+                {
+                    return false;
+                }
+                
+                if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (Drones.DroneBay != null)", Logging.Debug);    
+                
                 if (Drones.DroneBay.Capacity == 0 && DroneBayRetries <= 10)
                 {
                     DroneBayRetries++;
@@ -537,7 +544,11 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (!LookForItem(MoveItemTypeName, Drones.DroneBay)) return false;
+                if (!LookForItem(MoveItemTypeName, Drones.DroneBay))
+                {
+                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (!LookForItem(MoveItemTypeName, Drones.DroneBay))", Logging.Debug);
+                    return false;
+                }
 
                 Logging.Log(WeAreInThisStateForLogs(), "Dronebay details: Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
                 if (Drones.DroneBay.Capacity == Drones.DroneBay.UsedCapacity)

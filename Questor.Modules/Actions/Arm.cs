@@ -510,50 +510,57 @@ namespace Questor.Modules.Actions
         {
             try
             {
+                if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "(re)Entering MoveDronesToDroneBay", Logging.Debug);
                 //
                 // we assume useDrones is true if we got this far already.
                 //
 
                 if (string.IsNullOrEmpty(MoveItemTypeName))
                 {
-                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (string.IsNullOrEmpty(MoveItemTypeName))", Logging.Debug);
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (string.IsNullOrEmpty(MoveItemTypeName))", Logging.Debug);
                     ChangeArmState(StateToChangeToWhenDoneMoving);
                     return false;
                 }
 
                 if (ItemsAreBeingMoved)
                 {
-                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (ItemsAreBeingMoved)", Logging.Debug);
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (ItemsAreBeingMoved)", Logging.Debug);
                     if (!WaitForLockedItems(StateWeWereCalledFrom)) return false;
                     return true;
                 }
 
-                if (Cache.Instance.ItemHangar == null) return false;
-                if (Drones.DroneBay == null)
+                if (Cache.Instance.ItemHangar == null)
                 {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (Cache.Instance.ItemHangar == null)", Logging.Debug);
                     return false;
                 }
-                
-                if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (Drones.DroneBay != null)", Logging.Debug);    
+
+                if (Drones.DroneBay == null)
+                {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (Drones.DroneBay == null)", Logging.Debug);
+                    return false;
+                }
+
+                if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (Drones.DroneBay != null)", Logging.Debug);    
                 
                 if (Drones.DroneBay.Capacity == 0 && DroneBayRetries <= 10)
                 {
                     DroneBayRetries++;
-                    Logging.Log(WeAreInThisStateForLogs(), "Dronebay: not yet ready. Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
+                    Logging.Log("Arm.MoveDronesToDroneBay", "Dronebay: not yet ready. Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
                     Time.Instance.NextArmAction = DateTime.UtcNow.AddSeconds(2);
                     return false;
                 }
 
                 if (!LookForItem(MoveItemTypeName, Drones.DroneBay))
                 {
-                    if (Logging.DebugArm) Logging.Log(WeAreInThisStateForLogs(), "if (!LookForItem(MoveItemTypeName, Drones.DroneBay))", Logging.Debug);
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDronesToDroneBay", "if (!LookForItem(MoveItemTypeName, Drones.DroneBay))", Logging.Debug);
                     return false;
                 }
 
-                Logging.Log(WeAreInThisStateForLogs(), "Dronebay details: Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
+                Logging.Log("Arm.MoveDronesToDroneBay", "Dronebay details: Capacity [" + Drones.DroneBay.Capacity + "] UsedCapacity [" + Drones.DroneBay.UsedCapacity + "]", Logging.White);
                 if (Drones.DroneBay.Capacity == Drones.DroneBay.UsedCapacity)
                 {
-                    Logging.Log(WeAreInThisStateForLogs(), "Dronebay is Full. No need to move any more drones.", Logging.White);
+                    Logging.Log("Arm.MoveDronesToDroneBay", "Dronebay is Full. No need to move any more drones.", Logging.White);
                     ChangeArmState(StateToChangeToWhenDoneMoving);
                     return false;
                 }
@@ -561,18 +568,18 @@ namespace Questor.Modules.Actions
                 if (DroneInvTypeItem != null)
                 {
                     int neededDrones = (int)Math.Floor((Drones.DroneBay.Capacity - Drones.DroneBay.UsedCapacity) / DroneInvTypeItem.Volume);
-                    Logging.Log(WeAreInThisStateForLogs(), "neededDrones: [" + neededDrones + "]", Logging.White);
+                    Logging.Log("Arm.MoveDronesToDroneBay", "neededDrones: [" + neededDrones + "]", Logging.White);
 
                     if ((int)neededDrones == 0)
                     {
-                        Logging.Log(WeAreInThisStateForLogs(), "MoveItems", Logging.White);
+                        Logging.Log("Arm.MoveDronesToDroneBay", "MoveItems", Logging.White);
                         ChangeArmState(ArmState.MoveBringItems);
                         return false;
                     }
 
                     if (WeHaveThisManyOfThoseItemsInCargo + WeHaveThisManyOfThoseItemsInItemHangar + WeHaveThisManyOfThoseItemsInAmmoHangar + WeHaveThisManyOfThoseItemsInLootHangar < neededDrones)
                     {
-                        Logging.Log(WeAreInThisStateForLogs(), "ItemHangar has: [" + WeHaveThisManyOfThoseItemsInItemHangar + "] AmmoHangar has: [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] LootHangar has: [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + MoveItemTypeName + "] we need [" + neededDrones + "] drones to fill the DroneBay)", Logging.Red);
+                        Logging.Log("Arm.MoveDronesToDroneBay", "ItemHangar has: [" + WeHaveThisManyOfThoseItemsInItemHangar + "] AmmoHangar has: [" + WeHaveThisManyOfThoseItemsInAmmoHangar + "] LootHangar has: [" + WeHaveThisManyOfThoseItemsInLootHangar + "] [" + MoveItemTypeName + "] we need [" + neededDrones + "] drones to fill the DroneBay)", Logging.Red);
                         ItemsAreBeingMoved = false;
                         Cache.Instance.Paused = true;
                         ChangeArmState(ArmState.NotEnoughDrones);
@@ -608,7 +615,7 @@ namespace Questor.Modules.Actions
                         int moveDroneQuantity = Math.Min(LootHangarItem.Stacksize, _itemsLeftToMoveQuantity);
                         moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
                         _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
-                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + LootHangarItem.TypeName + "] from LootHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Logging.Log("Arm.MoveDronesToDroneBay", "Moving Item [" + LootHangarItem.TypeName + "] from LootHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
                         Drones.DroneBay.Add(LootHangarItem, moveDroneQuantity);
                         ItemsAreBeingMoved = true;
                         _lastArmAction = DateTime.UtcNow;
@@ -625,7 +632,7 @@ namespace Questor.Modules.Actions
                         int moveDroneQuantity = Math.Min(ItemHangarItem.Stacksize, _itemsLeftToMoveQuantity);
                         moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
                         _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
-                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + ItemHangarItem.TypeName + "] from ItemHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Logging.Log("Arm.MoveDronesToDroneBay", "Moving Item [" + ItemHangarItem.TypeName + "] from ItemHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
                         Drones.DroneBay.Add(ItemHangarItem, moveDroneQuantity);
                         ItemsAreBeingMoved = true;
                         _lastArmAction = DateTime.UtcNow;
@@ -642,7 +649,7 @@ namespace Questor.Modules.Actions
                         int moveDroneQuantity = Math.Min(AmmoHangarItem.Stacksize, _itemsLeftToMoveQuantity);
                         moveDroneQuantity = Math.Max(moveDroneQuantity, 1);
                         _itemsLeftToMoveQuantity = _itemsLeftToMoveQuantity - moveDroneQuantity;
-                        Logging.Log(WeAreInThisStateForLogs(), "Moving Item [" + AmmoHangarItem.TypeName + "] from AmmoHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
+                        Logging.Log("Arm.MoveDronesToDroneBay", "Moving Item [" + AmmoHangarItem.TypeName + "] from AmmoHangar to DroneBay: We have [" + _itemsLeftToMoveQuantity + "] more item(s) to move after this", Logging.White);
                         Drones.DroneBay.Add(AmmoHangarItem, moveDroneQuantity);
                         ItemsAreBeingMoved = true;
                         _lastArmAction = DateTime.UtcNow;
@@ -652,12 +659,12 @@ namespace Questor.Modules.Actions
                     return true;
                 }
 
-                Logging.Log(WeAreInThisStateForLogs(), "droneTypeId is highly likely to be incorrect in your settings xml", Logging.Debug);
+                Logging.Log("Arm.MoveDronesToDroneBay", "droneTypeId is highly likely to be incorrect in your settings xml", Logging.Debug);
                 return false;
             }
             catch (Exception ex)
             {
-                Logging.Log(WeAreInThisStateForLogs(), "Exception [" + ex + "]", Logging.Red);
+                Logging.Log("Arm.MoveDronesToDroneBay", "Exception [" + ex + "]", Logging.Red);
                 return false;
             }
         }
@@ -1187,12 +1194,25 @@ namespace Questor.Modules.Actions
         {
             try
             {
-                if (!Drones.UseDrones ||
-                    (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
-                     Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
-                     Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip ||
-                     Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName))
+                if (!Drones.UseDrones)
                 {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "UseDrones is [" + Drones.UseDrones + "] Changing ArmState to MoveBringItems",Logging.Debug);
+                    ChangeArmState(ArmState.MoveBringItems);
+                    return false;
+                }
+
+                if (Cache.Instance.ActiveShip.GroupId == (int)Group.Shuttle ||
+                     Cache.Instance.ActiveShip.GroupId == (int)Group.Industrial ||
+                     Cache.Instance.ActiveShip.GroupId == (int)Group.TransportShip)
+                {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "ActiveShip GroupID is [" + Cache.Instance.ActiveShip.GroupId + "] Which we assume is a Shuttle, Industrial, TransportShip: Changing ArmState to MoveBringItems", Logging.Debug);
+                    ChangeArmState(ArmState.MoveBringItems);
+                    return false;
+                }
+
+                if (Cache.Instance.ActiveShip.GivenName != Combat.CombatShipName)
+                {
+                    if (Logging.DebugArm) Logging.Log("Arm.MoveDrones", "ActiveShip Name is [" + Cache.Instance.ActiveShip.GivenName + "] Which is not the CombatShipname [" + Combat.CombatShipName + "]: Changing ArmState to MoveBringItems", Logging.Debug);
                     ChangeArmState(ArmState.MoveBringItems);
                     return false;
                 }
@@ -1207,7 +1227,8 @@ namespace Questor.Modules.Actions
                 }
 
                 if (MoveDronesToDroneBay(DroneInvTypeItem.TypeName, ArmState.MoveBringItems, ArmState.MoveDrones, false)) return false;
-                
+
+                Logging.Log("Arm.MoveDrones", "MoveDronesToDroneBay returned true! CurrentArmState is [" + _States.CurrentArmState + "]: this should NOT still be MoveDrones!", Logging.Orange);
                 return false;
             }
             catch (Exception ex)
@@ -1727,7 +1748,7 @@ namespace Questor.Modules.Actions
                 //
                 // this list of variables is cleared every pulse.
                 //
-                _itemsLeftToMoveQuantity = 0;                
+                _itemsLeftToMoveQuantity = 0;
             }
             catch (Exception exception)
             {

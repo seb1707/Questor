@@ -2608,34 +2608,44 @@ namespace Questor.Modules.Caching
             {
                 try
                 {
-                    if (SafeToUseStationHangars() && !Cache.Instance.InSpace && Cache.Instance.InStation)
+                    if (!SafeToUseStationHangars())
+                    {
+                        //Logging.Log("ItemHangar", "if (!SafeToUseStationHangars())", Logging.Debug);
+                        return null;
+                    }
+
+                    if (!Cache.Instance.InSpace && Cache.Instance.InStation)
                     {
                         if (Cache.Instance._itemHangar == null)
                         {
                             Cache.Instance._itemHangar = Cache.Instance.DirectEve.GetItemHangar();
                         }
 
-                        if (Instance.Windows.All(i => i.Type != "form.StationItems")) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
+                        if (Cache.Instance.Windows.All(i => i.Type != "form.StationItems")) // look for windows via the window (via caption of form type) ffs, not what is attached to this DirectCotnainer
                         {
                             if (DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(10))
                             {
+                                Logging.Log("Cache.ItemHangar", "Opening ItemHangar", Logging.Debug);
                                 Statistics.LogWindowActionToWindowLog("Itemhangar", "Opening ItemHangar");
                                 Cache.Instance.DirectEve.ExecuteCommand(DirectCmd.OpenHangarFloor);
                                 Time.Instance.LastOpenHangar = DateTime.UtcNow;
                                 return null;
                             }
 
+                            if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars ) Logging.Log("Cache.ItemHangar", "ItemHangar recently opened, waiting for the window to actually open", Logging.Debug);
                             return null;
                         }
 
-                        if (Instance.Windows.Any(i => i.Type == "form.StationItems") && DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
+                        if (Cache.Instance.Windows.Any(i => i.Type == "form.StationItems") && DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
                         {
                             return Cache.Instance._itemHangar;
                         }
 
+                        if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars) Logging.Log("Cache.ItemHangar", "Not sure how we got here... ", Logging.Debug);
                         return null;
                     }
 
+                    if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars) Logging.Log("Cache.ItemHangar", "InSpace [" + Cache.Instance.InSpace + "] InStation [" + Cache.Instance.InStation + "] waiting...", Logging.Debug);
                     return null;
                 }
                 catch (Exception ex)
@@ -2652,11 +2662,13 @@ namespace Questor.Modules.Caching
         {
             if (DateTime.UtcNow < Time.Instance.NextDockAction.AddSeconds(10)) //yes we are adding 10 more seconds...
             {
+                if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars) Logging.Log("ItemHangar", "if (DateTime.UtcNow < Time.Instance.NextDockAction.AddSeconds(10))", Logging.Debug);
                 return false;
             }
 
             if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(15))
             {
+                if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars) Logging.Log("ItemHangar", "if (DateTime.UtcNow < Time.Instance.LastInSpace.AddSeconds(15))", Logging.Debug);
                 return false;
             }
 

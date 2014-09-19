@@ -2632,12 +2632,13 @@ namespace Questor.Modules.Caching
                                 return null;
                             }
 
-                            if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars ) Logging.Log("Cache.ItemHangar", "ItemHangar recently opened, waiting for the window to actually open", Logging.Debug);
+                            if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars ) Logging.Log("Cache.ItemHangar", "ItemHangar recently opened, waiting for the window to actually appear", Logging.Debug);
                             return null;
                         }
 
-                        if (Cache.Instance.Windows.Any(i => i.Type == "form.StationItems") && DateTime.UtcNow > Time.Instance.LastOpenHangar.AddSeconds(15))
+                        if (Cache.Instance.Windows.Any(i => i.Type == "form.StationItems"))
                         {
+                            if (Logging.DebugArm || Logging.DebugUnloadLoot || Logging.DebugHangars) Logging.Log("Cache.ItemHangar", "if (Cache.Instance.Windows.Any(i => i.Type == form.StationItems))", Logging.Debug);
                             return Cache.Instance._itemHangar;
                         }
 

@@ -522,6 +522,12 @@ namespace Questor.Modules.Caching
                         return true;
                     }
 
+                    if (IsActive) //it is active, this click should deactivate it.
+                    {
+                        _module.Click();
+                        return true;
+                    }
+                    
                     if (Time.Instance.LastClickedTimeStamp != null) Time.Instance.LastClickedTimeStamp[ItemId] = DateTime.UtcNow;
                     return true;
                 }

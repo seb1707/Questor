@@ -501,7 +501,7 @@ namespace Questor.Modules.BackgroundTasks
                     foreach (DirectWindow window in Cache.Instance.Windows)
                     {
                         // Telecom messages are generally mission info messages: close them
-                        if (window.Name == "telecom")
+                        if (window.Name == "telecom" && !Logging.DebugDoNotCloseTelcomWindows)
                         {
                             Logging.Log("Cleanup", "Closing telecom message...", Logging.White);
                             Logging.Log("Cleanup", "Content of telecom window (HTML): [" + (window.Html ?? string.Empty).Replace("\n", "").Replace("\r", "") + "]", Logging.White);

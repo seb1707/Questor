@@ -324,6 +324,7 @@ namespace Questor.Modules.Lookup
                 Logging.DebugDisableTargetCombatants = (bool?)CharacterSettingsXml.Element("debugDisableTargetCombatants") ?? (bool?)CommonSettingsXml.Element("debugDisableTargetCombatants") ?? false;
                 Logging.DebugDisableNavigateIntoRange = (bool?)CharacterSettingsXml.Element("debugDisableNavigateIntoRange") ?? (bool?)CommonSettingsXml.Element("debugDisableNavigateIntoRange") ?? false;
                 Logging.DebugDoneAction = (bool?)CharacterSettingsXml.Element("debugDoneAction") ?? (bool?)CommonSettingsXml.Element("debugDoneAction") ?? false;
+                Logging.DebugDoNotCloseTelcomWindows = (bool?)CharacterSettingsXml.Element("debugDoNotCloseTelcomWindows") ?? (bool?)CommonSettingsXml.Element("debugDoNotCloseTelcomWindows") ?? false;
                 Logging.DebugDrones = (bool?)CharacterSettingsXml.Element("debugDrones") ?? (bool?)CommonSettingsXml.Element("debugDrones") ?? false;
                 Logging.DebugDroneHealth = (bool?)CharacterSettingsXml.Element("debugDroneHealth") ?? (bool?)CommonSettingsXml.Element("debugDroneHealth") ?? false;
                 Logging.DebugEachWeaponsVolleyCache = (bool?)CharacterSettingsXml.Element("debugEachWeaponsVolleyCache") ?? (bool?)CommonSettingsXml.Element("debugEachWeaponsVolleyCache") ?? false;

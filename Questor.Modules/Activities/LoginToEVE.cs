@@ -513,7 +513,7 @@ namespace Questor.Modules.Activities
                     //
                     // Close these windows and continue
                     //
-                    if (window.Name == "telecom")
+                    if (window.Name == "telecom" && !Logging.DebugDoNotCloseTelcomWindows)
                     {
                         Logging.Log("Startup", "Closing telecom message...", Logging.Yellow);
                         Logging.Log("Startup", "Content of telecom window (HTML): [" + (window.Html).Replace("\n", "").Replace("\r", "") + "]", Logging.Yellow);

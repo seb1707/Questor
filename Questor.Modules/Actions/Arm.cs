@@ -1226,7 +1226,7 @@ namespace Questor.Modules.Actions
                     return false;
                 }
 
-                if (MoveDronesToDroneBay(DroneInvTypeItem.TypeName, ArmState.MoveBringItems, ArmState.MoveDrones, false)) return false;
+                if (!MoveDronesToDroneBay(DroneInvTypeItem.TypeName, ArmState.MoveBringItems, ArmState.MoveDrones, false)) return false;
 
                 Logging.Log("Arm.MoveDrones", "MoveDronesToDroneBay returned true! CurrentArmState is [" + _States.CurrentArmState + "]: this should NOT still be MoveDrones!", Logging.Orange);
                 return false;

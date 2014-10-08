@@ -210,10 +210,18 @@ namespace Questor.Storylines
                 // Get the median sell price
                 DirectInvType type;
                 Cache.Instance.DirectEve.InvTypes.TryGetValue(20, out type);
-                double? maxPrice = type.AveragePrice * 4;
+                
+                //DirectItem OreTypeNeededForThisMission = (DirectItem)type;
+                //double? maxPrice;
 
+                //if (OreTypeNeededForThisMission != null)
+                //{
+                //    maxPrice = OreTypeNeededForThisMission.AveragePrice() * 4;    
+                //}
+                
                 // Do we have orders that sell enough ore for the mission?
-                IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == directEve.Session.StationId && o.Price < maxPrice).ToList();
+                //IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == directEve.Session.StationId && o.Price < maxPrice).ToList(); 
+                IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == directEve.Session.StationId).ToList();
                 if (!orders.Any() || orders.Sum(o => o.VolumeRemaining) < orequantity)
                 {
                     Logging.Log("MaterialsForWarPreparation", "Not enough (reasonably priced) ore available! Blacklisting agent for this Questor session!", Logging.Orange);

@@ -533,7 +533,7 @@ namespace Questor.Modules.Logging
                     if (ammo1 != null) Statistics.AmmoConsumption = (ammo1.Quantity - item.Quantity);
                     if (ammoType != null)
                     {
-                        Statistics.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.AmmoConsumption;
+                        //Statistics.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.AmmoConsumption;
                     }
                 }
             }

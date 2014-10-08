@@ -249,10 +249,11 @@ namespace Questor.Modules.Lookup
 		                double? maxPrice = 0;
                         if (type != null)
 		                {
-                            maxPrice = type.AveragePrice * 10;
+                            //maxPrice = type.AveragePrice * 10;
                             Logging.Log("buySkill", "maxPrice " + maxPrice.ToString(), Logging.White);
                             // Do we have orders?
-                            IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
+                            //IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
+                            IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId).ToList();
                             if (orders.Any())
                             {
                                 DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();

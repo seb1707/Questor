@@ -574,6 +574,7 @@ namespace Questor.Modules.Logging
         public static bool DebugDisableGetBestDroneTarget { get; set; }
         public static bool DebugDisableNavigateIntoRange { get; set; }
         public static bool DebugDoneAction { get; set; }
+        public static bool DebugDoNotCloseTelcomWindows { get; set; }
         public static bool DebugDrones { get; set; }
         public static bool DebugDroneHealth { get; set; }
         public static bool DebugEachWeaponsVolleyCache { get; set; }

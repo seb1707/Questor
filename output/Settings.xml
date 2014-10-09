@@ -35,7 +35,7 @@
   <debugDisableTargetCombatants>false</debugDisableTargetCombatants>
   <debugDisableNavigateIntoRange>false</debugDisableNavigateIntoRange>
   <debugDoneState>false</debugDoneState>
-  <debugDoNotCloseTelcomWindows>true</debugDoNotCloseTelcomWindows>
+  <debugDoNotCloseTelcomWindows>false</debugDoNotCloseTelcomWindows>
   <debugDrones>false</debugDrones>
   <debugDroneHealth>false</debugDroneHealth>
   <debugExceptions>false</debugExceptions>

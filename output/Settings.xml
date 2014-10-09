@@ -605,7 +605,8 @@
   </factionblacklist>
   <!-- BLACKLIST: List of missions which the bot will always decline -->
   <blacklist>
-    <mission>Anomic Team</mission>
+    <mission>Anomic Agent</mission> <!-- burner mission, needs frigate -->
+    <mission>Anomic Team</mission> <!-- burner mission, needs frigate -->
     <mission>Enemies Abound (1 of 5)</mission>
   </blacklist>
   

@@ -43,6 +43,7 @@ namespace Questor.Modules.Lookup
             MissionItems = new List<string>();
             MissionUseDrones = null;
             UseMissionShip = false;
+            DamageTypesForThisMission = new List<DamageType>();
         }
 
         //
@@ -409,15 +410,27 @@ namespace Questor.Modules.Lookup
                     MissionWarpAtDistanceRange = (int?)missionXml.Root.Element("missionWarpAtDistanceRange") ?? 0; //distance in km
                     MissionSettings.MissionDroneTypeID = (int?)missionXml.Root.Element("DroneTypeId") ?? null;
 
-                    IEnumerable<DamageType> damageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
-                    if (damageTypesForThisMission.Any() && !AmmoTypesToLoad.Any())
+                    DamageTypesForThisMission = new List<DamageType>();
+                    DamageTypesForThisMission = missionXml.XPathSelectElements("//damagetype").Select(e => (DamageType)Enum.Parse(typeof(DamageType), (string)e, true)).ToList();
+                    if (DamageTypesForThisMission.Any() && !AmmoTypesToLoad.Any())
                     {
-                        MissionDamageType = damageTypesForThisMission.FirstOrDefault();
-                        Logging.Log("AgentInteraction", "Mission XML specified the Mission Damagetype for [" + MissionName + "] is [" + MissionDamageType.ToString() + "]", Logging.White);
+                        int _MissionDamageTypeCount_ = 0;
+                        Logging.Log("AgentInteraction", "Mission XML specified there are [] Damagetype(s) for [" + MissionName + "] listed below: ", Logging.White);
+                        foreach (DamageType _missionDamageType in DamageTypesForThisMission)
+                        {
+                            //MissionDamageType = DamageTypesForThisMission.FirstOrDefault();
+                            Logging.Log("AgentInteraction", "[" + _MissionDamageTypeCount_ + "] DamageType [" + _missionDamageType + "]", Logging.White);
+                        }
+
                         LoadCorrectFactionOrMissionAmmo();
                         loadedAmmo = true;
+                        return;
                     }
+
+                    return;
                 }
+
+                return;
             }
             catch (Exception ex)
             {
@@ -429,6 +442,7 @@ namespace Questor.Modules.Lookup
                 System.GC.Collect();
             }
 
+            return;
         }
 
         public static bool loadedAmmo = false;
@@ -445,7 +459,11 @@ namespace Questor.Modules.Lookup
                     {
                         Logging.Log("LoadSpecificAmmo", "Adding [" + _ammo.Name + "] to the list of MissionAmmo to load", Logging.White);
                         MissionSettings.AmmoTypesToLoad = new List<Ammo>();
-                        MissionSettings.AmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == MissionSettings.CurrentDamageType).Select(a => a.Clone()));
+                        foreach (DamageType _missionDamageType in  DamageTypesForThisMission)
+                        {
+                            MissionSettings.AmmoTypesToLoad.AddRange(Combat.Ammo.Where(a => a.DamageType == _missionDamageType).Select(a => a.Clone()));
+                        }
+
                         int intAmmoToLoad = 0;
                         foreach (Ammo _ammoTypeToLoad in MissionSettings.AmmoTypesToLoad)
                         {
@@ -630,7 +648,7 @@ namespace Questor.Modules.Lookup
         public static DamageType? MissionDamageType { get; set; }
         public static DamageType? PocketDamageType { get; set; }
         public static DamageType? ManualDamageType { get; set; }
-
+        public static IEnumerable<DamageType> DamageTypesForThisMission { get; set; }
         public static DamageType GetFactionDamageType(string html)
         {
             DamageType DamageTypeToUse;

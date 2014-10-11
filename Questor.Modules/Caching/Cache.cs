@@ -4136,14 +4136,14 @@ namespace Questor.Modules.Caching
                                 return Cache.Instance.ItemHangar;
 
                             }
-
-                            if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance._ammoHangar != null)
-                            {
-                                Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
-                                _lootHangar = _ammoHangar;
-                            }
+                            //else if (Settings.Instance.AmmoHangarTabName == string.Empty && Cache.Instance._ammoHangar != null)
+                            //{
+                            //    Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
+                            //    _lootHangar = _ammoHangar;
+                            //}
                             else
                             {
+                                if (Logging.DebugHangars) Logging.Log("Cache.LootHangar","Using ItemHangar as the LootHangar",Logging.Debug);
                                 Time.Instance.NextOpenHangarAction = DateTime.UtcNow.AddSeconds(2);
                                 _lootHangar = Cache.Instance.ItemHangar;
                             }

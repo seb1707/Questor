@@ -543,6 +543,12 @@ namespace Questor.Modules.Actions
                 //
                 if (lootToMove.Any() && !LootIsBeingMoved)
                 {
+                    if (Cache.Instance.LootHangar == null)
+                    {
+                        if (Logging.DebugHangars || Logging.DebugUnloadLoot) Logging.Log("UnloadLoot.MoveLoot", "if (Cache.Instance.LootHangar == null)", Logging.Debug);
+                        return false;
+                    }
+
                     //Logging.Log("UnloadLoot", "Moving [" + lootToMove.Count() + "] items from CargoHold to LootHangar which has [" + Cache.Instance.LootHangar.Items.Count() + "] items in it now.", Logging.White);
                     Logging.Log(WeAreInThisStateForLogs(), "Moving [" + lootToMove.Count() + "] items from CargoHold to Loothangar", Logging.White);
                     LootIsBeingMoved = true;

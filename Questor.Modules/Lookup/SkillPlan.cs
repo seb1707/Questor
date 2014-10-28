@@ -223,13 +223,16 @@ namespace Questor.Modules.Lookup
 					}
 
 					// Get the median sell price
-				    DirectInvType type;
+
+                    //TODO: disable this piece of code since AveragePrice is not provided by DirectEve anymore
+				    /*DirectInvType type;
 				    Cache.Instance.DirectEve.InvTypes.TryGetValue(skillID, out type);
 					double? maxPrice = type.AveragePrice * 10;
 					Logging.Log("buySkill", "maxPrice "  + maxPrice.ToString(), Logging.White);
 
 					// Do we have orders?
-					IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();
+					IEnumerable<DirectOrder> orders = marketWindow.SellOrders.Where(o => o.StationId == Cache.Instance.DirectEve.Session.StationId && o.Price < maxPrice).ToList();*/
+                    IEnumerable<DirectOrder> orders = new List<DirectOrder>();
 					if (orders.Any())
 					{
 						DirectOrder order = orders.OrderBy(o => o.Price).FirstOrDefault();

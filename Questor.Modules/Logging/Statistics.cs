@@ -472,7 +472,9 @@ namespace Questor.Modules.Logging
                     DirectInvType ammoType;
                     Cache.Instance.DirectEve.InvTypes.TryGetValue(item.TypeId, out ammoType);
                     if (ammo1 != null) Statistics.Instance.AmmoConsumption = (ammo1.Quantity - item.Quantity);
-                    Statistics.Instance.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.Instance.AmmoConsumption;
+
+                    //TODO: disable this piece of code since AveragePrice is not provided by DirectEve anymore
+                    //Statistics.Instance.AmmoValue = ((int?)ammoType.AveragePrice ?? 0) * Statistics.Instance.AmmoConsumption;
                 }
             }
             catch (Exception exception)

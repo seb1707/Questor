@@ -1095,6 +1095,15 @@ namespace Questor.Modules.Caching
                         try
                         {
                             _agentName = SwitchAgent();
+
+                            // in case agent name was not found
+                            if (_agentName == null)
+                            {
+                                Logging.Log("Cache.CurrentAgent", "Switch agent failed", Logging.Red);
+                                _agentName = "";
+                                return _agentName;
+                            }
+
                             Logging.Log("Cache.CurrentAgent", "[ " + _agentName + " ] AgentID [ " + AgentId + " ]", Logging.White);
                             Cache.Instance.CurrentAgentText = CurrentAgent.ToString(CultureInfo.InvariantCulture);
                         }

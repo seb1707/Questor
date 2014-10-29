@@ -523,24 +523,19 @@ namespace Questor.Modules.BackgroundTasks
                                 gotoBaseNow |= window.Html.Contains("for a short unscheduled reboot");
 
                                 //fitting window errors - DO NOT undock if this happens! people should fix the fits they load to not move more modules than necessary as that causes problems and requires extra modules
-
-                                //if (_States.CurrentQuestorState == QuestorState.BackgroundBehavior)
-                                //{
-                                    //
-                                    // we do not care about fitting errors when using the BackgroundBehavior
-                                    //
-                                //    sayOk |= window.Html.Contains("Not all the items could be fitted");
-                                //}
-                                //else
-                                //{
-                                    pause |= window.Html.Contains("Not all the items could be fitted");   
-                                //}
+                                pause |= window.Html.Contains("Not all the items could be fitted");   
 
                                 pause |= window.Html.Contains("Cannot move");
 
                                 if (window.Type == "form.MessageBox" && window.IsDialog && window.IsModal && window.IsKillable)
                                 {
-                                    sayOk |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty
+                                    if(window.Html.Contains("If you decline or fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"))
+                                    {
+                                        // bug with DirectEve that don't manage to close Window without triggering Close AND AnswerModal, weird ?!
+                                        window.Close();
+                                        window.AnswerModal("OK");
+                                        continue;
+                                    }
                                 }
 
                                 // quitting eve?
@@ -556,8 +551,6 @@ namespace Questor.Modules.BackgroundTasks
                                 close |= window.Html.Contains("cargo units would be required to complete this operation.");
                                 close |= window.Html.Contains("You are too far away from the acceleration gate to activate it!");
                                 close |= window.Html.Contains("maximum distance is 2500 meters");
-                                // agent mission decline warning (ok button)
-                                close |= window.Html.Contains("If you decline of fail a mission from an agent he/she might become displeased and lower your standing towards him/her. You can decline a mission every four hours without penalty"); //4 hours without penalty
                                 // Stupid warning, lets see if we can find it
                                 close |= window.Html.Contains("Do you wish to proceed with this dangerous action?");
                                 // Yes we know the mission is not complete, Questor will just redo the mission
@@ -622,8 +615,7 @@ namespace Questor.Modules.BackgroundTasks
                                 sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
                                 sayOk |= window.Html.Contains("You have already selected a character for this session.");
-                                sayOk |= window.Html.Contains("If you decline or fail a mission from an agent");
-
+                                
                                 //
                                 // Not Enough Shelf Space
                                 // "You can't add the Militants as there are simply too many items here already."

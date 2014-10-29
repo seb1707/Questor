@@ -37,7 +37,7 @@ namespace Questor
         public static DateTime QuestorProgramLaunched = DateTime.UtcNow;
         private static bool _questorScheduleSaysWeShouldLoginNow;
         public static DateTime QuestorSchedulerReadyToLogin = DateTime.UtcNow;
-        public static DateTime EVEAccountLoginStarted = DateTime.UtcNow;
+        public static DateTime? EVEAccountLoginStarted = null;
         //public static DateTime EVECharacterSelected = DateTime.UtcNow;
         public static DateTime NextSlotActivate = DateTime.UtcNow;
         private static string _scriptFile;
@@ -511,8 +511,8 @@ namespace Questor
             else
             {
                 ReadyToLoginToEVEAccount = true;
-                Logging.Log("Startup", "Already passed start time.  Starting in 15 seconds.", Logging.White);
-                System.Threading.Thread.Sleep(15000);
+                Logging.Log("Startup", "Already passed start time.  Starting in 5 seconds.", Logging.White);
+                System.Threading.Thread.Sleep(5000);
             }
 
             //
@@ -836,14 +836,26 @@ namespace Questor
                     return;
                 }
 
+                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds < RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds * 1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds * 1000))
+                {
+                    // Wait a bit before login (seb1707 : not needed I think)
+                    return;
+                }
+
                 //
                 // we must have support instances available, after a delay, login
                 //
-                if (DateTime.UtcNow.Subtract(QuestorSchedulerReadyToLogin).TotalMilliseconds > RandomNumber(Time.Instance.EVEAccountLoginDelayMinimum_seconds * 1000, Time.Instance.EVEAccountLoginDelayMaximum_seconds * 1000))
+                bool reloginTry = EVEAccountLoginStarted.HasValue == true && DateTime.UtcNow.Subtract(EVEAccountLoginStarted.Value).TotalSeconds > Time.Instance.EVEAccountRetryLoginDelay_seconds;
+                if (EVEAccountLoginStarted.HasValue == false || reloginTry == true)
                 {
-                    Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
+                    if(reloginTry)
+                        Logging.Log("Startup", "Login took too long, try relogging to account [" + Logging._username + "]", Logging.White);
+                    else
+                        Logging.Log("Startup", "Login account [" + Logging._username + "]", Logging.White);
+
                     Cache.Instance.DirectEve.Login.Login(Logging._username, Logging._password);
                     EVEAccountLoginStarted = DateTime.UtcNow;
+
                     Logging.Log("Startup", "Waiting for Character Selection Screen", Logging.White);
                     return;
                 }
@@ -851,7 +863,7 @@ namespace Questor
 
             if (Cache.Instance.DirectEve.Login.AtCharacterSelection && Cache.Instance.DirectEve.Login.IsCharacterSelectionReady && !Cache.Instance.DirectEve.Login.IsConnecting && !Cache.Instance.DirectEve.Login.IsLoading)
             {
-                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted).TotalMilliseconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds * 1000, Time.Instance.CharacterSelectionDelayMaximum_seconds * 1000) && DateTime.UtcNow > NextSlotActivate)
+                if (DateTime.UtcNow.Subtract(EVEAccountLoginStarted.Value).TotalMilliseconds > RandomNumber(Time.Instance.CharacterSelectionDelayMinimum_seconds * 1000, Time.Instance.CharacterSelectionDelayMaximum_seconds * 1000) && DateTime.UtcNow > NextSlotActivate)
                 {
                     foreach (DirectLoginSlot slot in Cache.Instance.DirectEve.Login.CharacterSlots)
                     {

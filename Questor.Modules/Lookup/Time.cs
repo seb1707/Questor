@@ -81,8 +81,9 @@ namespace Questor.Modules.Lookup
         public int Marketbuyorderdelay_seconds = 2;
         public int QuestorScheduleNotUsed_Hours = 10;
         public int SkillTrainerPulse_milliseconds = 800;
-        public int EVEAccountLoginDelayMinimum_seconds = 7;
-        public int EVEAccountLoginDelayMaximum_seconds = 10;
+        public int EVEAccountLoginDelayMinimum_seconds = 1;
+        public int EVEAccountLoginDelayMaximum_seconds = 3;
+        public int EVEAccountRetryLoginDelay_seconds = 30;
         public int CharacterSelectionDelayMinimum_seconds = 2;
         public int CharacterSelectionDelayMaximum_seconds = 4;
         public int ReLogDelayMinimum_seconds = 35;                          //DO NOT set this lower than 20 or so seconds!

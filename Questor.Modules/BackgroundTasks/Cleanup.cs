@@ -503,7 +503,7 @@ namespace Questor.Modules.BackgroundTasks
 
                         // Modal windows must be closed
                         // But lets only close known modal windows
-                        if (window.Name == "modal")
+                        if (window.IsModal)
                         {
                             bool close = false;
                             bool restart = false;
@@ -603,7 +603,6 @@ namespace Questor.Modules.BackgroundTasks
                                 //
                                 sayYes |= window.Html.Contains(Settings.Instance.CharacterToAcceptInvitesFrom + " wants you to join their fleet");
 
-                                //sayyes |= window.Html.Contains("Repairing these items will cost");
                                 sayYes |= window.Html.Contains("Are you sure you would like to decline this mission");
                                 //sayyes |= window.Html.Contains("You can decline a mission every four hours without penalty");
                                 sayYes |= window.Html.Contains("has no other missions to offer right now. Are you sure you want to decline");
@@ -612,7 +611,6 @@ namespace Questor.Modules.BackgroundTasks
                                 // LP Store "Accept offer" dialog
                                 //
                                 sayOk |= window.Html.Contains("Are you sure you want to accept this offer?");
-                                sayOk |= window.Html.Contains("Repairing these items will cost");
                                 sayOk |= window.Html.Contains("You do not have an outstanding invitation to this fleet.");
                                 sayOk |= window.Html.Contains("You have already selected a character for this session.");
                                 
@@ -626,6 +624,13 @@ namespace Questor.Modules.BackgroundTasks
                                 // Modal Dialogs the need "no" pressed
                                 //
                                 //sayno |= window.Html.Contains("Do you wish to proceed with this dangerous action
+
+                                // Unfortunately, it now seems that the html content of payment confirmation windows during drone repair is empty,
+                                // therefore the following check is necessary to press Ok in that window
+                                if (_States.CurrentArmState == ArmState.RepairShop || _States.CurrentPanicState == PanicState.Panic)
+                                {
+                                    sayOk |= window.Type.Contains("form.HybridWindow") && window.Caption.Contains("Set Quantity");
+                                }
                             }
 
                             if (restartHarsh)

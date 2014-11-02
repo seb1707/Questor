@@ -829,6 +829,12 @@ namespace Questor.Modules.Actions
 
             if (!Cache.Instance.OpenAgentWindow(module)) return;
 
+            /*
+             * https://github.com/ISeeDEDPpl/Questor/issues/584
+             */
+            if (DateTime.UtcNow < _nextAgentAction.AddMilliseconds(Cache.Instance.RandomNumber(2000, 4000)))
+                return;
+
             List<DirectAgentResponse> responses = Agent.Window.AgentResponses;
             if (responses == null || responses.Count == 0)
             {

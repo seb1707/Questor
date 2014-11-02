@@ -33,7 +33,8 @@ namespace Questor.Modules.Lookup
         /// </summary>
         public static Settings Instance = new Settings();
         public string CharacterName;
-        private DateTime _lastModifiedDate;
+        private DateTime _lastModifiedDateOfMySettingsFile;
+        private DateTime _lastModifiedDateOfCommonSettingsFile;
         private int SettingsLoadedICount = 0;
 
         public static int SettingsInstances = 0;
@@ -1512,18 +1513,18 @@ namespace Questor.Modules.Lookup
             bool reloadSettings = true;
             if (File.Exists(Settings.Instance.CharacterSettingsPath))
             {
-                reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.CharacterSettingsPath);
+                reloadSettings = _lastModifiedDateOfMySettingsFile != File.GetLastWriteTime(Settings.Instance.CharacterSettingsPath);
+                _lastModifiedDateOfMySettingsFile = File.GetLastWriteTime(CharacterSettingsPath);
             }
 
-            //if (File.Exists(Settings.Instance.CommonSettingsPath))
-            //{
-            //    reloadSettings = _lastModifiedDate != File.GetLastWriteTime(Settings.Instance.CommonSettingsPath);
-            //}
+            if (File.Exists(Settings.Instance.CommonSettingsPath))
+            {
+                reloadSettings = _lastModifiedDateOfCommonSettingsFile != File.GetLastWriteTime(Settings.Instance.CommonSettingsPath);
+                _lastModifiedDateOfCommonSettingsFile = File.GetLastWriteTime(Settings.Instance.CommonSettingsPath);
+            }
 
             if (!reloadSettings)
                 return;
-
-            _lastModifiedDate = File.GetLastWriteTime(CharacterSettingsPath);
 
             Settings.Instance.EVEMemoryManager = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "MemManager.exe")); //https://github.com/VendanAndrews/EveMemManager
             Settings.Instance.FactionXMLExists = File.Exists(System.IO.Path.Combine(Settings.Instance.Path, "faction.XML"));
